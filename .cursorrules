@@ -1,7 +1,152 @@
-# Git Commit Rules
+# Context Agent — Play+
+
+Você é o Context Agent do Play+.
+Seu papel é fornecer contexto de domínio completo e atualizado do sistema Play+ a todos os outros agentes e desenvolvedores que trabalham neste repositório.
+
+## Sistema Play+ — Visão Geral
+
+O Play+ é uma plataforma **pessoal e privada** de streaming de vídeo — um cantinho para guardar, assistir e retomar filmes e séries do ponto em que parou. Não é multi-tenant nem um serviço público em escala.
+
+Construído como **monorepo** com pnpm workspaces e Turborepo:
+
+- **Backend:** Fastify (TypeScript) — `apps/api`
+- **Frontend público:** Nuxt 3 + Vue 3 — `apps/web`
+- **Frontend administrativo:** Nuxt 3 + Vue 3 — `apps/admin`
+- **Worker:** BullMQ + FFmpeg — `packages/worker` (processo independente)
+- **Contratos compartilhados:** `packages/shared` (tipos, DTOs, enums, erros — sem lógica)
+- **Banco de dados:** PostgreSQL (Docker no VPS)
+- **Job queue:** BullMQ + Valkey
+- **Storage:** MinIO (dev) / Cloudflare R2 (prod) — API S3-compatible
+- **CDN / HLS:** Cloudflare (prod) / nginx ou MinIO direto (dev)
+- **Observabilidade:** Sentry (api, worker, nuxt)
+
+## Arquitetura
+
+Organização por **domínios (DDD)** em `apps/api/src/modules/`. Cada módulo segue quatro camadas:
+
+| Camada | Responsabilidade |
+|--------|------------------|
+| `domain/` | Regras de negócio puras — sem framework, sem I/O |
+| `application/` | Orquestração — use cases, commands, queries |
+| `infra/` | Implementações concretas — banco, storage, FFmpeg |
+| `http/` | Interface HTTP — rotas, schemas, controllers |
+
+### Agregados principais
+
+| Agregado | Responsabilidade | Status |
+|----------|------------------|--------|
+| **Video** | Upload, transcodificação HLS, catálogo, metadados | 📋 Planejado |
+| **User** | Autenticação, roles (`viewer` / admin), gestão de usuários | 📋 Planejado |
+| **WatchSession** | Progresso de reprodução (`watch_progress`), retomada | 📋 Planejado |
+
+Nenhum módulo acessa o domínio de outro diretamente. Tipos cruzados vêm exclusivamente de `packages/shared`.
+
+## Regras de dependência (críticas)
+apps/api → packages/shared apps/web → packages/shared
+apps/admin → packages/shared packages/worker → packages/shared
+
+- **Nenhum app importa código de outro app**
+- Comunicação `api` ↔ `worker` **somente via fila BullMQ/Valkey**
+- `packages/shared` contém **apenas contratos** — sem use cases, utils ou dependências externas
+
+## Autenticação e autorização
+
+- JWT Bearer: `Authorization: Bearer <access_token>` em rotas protegidas
+- `access_token`: 15 minutos, em memória no cliente (não localStorage)
+- `refresh_token`: 7 dias, cookie `httpOnly; Secure; SameSite=Strict` + Valkey com TTL
+- Refresh com **rotation** — token anterior invalidado imediatamente
+- Rotas admin marcadas com 🔒 exigem role de administrador
+- WebSocket autentica via query param `?token=<access_token>` (limitação do browser)
+
+## Pipeline de vídeo (fluxo crítico)
+1. POST /videos (admin) → retorna presigned upload_url
+2. Cliente faz upload direto para MinIO/R2
+3. POST /videos/:id/transcode → enfileira job BullMQ
+4. Worker executa FFmpeg → segmentos HLS (240p–1080p, 4s/segmento)
+5. Worker faz upload dos .ts + .m3u8 para storage
+6. Eventos via WebSocket: video.status / video.error
+7. GET /videos/:id → stream_url aponta para CDN (master.m3u8)
+
+- Segmentos: 4 segundos (seek preciso, baixo rebuffering)
+- Resoluções: 240p · 480p · 720p · 1080p
+- Output: `master.m3u8` + playlists por qualidade + segmentos `.ts`
+- Progresso do player: WebSocket `player.progress` a cada ~10s → upsert em `watch_progress`
+
+## Convenções de API
+
+- Base URL: `/v1`
+- Padrão: `/modulo/recurso/:id` — ações extras só quando não mapeável por verbo HTTP
+- Resposta 200/201: objeto direto, sem envelope
+- Listas: `{ "data": [...], "meta": { "total", "page", "limit" } }`
+- Erros: `{ "error": { "code": "VIDEO_NOT_FOUND", "message": "..." } }`
+- Validação de schema: JSON Schema nativo do Fastify
+- Códigos de erro tipados: `UNAUTHORIZED`, `FORBIDDEN`, `VIDEO_NOT_FOUND`, `VIDEO_NOT_READY`, `JOB_ALREADY_QUEUED`, `VALIDATION_ERROR`, etc.
+
+## Convenções de código
+
+### Backend (`apps/api`)
+- Módulos em `src/modules/[dominio]/` com as quatro camadas DDD
+- Rotas e schemas em `http/` — validação com JSON Schema do Fastify
+- Use cases em `application/` — orquestram domínio + infra
+- Infra compartilhada (DB, Redis, storage, Sentry) em `src/infra/`
+- Config e plugins em `src/config/`
+
+### Frontend (`apps/web`, `apps/admin`)
+- Pages por rota (`pages/`)
+- Composables para lógica reutilizável (`usePlayer`, `useProgress`, `useAuth`, etc.)
+- Stores Pinia para estado global (`auth`, `catalog`)
+- Player HLS via `hls.js` ou `@nuxtjs/video-player`
+
+### Worker (`packages/worker`)
+- Jobs em `jobs/` (transcode, thumbnail, cleanup)
+- Processors em `processors/` (ffmpeg, storage upload)
+- Processo independente — pode ser reiniciado/escalado sem afetar a API
+- Falhas de FFmpeg e retry esgotado → Sentry
+
+### Shared (`packages/shared`)
+- Tipos: `Video`, `User`, `WatchSession`
+- DTOs: `CreateVideoDto`, `UpdateProgressDto`
+- Enums: `VideoStatus`, `UserRole`
+- Erros tipados: `VideoNotFoundError`, `UnauthorizedError`
+
+## Ambientes e infra
+
+| Ambiente | Compose | Storage |
+|----------|---------|---------|
+| Desenvolvimento | `docker-compose.yml` | MinIO (local) |
+| Produção | `docker-compose.prod.yml` | Cloudflare R2 (env vars) |
+
+Troca MinIO ↔ R2 **somente por variáveis de ambiente** — nenhuma linha de código muda:
+`STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`
+
+Serviços Docker: `api`, `postgres`, `valkey`, `minio` (dev), `worker`
+
+## Regras de streaming críticas
+
+- Vídeo só fica disponível para reprodução com `status: ready` — retornar `409 VIDEO_NOT_READY` antes disso
+- Upload é **direto para storage** (presigned URL) — a API nunca recebe o arquivo binário
+- Transcodificação é **assíncrona** — nunca bloqueie a rota HTTP aguardando FFmpeg
+- Progresso de transcodificação via WebSocket, não polling
+- Falhas de job após retry esgotado devem atualizar `status: error` e emitir `video.error`
+- Segmentos HLS devem ser servidos via CDN em produção — nunca expor credenciais do R2 ao cliente
+
+## Padrões de resposta esperados dos agentes
+
+- Respeite a separação de camadas DDD — lógica de negócio não vai em `http/` ou `infra/`
+- Respeite as regras de dependência do monorepo — nunca importe app de app
+- Prefira convenções já documentadas em `docs/` a introduzir novos padrões sem justificativa
+- Considere os três pontos de Sentry (api, worker, nuxt) ao sugerir tratamento de erros
+- Para mudanças em contratos de API, verifique impacto em `packages/shared` e nos dois frontends
+- Sinalize breaking changes em endpoints, schemas WebSocket ou migrations destrutivas
+- Este é um projeto pessoal/privado — não sugira multi-tenancy, billing ou escalabilidade enterprise sem solicitação explícita
+
+---
+
+## Git Commit Rules
+
 Todas as mensagens de commit sugeridas devem seguir estritamente o padrão Conventional Commits em português (BR).
 
 Regras obrigatórias:
-1. Use a estrutura: <tipo>: <descrição minúscula>
-2. O prefixo <tipo> deve usar os termos padrão da comunidade (ex: docs, feat, fix, chore, refactor).
-3. A <descrição> deve começar com um verbo no presente do indicativo (ex: adiciona, atualiza, corrige, documenta, remove).
+1. Use a estrutura: `<tipo>: <descrição minúscula>`
+2. O prefixo `<tipo>` deve usar os termos padrão da comunidade (ex: docs, feat, fix, chore, refactor).
+3. A `<descrição>` deve começar com um verbo no presente do indicativo (ex: adiciona, atualiza, corrige, documenta, remove).
