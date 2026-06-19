@@ -5,7 +5,7 @@
   "scripts": {
     "build": "node -e \"require('fs').mkdirSync('dist',{recursive:true})\"",
     "dev": "node -e \"setInterval(()=>{},86400000)\"",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   }
