@@ -72,7 +72,11 @@ importers:
 
   apps/web: {}
 
-  packages/shared: {}
+  packages/shared:
+    devDependencies:
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
 
   packages/worker: {}
 
