@@ -37,11 +37,71 @@ Um projeto pessoal, feito com cuidado.
 
 ## ✨ O que o Play+ representa
 
-🎬 Histórias organizadas  
-🌙 Experiências simples  
-🔒 Privacidade  
-💙 Liberdade  
-🚀 Aprendizado contínuo  
+🎬 Histórias organizadas
+🌙 Experiências simples
+🔒 Privacidade
+💙 Liberdade
+🚀 Aprendizado contínuo
+
+## 🚀 Como iniciar o projeto
+
+### Pré-requisitos
+
+- [Node.js](https://nodejs.org/) ≥ 20
+- [pnpm](https://pnpm.io/) 9.x (o projeto usa `packageManager: pnpm@9.15.4`)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine + Compose)
+
+### 1. Instalar dependências
+
+```bash
+pnpm install
+```
+
+### 2. Configurar variáveis de ambiente
+
+Copie o template e ajuste os valores sensíveis:
+
+```bash
+cp .env.example .env
+```
+
+Edite `.env` e defina pelo menos `JWT_SECRET` (≥ 32 caracteres) e `ADMIN_SEED_PASSWORD`. O arquivo `.env` não é versionado.
+
+### 3. Subir a infraestrutura local
+
+Na raiz do repositório:
+
+```bash
+docker compose up -d
+```
+
+Isso sobe **PostgreSQL**, **Valkey** e **MinIO** (com bucket `playplus` criado automaticamente). Verifique o status:
+
+Para parar a infra:
+
+```bash
+docker compose down
+```
+
+### 4. Rodar o monorepo em desenvolvimento
+
+Com a infra no ar:
+
+```bash
+pnpm dev
+```
+
+O Turbo executa o script `dev` de cada app/package em paralelo. Nesta fase inicial (`ETD-01`), os apps ainda são stubs — a API, worker, web e admin passam a responder conforme forem implementados nas ETDs seguintes.
+
+### Comandos úteis
+
+```bash
+pnpm lint          # ESLint em todo o monorepo
+pnpm typecheck     # TypeScript (tsc --noEmit)
+pnpm test          # Vitest
+pnpm knip          # exports e dependências não utilizadas
+pnpm build         # build de todos os packages
+```
 
 ## 📚 Documentação
 
