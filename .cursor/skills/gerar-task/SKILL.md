@@ -2,9 +2,9 @@
 name: gerar-task
 description: >-
   Gera ou refina issues estruturadas no GitHub para o Play+. Modo **gerar**: transforma
-  US/SPEC/planejamento em épico e sub-issues. Modo **refinar**: melhora, enriquece ou
+  US/SPEC/planejamento em milestone (épico) + issues. Modo **refinar**: melhora, enriquece ou
   revisa issue existente (texto, link GitHub ou .md). Triggers gerar: "gerar tasks",
-  "criar issues", "montar backlog", "quebrar a SPEC", "criar épico". Triggers refinar:
+  "criar issues", "montar backlog", "quebrar a SPEC", "criar milestone". Triggers refinar:
   "melhora essa task", "enriquecer issue", "refinar task", "melhorar descrição",
   "analisar task", "preparar issue", "revisar task", ou conteúdo que pareça issue de dev.
   Obrigatório: preservar anexos/links na descrição; antes de editar issue existente,
@@ -25,7 +25,7 @@ Dois modos complementares:
 
 | Modo | Entrada | Saída |
 |------|---------|-------|
-| **Gerar** | US/SPEC, `docs/planning/`, breakdown do `planning-agent` | Épico + sub-issues no GitHub |
+| **Gerar** | US/SPEC, `docs/planning/`, breakdown do `planning-agent` | Milestone (épico) + issues no GitHub |
 | **Refinar** | Texto, link `github.com/.../issues/N`, `.md` colado | Pré-visualização enriquecida → issue editada ou `.md` local |
 
 **Fontes canônicas Play+ (preferir nesta ordem):**
@@ -37,6 +37,52 @@ Dois modos complementares:
 **Contexto obrigatório:** [`.cursorrules`](../../../.cursorrules), [`../FLUXO.md`](../FLUXO.md), [`reference.md`](reference.md).
 
 **Handoff posterior:** issues criadas/refinadas → `dev-agent`, ordem `shared → api → worker → frontend`.
+
+---
+
+## Épico = Milestone (modo Gerar — obrigatório)
+
+**Não criar issue `[Épico]`.** O agrupamento de entrega é representado exclusivamente por um **GitHub Milestone**.
+
+| Papel | Mecanismo |
+|-------|-----------|
+| Épico / entrega agrupada | Milestone (`iter-01-foundation`, `iter-02-video-backend`, …) |
+| Task implementável | Issue com `--milestone` + labels de superfície e `pts-*` |
+| Dependência entre tasks | `--blocked-by` |
+| Ordem / escopo do épico | Descrição do milestone |
+
+**Proibido no modo Gerar:**
+- Issue com título `[Épico] …`
+- `--parent` para vincular issues ao agrupamento
+
+### Nome do milestone
+- Preferir IDs de planejamento: `iter-01-foundation`, `iter-02-video-backend`, `iter-03-worker-pipeline`
+- Alternativa: `v0-vertical-slice` para slice completo
+
+### Conteúdo da descrição do milestone
+Migrar para o milestone o que antes ia no corpo da issue épico:
+- Objetivo e escopo (**dentro** / **fora**)
+- Critérios de aceite do épico (checklist)
+- Lista de issues: `#N — título`
+- Ordem sugerida de implementação
+- Links fonte (ETD, US, `docs/planning/`, ADR)
+
+Salvar rascunho local em `tasks/<milestone>/milestone-body.md` antes de publicar.
+
+### Publicação (C) — modo Gerar
+1. Criar ou reutilizar milestone (`gh api repos/{owner}/{repo}/milestones`)
+2. Atualizar `description` do milestone com o corpo épico
+3. Criar issues com `--milestone "<nome>"` + labels + `--blocked-by` quando houver dependência
+4. Atualizar descrição do milestone com números reais das issues criadas
+
+### Milestone ou épico issue já existente
+| Situação | Ação |
+|----------|------|
+| Milestone já existe | Reutilizar; atualizar `description` — não criar duplicata |
+| Issue `[Épico]` existente | Migrar conteúdo para o milestone → fechar issue épico com comentário → issues filhas permanecem no milestone |
+| Issues com `--parent` legado | Remover vínculo de parent; agrupar só via milestone + `--blocked-by` |
+
+Comandos e templates: [reference.md § Milestone como épico](reference.md#milestone-como-épico).
 
 ---
 
@@ -270,7 +316,9 @@ Se a task envolver ambos:
 
 ---
 
-## 8. Formato de output (ambos os modos)
+## 8. Formato de output
+
+### Modo Refinar (issue única)
 
 Ordem obrigatória:
 
@@ -315,6 +363,46 @@ Ordem obrigatória:
 *Análise baseada em: [código local / inferência de domínio]*
 ```
 
+### Modo Gerar (breakdown)
+
+Ordem obrigatória:
+
+1. **Milestone** — nome, descrição (objetivo, escopo, critérios do épico, ordem)
+2. **Issues** — título, descrição, critérios, `blocked-by` por issue
+3. Tabela resumo: `# | título | labels | pts | blocked-by`
+4. **Por último:** Metadados sugeridos — **somente chat**
+
+```markdown
+# 📦 Breakdown — [nome do milestone]
+
+## Milestone: `iter-01-foundation`
+[Descrição completa do épico — vai para `description` do milestone]
+
+## Issues
+
+### 1. [Título da task]
+**Labels:** `infra`, `enhancement`, `pts-3`
+**Depende de:** —
+
+[Descrição + critérios de aceite]
+
+### 2. [Título da task]
+**Labels:** `infra`, `enhancement`, `pts-2`
+**Depende de:** #1
+
+...
+
+## Tabela resumo
+| # | Título | Labels | pts | blocked-by |
+|---|--------|--------|-----|------------|
+| TBD | ... | `infra` | `pts-3` | — |
+
+## Metadados sugeridos *(somente chat)*
+...
+```
+
+**Não** incluir seção `[Épico]` nem issue pai na pré-visualização.
+
 ---
 
 ## 9. Apresentar, confirmar e persistir
@@ -329,8 +417,8 @@ Ordem **obrigatória** — nunca inverter:
    > Confirme se a descrição **mantém** imagens, links e anexos.
 
 4. **Somente após** resposta afirmativa:
-   - **(B)** gravar em `tasks/<#N>/` ou caminho indicado (ex.: `*-refinamento.md`)
-   - **(C)** modo Refinar: §5.1 snapshot → `gh issue edit`; modo Gerar: §7
+   - **(B)** gravar em `tasks/<milestone>/` ou `tasks/#N/` (ex.: `milestone-body.md`, `*-refinamento.md`)
+   - **(C)** modo Refinar: §5.1 snapshot → `gh issue edit`; modo Gerar: § Épico = Milestone
 
 ### Publicação GitHub (C) — issue existente
 
@@ -341,7 +429,10 @@ Ordem **obrigatória** — nunca inverter:
 
 ### Publicação GitHub (C) — modo Gerar
 
-Seguir §7 após aprovação do breakdown (épico → sub-issues → `--blocked-by`).
+1. Criar ou atualizar milestone com `description` do épico
+2. Criar issues com `--milestone "<nome>"` (sem `--parent`)
+3. Aplicar `--blocked-by` conforme dependências
+4. Atualizar `description` do milestone com `#N` reais das issues
 
 ---
 
@@ -350,7 +441,8 @@ Seguir §7 após aprovação do breakdown (épico → sub-issues → `--blocked-
 | Situação | Ação |
 |----------|------|
 | SPEC grande (15+ issues) | Breakdown completo; perguntar se cria tudo ou por superfície |
-| Épico existente | Pular criação de épico; pedir `#N` |
+| Milestone já existe | Reutilizar; pedir nome ou confirmar `iter-NN-*` do planejamento |
+| Issue `[Épico]` legada | Migrar para milestone e fechar — não manter issue épico aberta |
 | Breakdown do `planning-agent` | Converter T01…Tn 1:1 ou agrupar com justificativa |
 | Issue GitHub vaga | Refinar em alto nível + nota "detalhar na implementação" |
 | `gh` não autenticado | `gh auth login` — não fingir que publicou |
@@ -369,6 +461,7 @@ Seguir §7 após aprovação do breakdown (épico → sub-issues → `--blocked-
 - **Anexos e links** — nunca remover silenciosamente (§5)
 - **Arquitetura Play+:** DDD, monorepo, fila api↔worker, contratos em `shared`
 - **Nenhuma alteração no GitHub sem confirmação** (§10)
+- **Épico = milestone** — nunca issue `[Épico]` nem `--parent` (§ Épico = Milestone)
 - **Snapshot em comentário antes de editar** (§5.1)
 - Commits/PRs: `feat(video): ... (#43)`
 

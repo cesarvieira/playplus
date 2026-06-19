@@ -120,7 +120,6 @@ gh label create "enhancement" --description "Nova capacidade ou task de implemen
 gh label create "documentation" --description "Somente docs, sem código de produção" --color "2563EB"
 gh label create "spike" --description "Investigação timeboxed — não entrega feature" --color "EA580C"
 # Superfície
-gh label create "epic" --description "Épico / feature completa" --color "1D4ED8"
 gh label create "shared" --description "packages/shared — contratos" --color "7C3AED"
 gh label create "api" --description "apps/api — módulos DDD, REST, WebSocket" --color "059669"
 gh label create "worker" --description "packages/worker — BullMQ, FFmpeg" --color "D97706"
@@ -135,7 +134,6 @@ gh label create "infra" --description "Docker, compose, CI, env, tooling" --colo
 | Tipo | `enhancement` | azul claro | feature/task |
 | Tipo | `documentation` | azul | só docs |
 | Tipo | `spike` | laranja escuro | investigação |
-| Superfície | `epic` | azul escuro | issue pai |
 | Superfície | `shared` | violeta | contratos |
 | Superfície | `api` | verde | backend |
 | Superfície | `worker` | âmbar | fila/FFmpeg |
@@ -178,11 +176,101 @@ Filtrar no board/lista: `label:pts-3`, `label:api label:pts-5`, etc.
 | `enhancement` | Nova capacidade ou task de implementação |
 | `documentation` | Só docs |
 
-### Hierarquia épico → sub-issue
+### Hierarquia milestone → issues
 
-1. Issue pai com label `epic` — **sem** `--parent`
-2. Sub-issues com `--parent <número_do_épico>`
-3. Milestone opcional (`iter-01`, `v0-vertical-slice`)
+**Épico = milestone.** Não criar issue `[Épico]`.
+
+| Papel | Mecanismo |
+|-------|-----------|
+| Épico | Milestone (`iter-01-foundation`, `v0-vertical-slice`, …) |
+| Task | Issue com `--milestone "<nome>"` |
+| Dependência | `--blocked-by` entre issues |
+
+---
+
+## Milestone como épico
+
+### Template descrição do milestone
+
+```markdown
+## [ETD-01 / US-VID-007] — Título da entrega
+
+## Objetivo
+[Entrega agrupada]
+
+## Escopo
+**Dentro:** ...
+**Fora:** ...
+
+## Critérios de aceite
+- [ ] ...
+
+## Issues
+- [ ] #3 — título
+- [ ] #4 — título
+
+## Ordem sugerida
+1. #3 → #4 e #5 em paralelo → #6
+
+## Fonte
+- [ETD-01 (Wiki)](https://github.com/cesarvieira/playplus/wiki/ETD-01-Root-e-Infra)
+- [docs/planning/iter-01-foundation.md](docs/planning/iter-01-foundation.md)
+```
+
+### Criar ou atualizar milestone
+
+```bash
+# Criar (se não existir)
+gh api repos/{owner}/{repo}/milestones \
+  -f title="iter-01-foundation" \
+  -f description="$(cat tasks/iter-01-foundation/milestone-body.md)" \
+  -f state=open
+
+# Atualizar descrição (épico já publicado, issues criadas)
+gh api repos/{owner}/{repo}/milestones/1 \
+  -X PATCH \
+  -f description="$(cat tasks/iter-01-foundation/milestone-body.md)"
+```
+
+### Criar issue no milestone
+
+```bash
+gh issue create --title "Scaffold monorepo pnpm + Turborepo + TypeScript base" \
+  --label infra,enhancement,pts-3 \
+  --milestone "iter-01-foundation" \
+  --body-file tasks/iter-01-foundation/01-scaffold.md
+```
+
+### Issue com dependência
+
+```bash
+gh issue create --title "Configurar ESLint 9 flat config e Prettier" \
+  --label infra,enhancement,pts-2 \
+  --milestone "iter-01-foundation" \
+  --blocked-by 3 \
+  --body-file tasks/iter-01-foundation/02-eslint.md
+```
+
+### Listar issues do milestone
+
+```bash
+gh issue list --milestone "iter-01-foundation" --json number,title,labels,state
+```
+
+### Migrar épico issue legado para milestone
+
+```bash
+# 1. Copiar corpo da issue épico para milestone-body.md
+gh issue view 2 --json body -q .body > tasks/iter-01-foundation/milestone-body.md
+
+# 2. Atualizar milestone
+gh api repos/{owner}/{repo}/milestones/1 -X PATCH -f description="$(cat tasks/iter-01-foundation/milestone-body.md)"
+
+# 3. Fechar issue épico
+gh issue close 2 --comment "Épico representado pelo milestone iter-01-foundation."
+```
+
+**Não usar** `--parent` em novas issues. Issues com `parent_issue_url` legado permanecem funcionais via milestone.
 
 ---
 
@@ -268,31 +356,11 @@ Salvar em `tasks/#43/` ou `tasks/issue-43/`:
 
 ## Template corpo issue
 
-### Épico
+### Milestone (épico)
 
-```markdown
-## Objetivo
-[Entrega do épico]
+Ver [§ Milestone como épico](#milestone-como-épico) — conteúdo vai em `description` do milestone, não em issue.
 
-## Agregado(s) e superfície(s)
-- Agregado: Video
-- Superfície: shared, api, admin
-
-## Escopo
-**Dentro:** ...
-**Fora:** ...
-
-## Critérios de aceite do épico
-- [ ] ...
-
-## Fonte
-- [docs/requirements/v0-vertical-slice/US-VID-007.md](docs/requirements/v0-vertical-slice/US-VID-007.md)
-
-## Sub-issues
-- [ ] #NN — título
-```
-
-### Sub-issue (task)
+### Issue (task)
 
 ```markdown
 ---
@@ -302,7 +370,7 @@ Salvar em `tasks/#43/` ou `tasks/issue-43/`:
 ---
 
 ## Contexto
-[Task dentro do épico; estado atual no repo]
+[Task dentro do milestone; estado atual no repo]
 
 ## O que deve ser desenvolvido
 [Camadas DDD, arquivos-alvo]
@@ -334,7 +402,7 @@ Salvar em `tasks/#43/` ou `tasks/issue-43/`:
 - `apps/api/src/modules/video/http/...`
 
 ## Relacionamentos
-- Épico: #42
+- Milestone: `iter-02-video-backend`
 - Depende de: #43
 ```
 
@@ -359,37 +427,14 @@ Salvar em `tasks/#43/` ou `tasks/issue-43/`:
 
 ## Comandos gh — modo Gerar
 
-### Criar épico
+Ver [§ Milestone como épico](#milestone-como-épico) para fluxo completo.
 
-```bash
-gh issue create --title "[Épico] Painel admin com status em tempo real" \
-  --label epic --milestone "v0-vertical-slice" \
-  --body-file epic-body.md
-```
+Resumo:
 
-### Criar sub-issue
-
-```bash
-gh issue create --title "Implementar listagem GET /v1/videos no admin" \
-  --label admin,enhancement,pts-5 --parent 42 \
-  --blocked-by 41 \
-  --body-file sub-issue-body.md
-```
-
-### Milestone
-
-```bash
-gh api repos/{owner}/{repo}/milestones \
-  -f title="iter-01-foundation" \
-  -f description="Fundação monorepo + auth API" \
-  -f state=open
-```
-
-### Listar sub-issues do épico
-
-```bash
-gh issue list --search "parent:42" --json number,title,labels
-```
+1. `gh api ... milestones` — criar ou atualizar milestone
+2. `gh issue create --milestone "..."` — criar tasks (sem `--parent`)
+3. `gh issue create --blocked-by N` — dependências entre tasks
+4. Atualizar `description` do milestone com `#N` reais
 
 ---
 
@@ -411,7 +456,7 @@ apps/web / apps/admin
 
 ## Exemplo — US-VID-007 Painel admin
 
-**Épico:** `#42` — Painel admin de vídeos com status em tempo real
+**Milestone:** `iter-04-admin-ui`
 
 | # | Labels | Título | blocked-by |
 |---|--------|--------|------------|
@@ -446,6 +491,7 @@ apps/web / apps/admin
 - Remover links/anexos ao refinar
 - Editar issue sem snapshot em comentário
 - Publicar sem confirmação explícita do usuário
+- Criar issue `[Épico]` ou usar `--parent` — épico = milestone
 
 ---
 
@@ -464,7 +510,7 @@ apps/web / apps/admin
 
 - Branch: `feat/43-video-list-shared` ou `issue-43`
 - Commit: `feat(shared): adiciona VideoListItem (#43)`
-- PR body: `Closes #43` ou `Relates to #42`
+- PR body: `Closes #43` ou `Relates to milestone iter-04-admin-ui`
 
 ---
 
