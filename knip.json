@@ -11,5 +11,5 @@
       "project": ["src/**/*.ts"]
     }
   },
-  "ignoreDependencies": ["@vitest/coverage-v8"]
+  "ignoreDependencies": ["@vitest/coverage-v8", "lint-staged"]
 }
