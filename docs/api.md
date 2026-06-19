@@ -95,6 +95,7 @@ Lista vídeos disponíveis.
       "duration": 7240,
       "thumbnail_url": "https://cdn.../thumb.jpg",
       "status": "ready",
+      "upload_complete": true,
       "created_at": "2025-01-01T00:00:00Z"
     }
   ],
@@ -102,12 +103,16 @@ Lista vídeos disponíveis.
 }
 ```
 
+`upload_complete`: `boolean` — presente em itens com `status: pending`. `false` = aguardando upload ao storage; `true` = arquivo no storage, pronto para `POST /videos/:id/transcode`. Omitido ou `true` nos demais status.
+
+**Filtros admin (v0):** pill **Em andamento** agrupa `queued` + `processing` no client — a API não expõe filtro único para ambos; `queued` aparece na listagem sem query param dedicado.
+
 ---
 
 ### `GET /videos/:id`
 Retorna metadados completos de um vídeo, incluindo progresso salvo do usuário autenticado.
 
-**Response `200`:**
+**Response `200`** (vídeo com `status: ready`):
 ```json
 {
   "id": "uuid",
@@ -123,6 +128,32 @@ Retorna metadados completos de um vídeo, incluindo progresso salvo do usuário 
   "created_at": "2025-01-01T00:00:00Z"
 }
 ```
+
+**Response `200`** (vídeo com `status` diferente de `ready` — metadados sem reprodução):
+```json
+{
+  "id": "uuid",
+  "title": "...",
+  "duration": null,
+  "thumbnail_url": null,
+  "status": "processing",
+  "created_at": "2025-01-01T00:00:00Z"
+}
+```
+`stream_url` omitido quando o vídeo não está pronto. A UI do player (`apps/web`) deve tratar `status !== ready` sem montar HLS.
+
+**Response `409`** (alternativa quando cliente solicita reprodução e vídeo não está pronto):
+```json
+{
+  "error": {
+    "code": "VIDEO_NOT_READY",
+    "message": "Vídeo ainda em processamento"
+  }
+}
+```
+Aplicável quando `status` é `pending`, `queued` ou `processing`. A implementação pode retornar `200` com metadados parciais (acima) **ou** `409` — a UI deve tratar ambos.
+
+**Erros:** `404 VIDEO_NOT_FOUND` · `401 UNAUTHORIZED`
 
 ---
 
@@ -147,6 +178,22 @@ Registra um novo vídeo e inicia o upload.
 }
 ```
 O cliente faz upload direto para a `upload_url` (MinIO/R2 presigned). Ao concluir, chama `/videos/:id/transcode`.
+
+---
+
+### `POST /videos/:id/upload-url` 🔒 admin
+Renova a URL presigned de um vídeo com `status: pending` — usado quando a URL anterior expirou antes do upload concluir, sem recriar o registro.
+
+**Response `200`:**
+```json
+{
+  "id": "uuid",
+  "upload_url": "https://storage.../presigned",
+  "status": "pending"
+}
+```
+
+**Erros:** `404 VIDEO_NOT_FOUND` · `409` se vídeo não estiver em `pending` (ex.: transcode já enfileirado)
 
 ---
 

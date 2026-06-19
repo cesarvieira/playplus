@@ -16,6 +16,8 @@
 - [ ] Dado body inválido (campos ausentes ou `file_size` ≤ 0), quando chamo `POST /videos`, então recebo `422 VALIDATION_ERROR`
 - [ ] Dado registro criado, quando inspeciono storage, então a `upload_url` aponta para MinIO com TTL limitado e permite PUT/POST do arquivo original
 - [ ] Dado registro criado, quando consulto banco, então vídeo persiste com `status: pending` e metadados informados
+- [ ] Dado vídeo existente com `status: pending`, quando admin chama `POST /videos/:id/upload-url`, então recebo `200` com nova `upload_url` para o mesmo `id` — sem criar registro duplicado
+- [ ] Dado vídeo com status diferente de `pending`, quando chamo `POST /videos/:id/upload-url`, então recebo `409` (upload já concluído ou transcode em andamento)
 
 ## Requisitos Não-Funcionais
 

@@ -11,7 +11,7 @@
 
 ## Critérios de Aceite
 
-- [ ] Dado usuário autenticado, quando chamo `GET /videos?page=1&limit=20`, então recebo `{ data: [...], meta: { total, page, limit } }` com itens contendo `id`, `title`, `duration`, `thumbnail_url`, `status`, `created_at`
+- [ ] Dado usuário autenticado, quando chamo `GET /videos?page=1&limit=20`, então recebo `{ data: [...], meta: { total, page, limit } }` com itens contendo `id`, `title`, `duration`, `thumbnail_url`, `status`, `created_at`; itens com `status: pending` incluem `upload_complete` (`boolean`)
 - [ ] Dado filtro `status=ready`, quando listo vídeos, então apenas vídeos prontos aparecem
 - [ ] Dado vídeo existente com `status: ready`, quando chamo `GET /videos/:id`, então recebo metadados completos incluindo `stream_url` apontando para `master.m3u8` (MinIO/nginx em dev)
 - [ ] Dado vídeo com `status: processing` ou `pending`, quando chamo `GET /videos/:id` para reprodução, então `stream_url` pode estar ausente ou rota de play deve tratar `409 VIDEO_NOT_READY` conforme contrato

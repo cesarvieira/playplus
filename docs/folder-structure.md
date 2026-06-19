@@ -22,12 +22,15 @@ playplus/
 │   │   ├── pages/                  # index, /[id], /login
 │   │   ├── components/             # VideoPlayer, MediaCard, ProgressBar
 │   │   ├── composables/            # usePlayer, useProgress, useAuth
-│   │   └── stores/                 # auth, catalog
+│   │   ├── stores/                 # auth, catalog
+│   │   └── middleware/             # auth (guard de rotas protegidas)
 │   │
 │   └── admin/                      # Nuxt 3 — frontend administrativo
-│       ├── pages/                  # dashboard, /videos, /users, /jobs
+│       ├── pages/                  # /login, /videos, /users, /jobs
 │       ├── components/             # UploadForm, JobQueue, VideoTable
-│       └── composables/            # useUpload, useJobs, useStats
+│       ├── composables/            # useAuth, useUpload, useJobs, useStats
+│       ├── stores/                 # auth
+│       └── middleware/             # auth (guard de rotas protegidas)
 │
 ├── packages/
 │   ├── shared/                     # Contratos compartilhados (sem lógica)

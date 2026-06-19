@@ -19,7 +19,7 @@
 PLAY-US-001  Infra Docker (postgres, valkey, minio)
 PLAY-US-002  Contratos packages/shared
 US-USR-001   API auth JWT
-US-VID-001   POST /videos presigned
+US-VID-001   POST /videos presigned + POST /videos/:id/upload-url
 US-VID-003   POST /videos/:id/transcode
 US-VID-004   Worker FFmpeg HLS
 US-VID-005   WebSocket video.status / video.error

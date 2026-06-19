@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  @keyframes pl-spin { to { transform: rotate(360deg); } }
+  @keyframes pl-pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+</style>
+</helmet>
+
+<div style="width:max-content;min-width:100%;min-height:100vh;box-sizing:border-box;padding:48px;background:#E9E1DB;color:#231C18;">
+
+  <!-- ===== INTRO / NOTES ===== -->
+  <div style="max-width:1180px;margin:0 0 40px 0;">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+      <div style="width:46px;height:46px;border-radius:14px;background:#231C18;display:flex;align-items:center;justify-content:center;">
+        <div style="width:0;height:0;border-style:solid;border-width:9px 0 9px 15px;border-color:transparent transparent transparent #fff;margin-left:3px;"></div>
+      </div>
+      <div>
+        <div style="font-size:24px;font-weight:800;letter-spacing:-.02em;">Play+ <span style="color:#E8956B;">Admin</span></div>
+        <div style="font-size:13px;color:#8A7F78;font-weight:500;">Vertical Slice v0 · seu cinema particular</div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:24px;padding:26px 30px;box-shadow:0 10px 34px rgba(80,40,20,.06);display:flex;gap:34px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:340px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#B59C8C;margin-bottom:10px;">Direção</div>
+        <p style="margin:0;font-size:14.5px;line-height:1.6;color:#5C524C;">Tom pessoal e acolhedor — nada de SaaS corporativo. Cantos suaves, paleta pêssego inspirada na referência, tipografia Plus&nbsp;Jakarta&nbsp;Sans. Status sempre com <strong style="color:#231C18;">ícone + texto</strong>, nunca só cor.</p>
+      </div>
+      <div style="flex:1;min-width:340px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#B59C8C;margin-bottom:10px;">Telas neste canvas</div>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:14px;color:#5C524C;line-height:1.5;">
+          <div><strong style="color:#231C18;">Login</strong> — padrão · carregando · erro genérico</div>
+          <div><strong style="color:#231C18;">Listagem</strong> — lista de vídeos com 5 status, sub-estado pending pós-upload e progresso ao vivo</div>
+          <div><strong style="color:#231C18;">Criar / editar</strong> — formulário · modal de envio · toast de conclusão</div>
+        </div>
+      </div>
+      <div style="flex:0 0 auto;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#B59C8C;margin-bottom:10px;">Status</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:#FBE6D6;color:#A85B2A;font-size:12.5px;font-weight:700;">Pendente</span>
+          <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:#DDE8F5;color:#3A5F94;font-size:12.5px;font-weight:700;">Na fila</span>
+          <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:#E7DCF2;color:#6B4E9E;font-size:12.5px;font-weight:700;">Processando</span>
+          <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:#D9ECDD;color:#3C7A4A;font-size:12.5px;font-weight:700;">Pronto</span>
+          <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:#F8DAD9;color:#B0413C;font-size:12.5px;font-weight:700;">Erro</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- SECTION: LOGIN -->
+  <!-- ============================================================= -->
+  <div style="font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#9A8676;margin:0 0 18px 4px;">01 · Login</div>
+  <div style="display:flex;gap:48px;align-items:flex-start;margin-bottom:64px;">
+
+    <!-- Login default -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:600;color:#7A6F68;margin-bottom:12px;">Padrão</div>
+      <div style="width:1040px;height:660px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(80,40,20,.10);display:flex;">
+        <div style="width:480px;background:linear-gradient(150deg,#F4CDA9 0%,#EC9E84 55%,#E07E7A 100%);padding:44px;display:flex;flex-direction:column;justify-content:space-between;position:relative;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;">
+              <div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 13px;border-color:transparent transparent transparent #E07E7A;margin-left:3px;"></div>
+            </div>
+            <div style="font-size:21px;font-weight:800;color:#fff;letter-spacing:-.02em;">Play+</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-end;">
+            <div style="width:96px;height:140px;border-radius:16px;background:rgba(255,255,255,.28);"></div>
+            <div style="width:96px;height:172px;border-radius:16px;background:rgba(255,255,255,.45);"></div>
+            <div style="width:96px;height:120px;border-radius:16px;background:rgba(255,255,255,.22);"></div>
+          </div>
+          <div>
+            <div style="font-size:28px;font-weight:800;color:#fff;line-height:1.2;letter-spacing:-.02em;">Seu cinema<br>particular.</div>
+            <div style="font-size:14.5px;color:rgba(255,255,255,.85);margin-top:10px;font-weight:500;">Guarde, assista e retome de onde parou.</div>
+          </div>
+        </div>
+        <div style="flex:1;padding:56px 56px;display:flex;flex-direction:column;justify-content:center;">
+          <div style="font-size:25px;font-weight:800;letter-spacing:-.02em;">Bem-vindo de volta</div>
+          <div style="font-size:14.5px;color:#8A7F78;margin-top:6px;margin-bottom:32px;font-weight:500;">Faça login para continuar.</div>
+          <label style="font-size:13px;font-weight:600;color:#5C524C;">E-mail</label>
+          <div style="margin-top:8px;margin-bottom:20px;height:50px;border:1.5px solid #E6DCD3;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#8A7F78;background:#FBF7F4;">test@test.net</div>
+          <label style="font-size:13px;font-weight:600;color:#5C524C;">Senha</label>
+          <div style="margin-top:8px;margin-bottom:28px;height:50px;border:1.5px solid #E6DCD3;border-radius:14px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:15px;color:#231C18;background:#FBF7F4;letter-spacing:.18em;">••••••••<span style="color:#B59C8C;font-size:13px;letter-spacing:0;font-weight:600;cursor:pointer;">mostrar</span></div>
+          <div style="height:52px;border-radius:14px;background:#231C18;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:700;">Entrar</div>
+          <div style="text-align:center;margin-top:18px;font-size:13.5px;color:#B59C8C;font-weight:500;">Esqueceu a senha?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login loading -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:600;color:#7A6F68;margin-bottom:12px;">Carregando (submit)</div>
+      <div style="width:560px;height:660px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(80,40,20,.10);padding:56px;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:25px;font-weight:800;letter-spacing:-.02em;">Bem-vindo de volta</div>
+        <div style="font-size:14.5px;color:#8A7F78;margin-top:6px;margin-bottom:32px;font-weight:500;">Faça login para continuar.</div>
+        <label style="font-size:13px;font-weight:600;color:#5C524C;">E-mail</label>
+        <div style="margin-top:8px;margin-bottom:20px;height:50px;border:1.5px solid #E6DCD3;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#231C18;background:#FBF7F4;">test@test.net</div>
+        <label style="font-size:13px;font-weight:600;color:#5C524C;">Senha</label>
+        <div style="margin-top:8px;margin-bottom:28px;height:50px;border:1.5px solid #E6DCD3;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#231C18;background:#FBF7F4;letter-spacing:.18em;">••••••••</div>
+        <div style="height:52px;border-radius:14px;background:#231C18;color:#fff;display:flex;align-items:center;justify-content:center;gap:11px;font-size:15.5px;font-weight:700;opacity:.92;">
+          <div style="width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:pl-spin .7s linear infinite;"></div>
+          Entrando…
+        </div>
+        <div style="text-align:center;margin-top:18px;font-size:13.5px;color:#B59C8C;font-weight:500;">Esqueceu a senha?</div>
+      </div>
+    </div>
+
+    <!-- Login error -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:600;color:#7A6F68;margin-bottom:12px;">Erro genérico</div>
+      <div style="width:560px;height:660px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(80,40,20,.10);padding:56px;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:25px;font-weight:800;letter-spacing:-.02em;">Bem-vindo de volta</div>
+        <div style="font-size:14.5px;color:#8A7F78;margin-top:6px;margin-bottom:22px;font-weight:500;">Faça login para continuar.</div>
+        <div style="display:flex;align-items:center;gap:11px;background:#FBEAE9;border:1px solid #F2C7C4;border-radius:14px;padding:13px 16px;margin-bottom:24px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span style="font-size:13.5px;font-weight:600;color:#B0413C;">E-mail ou senha incorretos.</span>
+        </div>
+        <label style="font-size:13px;font-weight:600;color:#5C524C;">E-mail</label>
+        <div style="margin-top:8px;margin-bottom:20px;height:50px;border:1.5px solid #E6DCD3;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#231C18;background:#FBF7F4;">test@test.net</div>
+        <label style="font-size:13px;font-weight:600;color:#5C524C;">Senha</label>
+        <div style="margin-top:8px;margin-bottom:28px;height:50px;border:1.5px solid #EBC4C0;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#231C18;background:#FCF6F4;letter-spacing:.18em;">••••••</div>
+        <div style="height:52px;border-radius:14px;background:#231C18;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15.5px;font-weight:700;">Entrar</div>
+        <div style="text-align:center;margin-top:18px;font-size:13.5px;color:#B59C8C;font-weight:500;">Esqueceu a senha?</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- SECTION: LISTAGEM (LIST) -->
+  <!-- ============================================================= -->
+  <div style="font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#9A8676;margin:0 0 18px 4px;">02 · Listagem de vídeos · /videos</div>
+  <div style="display:flex;gap:48px;align-items:flex-start;margin-bottom:64px;">
+
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:600;color:#7A6F68;margin-bottom:12px;">Lista · 5 status, pending pós-upload e progresso ao vivo</div>
+      <div style="width:1320px;height:840px;background:#FBF6F2;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(80,40,20,.10);display:flex;flex-direction:column;">
+        <!-- app header -->
+        <div style="height:68px;flex:none;background:#fff;border-bottom:1px solid #EFE6DE;display:flex;align-items:center;padding:0 28px;gap:18px;">
+          <div style="display:flex;align-items:center;gap:11px;">
+            <div style="width:34px;height:34px;border-radius:11px;background:#231C18;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div></div>
+            <div style="font-size:18px;font-weight:800;letter-spacing:-.02em;">Play+</div>
+          </div>
+          <div style="margin-left:14px;display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:999px;background:#F4ECE5;color:#231C18;font-size:14px;font-weight:700;">Vídeos</div>
+          <div style="flex:1;"></div>
+          <div style="display:flex;align-items:center;gap:9px;height:40px;padding:0 16px;border-radius:999px;background:#F4ECE5;width:240px;color:#A89A8E;font-size:14px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A89A8E" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Buscar vídeo…
+          </div>
+          <div style="width:40px;height:40px;border-radius:999px;background:#F4ECE5;display:flex;align-items:center;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A6F68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;height:40px;padding:3px 14px 3px 3px;border-radius:999px;background:#F4ECE5;">
+            <div style="width:34px;height:34px;border-radius:999px;background:linear-gradient(135deg,#E89B8E,#C97FB0);"></div>
+            <span style="font-size:13.5px;font-weight:700;">Rafael</span>
+          </div>
+          <div style="width:40px;height:40px;border-radius:999px;background:#F4ECE5;display:flex;align-items:center;justify-content:center;" title="Sair">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A6F68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </div>
+        </div>
+        <!-- page body -->
+        <div style="flex:1;padding:28px 36px;overflow:hidden;">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;">
+            <div>
+              <div style="font-size:26px;font-weight:800;letter-spacing:-.02em;">Meus vídeos</div>
+              <div style="font-size:14px;color:#8A7F78;margin-top:4px;font-weight:500;">7 vídeos · 1 na fila, 1 transcodificando</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="display:flex;gap:7px;">
+                <span style="padding:8px 15px;border-radius:999px;background:#231C18;color:#fff;font-size:13px;font-weight:700;">Todos</span>
+                <span style="padding:8px 15px;border-radius:999px;background:#fff;color:#7A6F68;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(80,40,20,.05);">Pronto</span>
+                <span style="padding:8px 15px;border-radius:999px;background:#fff;color:#7A6F68;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(80,40,20,.05);">Em andamento</span>
+                <span style="padding:8px 15px;border-radius:999px;background:#fff;color:#7A6F68;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(80,40,20,.05);">Erro</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:9px;height:42px;padding:0 20px;border-radius:999px;background:#231C18;color:#fff;font-size:14px;font-weight:700;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Adicionar vídeo
+              </div>
+            </div>
+          </div>
+
+          <!-- list -->
+          <div style="display:flex;flex-direction:column;gap:13px;">
+
+            <!-- ROW: processing -->
+            <div style="display:flex;align-items:center;gap:18px;background:#fff;border-radius:18px;padding:12px;box-shadow:0 8px 22px rgba(80,40,20,.05);">
+              <div style="position:relative;width:132px;height:78px;border-radius:12px;flex:none;background:linear-gradient(135deg,#D9C9EE,#B9A3E0);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                <div style="position:absolute;inset:0;background:rgba(35,28,24,.34);"></div>
+                <div style="position:relative;width:24px;height:24px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:pl-spin .9s linear infinite;"></div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:700;">Aniversário da Lia</div>
+                <div style="font-size:12.5px;color:#A89A8E;font-weight:500;margin-top:3px;">12 jun 2026 · 08:21</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:9px;max-width:320px;">
+                  <div role="progressbar" aria-valuenow="47" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Processando 47 por cento" style="flex:1;height:7px;border-radius:999px;background:#EFE6DE;overflow:hidden;"><div style="width:47%;height:100%;border-radius:999px;background:#8B6FC9;"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:#6B4E9E;">47%</span>
+                </div>
+              </div>
+              <span style="flex:none;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#E7DCF2;color:#6B4E9E;font-size:12.5px;font-weight:700;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B4E9E" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg>
+                Processando
+              </span>
+              <div style="width:150px;flex:none;display:flex;justify-content:flex-end;">
+                <span style="font-size:12.5px;color:#B59C8C;font-weight:600;">Transcodificando…</span>
+              </div>
+              <div style="display:flex;gap:6px;flex:none;">
+                <div style="width:36px;height:36px;border-radius:11px;background:#F4ECE5;display:flex;align-items:center;justify-content:center;" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A6F68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+                <div style="width:36px;height:36px;border-radius:11px;background:#FBEAE9;display:flex;align-items:center;justify-content:center;" title="Excluir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
+              </div>
+            </div>
+
+            <!-- ROW: ready -->
+            <div style="display:flex;align-items:center;gap:18px;background:#fff;border-radius:18px;padding:12px;box-shadow:0 8px 22px rgba(80,40,20,.05);">
+              <div style="position:relative;width:132px;height:78px;border-radius:12px;flex:none;background:linear-gradient(135deg,#F3C9A6,#E89B8E);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent #231C18;margin-left:2px;"></div></div>
+                <div style="position:absolute;bottom:6px;right:6px;background:rgba(35,28,24,.7);color:#fff;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:6px;">12:04</div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:700;">Férias na Serra 2024</div>
+                <div style="font-size:12.5px;color:#A89A8E;font-weight:500;margin-top:3px;">28 mai 2026 · 14:02</div>
+              </div>
+              <span style="flex:none;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#D9ECDD;color:#3C7A4A;font-size:12.5px;font-weight:700;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3C7A4A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Pronto
+              </span>
+              <div style="width:150px;flex:none;display:flex;justify-content:flex-end;">
+                <div style="height:38px;padding:0 14px;border-radius:11px;background:#F4ECE5;color:#231C18;display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;">Assistir
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#231C18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex:none;">
+                <div style="width:36px;height:36px;border-radius:11px;background:#F4ECE5;display:flex;align-items:center;justify-content:center;" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A6F68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+                <div style="width:36px;height:36px;border-radius:11px;background:#FBEAE9;display:flex;align-items:center;justify-content:center;" title="Excluir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
+              </div>
+            </div>
+
+            <!-- ROW: queued -->
+            <div style="display:flex;align-items:center;gap:18px;background:#fff;border-radius:18px;padding:12px;box-shadow:0 8px 22px rgba(80,40,20,.05);">
+              <div style="position:relative;width:132px;height:78px;border-radius:12px;flex:none;background:linear-gradient(135deg,#C9D8F0,#A9C0E8);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent #3A5F94;margin-left:2px;"></div></div>
+                <div style="position:absolute;bottom:6px;right:6px;background:rgba(35,28,24,.7);color:#fff;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:6px;">04:38</div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:700;">Show acústico no quintal</div>
+                <div style="font-size:12.5px;color:#A89A8E;font-weight:500;margin-top:3px;">12 jun 2026 · 08:19</div>
+              </div>
+              <span style="flex:none;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#DDE8F5;color:#3A5F94;font-size:12.5px;font-weight:700;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A5F94" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+                Na fila
+              </span>
+              <div style="width:150px;flex:none;display:flex;justify-content:flex-end;">
+                <span style="font-size:12.5px;color:#B59C8C;font-weight:600;">Aguardando worker…</span>
+              </div>
+              <div style="display:flex;gap:6px;flex:none;">
+                <div style="width:36px;height:36px;border-radius:11px;background:#F4ECE5;display:flex;align-items:center;justify-content:center;" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A6F68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+                <div style="width:36px;height:36px;border-radius:11px;background:#FBEAE9;display:flex;align-items:center;justify-content:center;" title="Excluir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
+              </div>
+            </div>
+
+            <!-- ROW: pending -->
+            <div style="display:flex;align-items:center;gap:18px;background:#fff;border-radius:18px;padding:12px;box-shadow:0 8px 22px rgba(80,40,20,.05);">
+              <div style="position:relative;width:132px;height:78px;border-radius:12px;flex:none;background:linear-gradient(135deg,#E7D2C0,#CDA98C);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent #A85B2A;margin-left:2px;"></div></div>
+                <div style="position:absolute;bottom:6px;right:6px;background:rgba(35,28,24,.7);color:#fff;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:6px;">21:50</div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:700;">Viagem Chile — bruto</div>
+                <div style="font-size:12.5px;color:#A89A8E;font-weight:500;margin-top:3px;">11 jun 2026 · 22:40</div>
+              </div>
+              <span style="flex:none;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#FBE6D6;color:#A85B2A;font-size:12.5px;font-weight:700;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A85B2A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Pendente
+              </span>
+              <div style="width:150px;flex:none;display:flex;justify-content:flex-end;">
+                <span style="font-size:12.5px;color:#B59C8C;font-weight:600;">Aguardando upload…</span>
+              </div>
+              <div style="display:flex;gap:6px;flex:none;">
+                <div style="width:36px;height:36px;border-radius:11px;background:#F4ECE5;display:flex;align-items:center;justify-content:center;" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A6F68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+                <div style="width:36px;height:36px;border-radius:11px;background:#FBEAE9;display:flex;align-items:center;justify-content:center;" title="Excluir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
+              </div>
+            </div>
+
+            <!-- ROW: ready 2 -->
+            <div style="display:flex;align-items:center;gap:18px;background:#fff;border-radius:18px;padding:12px;box-shadow:0 8px 22px rgba(80,40,20,.05);">
+              <div style="position:relative;width:132px;height:78px;border-radius:12px;flex:none;background:linear-gradient(135deg,#CFE6D2,#A9D0AE);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent #231C18;margin-left:2px;"></div></div>
+                <div style="position:absolute;bottom:6px;right:6px;background:rgba(35,28,24,.7);color:#fff;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:6px;">02:11</div>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:700;">Pôr do sol — Jeri</div>
+                <div style="font-size:12.5px;color:#A89A8E;font-weight:500;margin-top:3px;">02 mai 2026 · 18:55</div>
+              </div>
+              <span style="flex:none;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#D9ECDD;color:#3C7A4A;font-size:12.5px;font-weight:700;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3C7A4A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Pronto
+              </span>
+              <div style="width:150px;flex:none;display:flex;justify-content:flex-end;">
+                <div style="height:38px;padding:0 14px;border-radius:11px;background:#F4ECE5;color:#231C18;display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;">Assistir
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#231C18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex:none;">
+                <div style="width:36px;height:36px;border-radius:11px;background:#F4ECE5;display:flex;align-items:center;justify-content:center;" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A6F68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+                <div style="width:36px;height:36px;border-radius:11px;background:#FBEAE9;display:flex;align-items:center;justify-content:center;" title="Excluir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
+              </div>
+            </div>
+
+            <!-- ROW: error -->
+            <div style="display:flex;align-items:center;gap:18px;background:#fff;border-radius:18px;padding:12px;box-shadow:0 8px 22px rgba(80,40,20,.05);">
+              <div style="position:relative;width:132px;height:78px;border-radius:12px;flex:none;background:linear-gradient(135deg,#E4D4CE,#C9B3AC);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:700;">Documentário caseiro</div>
+                <div style="font-size:12.5px;color:#A89A8E;font-weight:500;margin-top:3px;">10 jun 2026 · 09:30</div>
+                <div style="font-size:12px;color:#B0413C;font-weight:600;margin-top:7px;">Falha na transcodificação após 3 tentativas.</div>
+              </div>
+              <span style="flex:none;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#F8DAD9;color:#B0413C;font-size:12.5px;font-weight:700;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                Erro
+              </span>
+              <div style="width:150px;flex:none;display:flex;justify-content:flex-end;">
+                <div style="height:38px;padding:0 14px;border-radius:11px;background:#FBEAE9;border:1px solid #F2C7C4;color:#B0413C;display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                  Tentar de novo
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex:none;">
+                <div style="width:36px;height:36px;border-radius:11px;background:#F4ECE5;display:flex;align-items:center;justify-content:center;" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7A6F68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+                <div style="width:36px;height:36px;border-radius:11px;background:#FBEAE9;display:flex;align-items:center;justify-content:center;" title="Excluir"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- SECTION: CRIAR / EDITAR -->
+  <!-- ============================================================= -->
+  <div style="font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#9A8676;margin:0 0 18px 4px;">03 · Criar / editar vídeo</div>
+  <div style="display:flex;gap:48px;align-items:flex-start;margin-bottom:64px;">
+
+    <!-- Form (create + edit) -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:600;color:#7A6F68;margin-bottom:12px;">Formulário · criar e editar</div>
+      <div style="width:680px;height:660px;background:#FBF6F2;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(80,40,20,.10);display:flex;flex-direction:column;">
+        <div style="height:68px;flex:none;background:#fff;border-bottom:1px solid #EFE6DE;display:flex;align-items:center;padding:0 24px;gap:12px;">
+          <div style="display:flex;align-items:center;gap:8px;color:#7A6F68;font-size:13.5px;font-weight:600;cursor:pointer;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A6F68" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            Voltar
+          </div>
+          <div style="flex:1;"></div>
+          <div style="font-size:15px;font-weight:800;">Editar vídeo</div>
+          <div style="flex:1;"></div>
+          <div style="width:60px;"></div>
+        </div>
+        <div style="flex:1;padding:30px 44px;overflow:hidden;">
+          <div style="font-size:13px;color:#8A7F78;font-weight:500;margin-bottom:24px;">Mesma tela para criar um novo vídeo ou editar um existente.</div>
+          <label style="font-size:13px;font-weight:700;color:#5C524C;">Título</label>
+          <div style="margin-top:8px;margin-bottom:24px;height:50px;border:1.5px solid #E6DCD3;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#231C18;background:#fff;">Aniversário da Lia</div>
+          <label style="font-size:13px;font-weight:700;color:#5C524C;">Arquivo de vídeo</label>
+          <div style="margin-top:8px;border:2px dashed #DCCFC3;border-radius:18px;background:#fff;padding:26px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div style="width:54px;height:54px;border-radius:16px;background:#F4ECE5;display:flex;align-items:center;justify-content:center;margin-bottom:13px;">
+              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#A85B2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div style="font-size:14.5px;font-weight:700;">Arraste o arquivo ou <span style="color:#E8956B;">procure</span></div>
+            <div style="font-size:12.5px;color:#A89A8E;margin-top:5px;font-weight:500;">MP4, MOV ou MKV · até 2&nbsp;GB (v0)</div>
+          </div>
+          <div style="margin-top:16px;display:flex;align-items:center;gap:13px;background:#fff;border:1px solid #EFE6DE;border-radius:14px;padding:12px 14px;">
+            <div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#D9C9EE,#B9A3E0);flex:none;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13.5px;font-weight:700;">aniversario-lia-4k.mp4</div>
+              <div style="font-size:12px;color:#A89A8E;font-weight:500;margin-top:2px;">1.84 GB · MP4</div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B59C8C" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </div>
+        </div>
+        <div style="flex:none;padding:18px 44px;border-top:1px solid #EFE6DE;background:#fff;display:flex;justify-content:flex-end;gap:12px;">
+          <div style="height:48px;padding:0 22px;border-radius:14px;background:#F4ECE5;color:#7A6F68;display:flex;align-items:center;font-size:14.5px;font-weight:700;">Cancelar</div>
+          <div style="height:48px;padding:0 26px;border-radius:14px;background:#231C18;color:#fff;display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Salvar e enviar
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Envio modal -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:600;color:#7A6F68;margin-bottom:12px;">Envio · modal</div>
+      <div style="width:760px;height:560px;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(80,40,20,.10);position:relative;background:#FBF6F2;">
+        <!-- dimmed backdrop -->
+        <div style="position:absolute;inset:0;filter:saturate(.9);">
+          <div style="height:60px;background:#fff;border-bottom:1px solid #EFE6DE;display:flex;align-items:center;padding:0 24px;gap:11px;">
+            <div style="width:30px;height:30px;border-radius:10px;background:#231C18;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div></div>
+            <div style="font-size:16px;font-weight:800;">Play+</div>
+          </div>
+          <div style="padding:22px 28px;">
+            <div style="font-size:20px;font-weight:800;margin-bottom:16px;">Meus vídeos</div>
+            <div style="display:flex;flex-direction:column;gap:11px;">
+              <div style="height:64px;background:#fff;border-radius:16px;opacity:.7;"></div>
+              <div style="height:64px;background:#fff;border-radius:16px;opacity:.55;"></div>
+              <div style="height:64px;background:#fff;border-radius:16px;opacity:.4;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- overlay + modal -->
+        <div style="position:absolute;inset:0;background:rgba(35,28,24,.46);display:flex;align-items:center;justify-content:center;" role="dialog" aria-labelledby="upload-modal-title" aria-modal="true">
+          <div style="width:440px;background:#fff;border-radius:22px;box-shadow:0 24px 60px rgba(35,20,10,.32);padding:24px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;">
+              <div>
+                <div id="upload-modal-title" style="font-size:17px;font-weight:800;">Enviando vídeo</div>
+                <div style="font-size:12.5px;color:#A89A8E;font-weight:500;margin-top:3px;">Não feche a aba enquanto envia.</div>
+              </div>
+            </div>
+            <div aria-live="polite" aria-atomic="true">
+            <div style="display:flex;align-items:center;gap:13px;margin-bottom:20px;">
+              <div style="width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#D9C9EE,#B9A3E0);flex:none;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:6px 0 6px 11px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div></div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;">aniversario-lia-4k.mp4</div>
+                <div style="font-size:12px;color:#A89A8E;font-weight:500;margin-top:2px;">1.84 GB · enviando…</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span id="upload-progress-label" style="font-size:13.5px;font-weight:700;color:#6B4E9E;">Enviando… 47%</span>
+              <span style="font-size:12px;color:#A89A8E;font-weight:600;" aria-hidden="true">865 MB / 1.84 GB</span>
+            </div>
+            <div role="progressbar" aria-labelledby="upload-progress-label" aria-valuenow="47" aria-valuemin="0" aria-valuemax="100" aria-valuetext="Enviando, 47 por cento, 865 megabytes de 1,84 gigabytes" style="height:10px;border-radius:999px;background:#EFE6DE;overflow:hidden;"><div style="width:47%;height:100%;border-radius:999px;background:linear-gradient(90deg,#B9A3E0,#8B6FC9);"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:16px;background:#F6F1EC;border-radius:12px;padding:10px 13px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8A7F78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span style="font-size:12px;color:#7A6F68;font-weight:500;">O arquivo vai direto ao armazenamento — não passa pelo servidor.</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+              <span style="font-size:11.5px;color:#A89A8E;font-weight:500;">O registro permanece se cancelar.</span>
+              <div style="height:44px;padding:0 20px;border-radius:13px;background:#FBEAE9;color:#B0413C;display:flex;align-items:center;font-size:14px;font-weight:700;">Cancelar envio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Falha modal -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:600;color:#7A6F68;margin-bottom:12px;">Falha no envio · modal</div>
+      <div style="width:760px;height:560px;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(80,40,20,.10);position:relative;background:#FBF6F2;">
+        <div style="position:absolute;inset:0;filter:saturate(.9);">
+          <div style="height:60px;background:#fff;border-bottom:1px solid #EFE6DE;display:flex;align-items:center;padding:0 24px;gap:11px;">
+            <div style="width:30px;height:30px;border-radius:10px;background:#231C18;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div></div>
+            <div style="font-size:16px;font-weight:800;">Play+</div>
+          </div>
+          <div style="padding:22px 28px;">
+            <div style="font-size:20px;font-weight:800;margin-bottom:16px;">Meus vídeos</div>
+            <div style="display:flex;flex-direction:column;gap:11px;">
+              <div style="height:64px;background:#fff;border-radius:16px;opacity:.7;"></div>
+              <div style="height:64px;background:#fff;border-radius:16px;opacity:.55;"></div>
+              <div style="height:64px;background:#fff;border-radius:16px;opacity:.4;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(35,28,24,.46);display:flex;align-items:center;justify-content:center;">
+          <div style="width:450px;background:#fff;border-radius:22px;box-shadow:0 24px 60px rgba(35,20,10,.32);padding:24px;">
+            <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:20px;">
+              <div style="width:50px;height:50px;border-radius:14px;background:#FBEAE9;flex:none;display:flex;align-items:center;justify-content:center;">
+                <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#B0413C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:17px;font-weight:800;color:#B0413C;">Falha no envio</div>
+                <div style="font-size:13px;color:#8A7F78;font-weight:500;margin-top:4px;line-height:1.5;">A URL de upload expirou antes de concluir. Nenhum dado foi perdido — tente de novo.</div>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B59C8C" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:13px;font-weight:700;color:#B0413C;">Interrompido em 47%</span>
+              <span style="font-size:12px;color:#A89A8E;font-weight:600;">865 MB / 1.84 GB</span>
+            </div>
+            <div style="height:10px;border-radius:999px;background:#EFE6DE;overflow:hidden;"><div style="width:47%;height:100%;border-radius:999px;background:#D98A85;"></div></div>
+            <div style="display:flex;gap:12px;margin-top:22px;">
+              <div style="flex:1;height:46px;border-radius:13px;background:#231C18;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                Tentar novamente
+              </div>
+              <div style="height:46px;padding:0 20px;border-radius:13px;background:#F4ECE5;color:#7A6F68;display:flex;align-items:center;font-size:14px;font-weight:700;">Cancelar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sucesso toast -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:600;color:#7A6F68;margin-bottom:12px;">Conclusão · toast</div>
+      <div style="width:760px;height:560px;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(80,40,20,.10);position:relative;background:#FBF6F2;">
+        <!-- normal app backdrop (toast is non-blocking) -->
+        <div style="position:absolute;inset:0;">
+          <div style="height:60px;background:#fff;border-bottom:1px solid #EFE6DE;display:flex;align-items:center;padding:0 24px;gap:11px;">
+            <div style="width:30px;height:30px;border-radius:10px;background:#231C18;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div></div>
+            <div style="font-size:16px;font-weight:800;">Play+</div>
+            <div style="flex:1;"></div>
+            <div style="width:30px;height:30px;border-radius:999px;background:linear-gradient(135deg,#E89B8E,#C97FB0);"></div>
+          </div>
+          <div style="padding:22px 28px;">
+            <div style="font-size:20px;font-weight:800;margin-bottom:16px;">Meus vídeos</div>
+            <div style="display:flex;flex-direction:column;gap:11px;">
+              <div style="height:84px;background:#fff;border-radius:16px;box-shadow:0 8px 22px rgba(80,40,20,.05);display:flex;align-items:center;gap:14px;padding:12px;">
+                <div style="width:96px;height:60px;border-radius:10px;background:linear-gradient(135deg,#F3D4BC,#E8B896);flex:none;"></div>
+                <div style="flex:1;"><div style="font-size:14px;font-weight:700;">Churrasco de domingo</div><div style="font-size:12px;color:#A89A8E;margin-top:3px;">12 jun 2026 · 19:05</div></div>
+                <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#FBE6D6;color:#A85B2A;font-size:12px;font-weight:700;">Pendente</span>
+                <span style="font-size:11.5px;color:#A89A8E;font-weight:600;">Pronto para transcodificar</span>
+                <div style="height:34px;padding:0 12px;border-radius:10px;background:#231C18;color:#fff;display:flex;align-items:center;font-size:12px;font-weight:700;">Iniciar transcodificação</div>
+              </div>
+              <div style="height:84px;background:#fff;border-radius:16px;box-shadow:0 8px 22px rgba(80,40,20,.05);opacity:.6;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- toast top-right -->
+        <div style="position:absolute;top:78px;right:24px;width:380px;background:#fff;border-radius:18px;box-shadow:0 18px 44px rgba(35,20,10,.22);border:1px solid #EFE6DE;overflow:hidden;" role="status" aria-live="polite">
+          <div style="padding:18px;display:flex;gap:13px;">
+            <div style="width:42px;height:42px;border-radius:12px;background:#D9ECDD;flex:none;display:flex;align-items:center;justify-content:center;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3C7A4A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:15px;font-weight:800;">Upload concluído!</div>
+              <div style="font-size:12.5px;color:#8A7F78;font-weight:500;margin-top:4px;line-height:1.45;">“Aniversário da Lia” foi enviado. A transcodificação começou automaticamente.</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:13px;">
+                <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:#DDE8F5;color:#3A5F94;font-size:12px;font-weight:700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3A5F94" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Na fila</span>
+                <span style="font-size:12.5px;color:#231C18;font-weight:700;">Ver na lista</span>
+              </div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B59C8C" stroke-width="2" stroke-linecap="round" style="flex:none;" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </div>
+          <div style="height:4px;background:#EFE6DE;"><div style="width:64%;height:100%;background:#7FBF92;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- SECTION: PALETTE VARIATIONS -->
+  <!-- ============================================================= -->
+  <div style="font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#9A8676;margin:0 0 6px 4px;">04 · Variações de paleta</div>
+  <div style="font-size:13.5px;color:#8A7F78;margin:0 0 20px 4px;font-weight:500;max-width:560px;">Mesma estrutura, três temperaturas. <strong style="color:#231C18;">Pêssego</strong> é o padrão (referência); as outras mantêm o tom acolhedor.</div>
+  <div style="display:flex;gap:48px;align-items:flex-start;">
+
+    <!-- Pêssego -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:700;color:#231C18;margin-bottom:12px;">Pêssego · padrão</div>
+      <div style="width:380px;background:#FBF6F2;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(80,40,20,.10);padding:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:9px;"><div style="width:30px;height:30px;border-radius:10px;background:#231C18;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div></div><span style="font-size:16px;font-weight:800;">Play+</span></div>
+          <div style="height:34px;padding:0 16px;border-radius:999px;background:#231C18;color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:6px;">+ Adicionar</div>
+        </div>
+        <div style="background:#fff;border-radius:18px;padding:11px;box-shadow:0 8px 22px rgba(80,40,20,.06);">
+          <div style="height:130px;border-radius:13px;background:linear-gradient(135deg,#F3C9A6,#E89B8E);display:flex;align-items:center;justify-content:center;"><div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 12px;border-color:transparent transparent transparent #231C18;margin-left:3px;"></div></div></div>
+          <div style="font-size:14px;font-weight:700;margin-top:11px;">Férias na Serra 2024</div>
+          <span style="margin-top:9px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:#D9ECDD;color:#3C7A4A;font-size:12px;font-weight:700;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3C7A4A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Pronto</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px;">
+          <div style="width:30px;height:30px;border-radius:9px;background:#E89B8E;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#F3C9A6;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#D9ECDD;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#E7DCF2;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#231C18;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lavanda -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:700;color:#231C18;margin-bottom:12px;">Lavanda · noite</div>
+      <div style="width:380px;background:#F6F3FB;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(70,50,110,.10);padding:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:9px;"><div style="width:30px;height:30px;border-radius:10px;background:#2C2444;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div></div><span style="font-size:16px;font-weight:800;color:#2C2444;">Play+</span></div>
+          <div style="height:34px;padding:0 16px;border-radius:999px;background:#6B4E9E;color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:6px;">+ Adicionar</div>
+        </div>
+        <div style="background:#fff;border-radius:18px;padding:11px;box-shadow:0 8px 22px rgba(70,50,110,.07);">
+          <div style="height:130px;border-radius:13px;background:linear-gradient(135deg,#C9B6EE,#8B6FC9);display:flex;align-items:center;justify-content:center;"><div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 12px;border-color:transparent transparent transparent #2C2444;margin-left:3px;"></div></div></div>
+          <div style="font-size:14px;font-weight:700;margin-top:11px;color:#2C2444;">Férias na Serra 2024</div>
+          <span style="margin-top:9px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:#DCE9DD;color:#3C7A4A;font-size:12px;font-weight:700;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3C7A4A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Pronto</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px;">
+          <div style="width:30px;height:30px;border-radius:9px;background:#6B4E9E;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#C9B6EE;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#DCE9DD;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#F0D9E6;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#2C2444;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menta -->
+    <div style="flex:none;">
+      <div style="font-size:12.5px;font-weight:700;color:#231C18;margin-bottom:12px;">Menta · fresco</div>
+      <div style="width:380px;background:#F0F6F1;border-radius:24px;overflow:hidden;box-shadow:0 16px 40px rgba(40,90,60,.10);padding:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:9px;"><div style="width:30px;height:30px;border-radius:10px;background:#1E3A2B;display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:5px 0 5px 8px;border-color:transparent transparent transparent #fff;margin-left:2px;"></div></div><span style="font-size:16px;font-weight:800;color:#1E3A2B;">Play+</span></div>
+          <div style="height:34px;padding:0 16px;border-radius:999px;background:#3F8C66;color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:6px;">+ Adicionar</div>
+        </div>
+        <div style="background:#fff;border-radius:18px;padding:11px;box-shadow:0 8px 22px rgba(40,90,60,.07);">
+          <div style="height:130px;border-radius:13px;background:linear-gradient(135deg,#A9D8B6,#5FB389);display:flex;align-items:center;justify-content:center;"><div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;"><div style="width:0;height:0;border-style:solid;border-width:8px 0 8px 12px;border-color:transparent transparent transparent #1E3A2B;margin-left:3px;"></div></div></div>
+          <div style="font-size:14px;font-weight:700;margin-top:11px;color:#1E3A2B;">Férias na Serra 2024</div>
+          <span style="margin-top:9px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:#E7DCF2;color:#6B4E9E;font-size:12px;font-weight:700;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B4E9E" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.5"/></svg>Processando</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px;">
+          <div style="width:30px;height:30px;border-radius:9px;background:#3F8C66;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#A9D8B6;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#FBE6D6;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#E7DCF2;"></div>
+          <div style="width:30px;height:30px;border-radius:9px;background:#1E3A2B;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>
