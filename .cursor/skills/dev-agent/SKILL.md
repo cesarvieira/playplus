@@ -76,7 +76,7 @@ Não implemente frontend antes de contratos em `shared` e rotas/eventos definido
 - Apenas tipos, DTOs, enums e erros — sem lógica, sem dependências externas
 - Breaking change aqui impacta api, worker, web e admin — sinalize sempre
 
-**Frontend (`apps/web`, `apps/admin` — Nuxt 3 / Vue 3):**
+**Frontend (`apps/web`, `apps/admin` — Nuxt 4 / Vue 3):**
 
 - Composables para lógica reutilizável — não duplique lógica entre pages
 - Tipagem TypeScript obrigatória — sem `any` explícito

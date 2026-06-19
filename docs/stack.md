@@ -72,7 +72,7 @@ Configuração via variáveis de ambiente: `STORAGE_ENDPOINT`, `STORAGE_BUCKET`,
 
 ## Frontend
 
-**Nuxt 3 + Vue 3**
+**Nuxt 4 + Vue 3 + Tailwind CSS 4**
 
 - TypeScript nativo, SSR para metadados de vídeo
 - `@nuxtjs/video-player` ou integração direta com `hls.js`
@@ -126,6 +126,6 @@ Integração em três pontos críticos:
 | Storage (prod) | Cloudflare R2 |
 | CDN | Cloudflare |
 | Transcodificação | FFmpeg |
-| Frontend | Nuxt 3 + Vue 3 |
+| Frontend | Nuxt 4 + Vue 3 + Tailwind CSS 4 |
 | Observabilidade | Sentry |
 | Infra | Docker Compose |

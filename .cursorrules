@@ -10,8 +10,8 @@ O Play+ é uma plataforma **pessoal e privada** de streaming de vídeo — um ca
 Construído como **monorepo** com pnpm workspaces e Turborepo:
 
 - **Backend:** Fastify (TypeScript) — `apps/api`
-- **Frontend público:** Nuxt 3 + Vue 3 — `apps/web`
-- **Frontend administrativo:** Nuxt 3 + Vue 3 — `apps/admin`
+- **Frontend público:** Nuxt 4 + Vue 3 + Tailwind CSS 4 — `apps/web`
+- **Frontend administrativo:** Nuxt 4 + Vue 3 + Tailwind CSS 4 — `apps/admin`
 - **Worker:** BullMQ + FFmpeg — `packages/worker` (processo independente)
 - **Contratos compartilhados:** `packages/shared` (tipos, DTOs, enums, erros — sem lógica)
 - **Banco de dados:** PostgreSQL (Docker no VPS)

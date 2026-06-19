@@ -1,6 +1,6 @@
 # ADR-001: Bootstrap monorepo v0
 
-**Data:** 2026-06-18  
+**Data:** 2026-06-18
 **Status:** Aceito
 
 ## Contexto
@@ -14,8 +14,8 @@ Bootstrap com **pnpm workspaces + Turborepo**:
 ```
 playplus/
 ├── apps/api/          # Fastify + TypeScript
-├── apps/web/          # Nuxt 3
-├── apps/admin/        # Nuxt 3
+├── apps/web/          # Nuxt 4
+├── apps/admin/        # Nuxt 4
 ├── packages/shared/   # contratos only
 ├── packages/worker/   # BullMQ + FFmpeg (processo separado)
 ├── docker-compose.yml

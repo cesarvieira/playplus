@@ -117,7 +117,7 @@ Não exige ADR duplicado — referencie o doc existente:
 | BullMQ + Valkey (vs pg-boss) | Aceito — ver alternativa em stack.md |
 | MinIO dev / R2 prod | Aceito |
 | FFmpeg HLS 4s, 240p–1080p | Aceito |
-| Nuxt 3 + Vue 3 (web + admin) | Aceito |
+| Nuxt 4 + Vue 3 (web + admin) | Aceito |
 | Sentry (api, worker, nuxt) | Aceito |
 | Docker Compose | Aceito |
 
