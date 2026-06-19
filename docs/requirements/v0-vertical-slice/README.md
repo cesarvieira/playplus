@@ -71,4 +71,5 @@ US-VID-009   Player HLS web
 
 ## Próximo passo
 
-Handoff para **`ux-agent`** (US com `apps/admin` e `apps/web`) e **`architect-agent`** (bootstrap monorepo, módulo Video DDD, pipeline cross-app) → depois **`planning-agent`**.
+- **Architect Agent:** concluído — ver [docs/architecture.md](../../architecture.md) e [docs/adr/](../../adr/)
+- **Handoff:** invocar **`planning-agent`** para breakdown em tasks ordenadas → **`dev-agent`**
