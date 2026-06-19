@@ -71,5 +71,6 @@ US-VID-009   Player HLS web
 
 ## Próximo passo
 
-- **Architect Agent:** concluído — ver [docs/architecture.md](../../architecture.md) e [docs/adr/](../../adr/)
-- **Handoff:** invocar **`planning-agent`** para breakdown em tasks ordenadas → **`dev-agent`**
+- **Architect Agent:** concluído — [docs/architecture.md](../../architecture.md) · [docs/adr/](../../adr/)
+- **Planning Agent:** concluído — [docs/planning/](../../planning/) · **iter 01 pronta para dev**
+- **Handoff:** invocar **`dev-agent`** — executar T01→T04 ([iter-01-foundation.md](../../planning/iter-01-foundation.md))
