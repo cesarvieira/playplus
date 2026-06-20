@@ -8,7 +8,7 @@ import {
   ValidationError,
   VideoNotFoundError,
 } from '@playplus/shared';
-import errorHandlerPlugin, { resolveErrorResponse } from './error-handler.js';
+import errorHandlerPlugin, { resolveErrorResponse } from './error-handler.ts';
 
 describe('resolveErrorResponse', () => {
   it('mapeia UnauthorizedError para 401', () => {

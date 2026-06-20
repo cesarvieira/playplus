@@ -47,7 +47,7 @@ Um projeto pessoal, feito com cuidado.
 
 ### Pré-requisitos
 
-- [Node.js](https://nodejs.org/) ≥ 20
+- [Node.js](https://nodejs.org/) ≥ 24
 - [pnpm](https://pnpm.io/) 9.x (o projeto usa `packageManager: pnpm@9.15.4`)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine + Compose)
 

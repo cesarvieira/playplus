@@ -2,7 +2,16 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "workspaces": {
     ".": {},
-    "apps/*": {
+    "apps/api": {
+      "entry": ["src/index.ts", "src/drizzle.config.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/infra/database/schema.ts"]
+    },
+    "apps/admin": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "apps/web": {
       "entry": ["src/index.ts"],
       "project": ["src/**/*.ts"]
     },
@@ -10,5 +19,5 @@
       "project": ["src/**/*.ts"]
     }
   },
-  "ignoreDependencies": ["lint-staged", "tsx"]
+  "ignoreDependencies": ["lint-staged", "pino-pretty"]
 }

@@ -1,6 +1,6 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 
-import { env } from '../../config/env.js';
+import { env } from '#config/env';
 
 export const valkey = new Redis(env.VALKEY_URL, {
   maxRetriesPerRequest: null,

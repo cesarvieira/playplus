@@ -4,6 +4,9 @@ import shared from '../../vitest.shared.node.ts';
 export default mergeConfig(
   shared,
   defineConfig({
+    resolve: {
+      conditions: ['development'],
+    },
     test: {
       name: '@playplus/api',
     },
