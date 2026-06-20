@@ -40,6 +40,15 @@ const enumConstRestrictedSyntax = {
     'Constantes de enum devem usar UPPER_CASE (ex.: ERROR_CODE, não ErrorCode).',
 };
 
+const noDeepRelativeImports = {
+  patterns: [
+    {
+      regex: '^\\.\\./\\.\\./',
+      message: 'Evite imports com ../../ — prefira aliases de caminho (ex.: @/*).',
+    },
+  ],
+};
+
 const namingConventionBase = [
   {
     selector: 'default',
@@ -253,6 +262,7 @@ export default defineConfig(
       'max-params': ['error', 4],
       'no-console': 'error',
       'no-debugger': 1,
+      'no-restricted-imports': ['error', noDeepRelativeImports],
       'no-restricted-syntax': ['error', ...promiseRestrictedSyntax],
       quotes: ['error', 'single'],
       semi: ['error', 'always'],
@@ -308,7 +318,10 @@ export default defineConfig(
   },
   {
     files: toolingFiles,
-    rules: { 'no-console': 'off' },
+    rules: {
+      'no-console': 'off',
+      'no-restricted-imports': 'off',
+    },
   },
   eslintConfigPrettier,
   {

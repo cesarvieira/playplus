@@ -4,7 +4,11 @@
     "rootDir": ".",
     "outDir": "dist",
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "#infra/*": ["./src/infra/*.ts"],
+      "#config/*": ["./src/config/*.ts"]
+    }
   },
-  "include": ["src/**/*.ts", "drizzle.config.ts"]
+  "include": ["src/**/*.ts"]
 }
