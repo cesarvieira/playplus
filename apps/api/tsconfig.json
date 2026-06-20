@@ -6,8 +6,10 @@
     "noEmit": true,
     "types": ["node"],
     "paths": {
+      "#config/*": ["./src/config/*.ts"],
+      "#http/*": ["./src/http/*.ts"],
       "#infra/*": ["./src/infra/*.ts"],
-      "#config/*": ["./src/config/*.ts"]
+      "#modules/*": ["./src/modules/*.ts"]
     }
   },
   "include": ["src/**/*.ts"]

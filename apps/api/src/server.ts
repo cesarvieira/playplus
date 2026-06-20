@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 
 import { env } from './config/env.ts';
@@ -11,6 +12,7 @@ import { closeDatabase } from './infra/database/client.ts';
 import { closeValkey } from './infra/valkey/client.ts';
 import errorHandlerPlugin from './http/plugins/error-handler.ts';
 import healthRoutes from './http/routes/health.routes.ts';
+import authRoutes from './modules/user/http/auth.routes.ts';
 
 export async function buildServer() {
   const fastify = Fastify({
@@ -30,8 +32,10 @@ export async function buildServer() {
   await fastify.register(cors, {
     origin: env.NODE_ENV === 'development',
   });
-  await fastify.register(errorHandlerPlugin);
+  await fastify.register(cookie);
+  await errorHandlerPlugin(fastify);
   await fastify.register(healthRoutes);
+  await fastify.register(authRoutes, { prefix: '/v1' });
 
   return fastify;
 }

@@ -5,8 +5,10 @@
     "rootDir": "src",
     "outDir": "dist",
     "paths": {
+      "#config/*": ["./src/config/*.js"],
+      "#http/*": ["./src/http/*.js"],
       "#infra/*": ["./src/infra/*.js"],
-      "#config/*": ["./src/config/*.js"]
+      "#modules/*": ["./src/modules/*.js"]
     }
   },
   "include": ["src/**/*.ts"],
