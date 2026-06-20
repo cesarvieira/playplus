@@ -20,10 +20,13 @@
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "db:migrate": "node --env-file=../../.env ./node_modules/drizzle-kit/bin.cjs migrate"
+    "db:generate": "node --env-file=../../.env ./node_modules/drizzle-kit/bin.cjs generate",
+    "db:migrate": "node --env-file=../../.env ./node_modules/drizzle-kit/bin.cjs migrate && node --conditions=development --env-file=../../.env src/infra/database/seed/run.ts",
+    "db:seed": "node --conditions=development --env-file=../../.env src/infra/database/seed/run.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.0.1",
+    "@node-rs/argon2": "^2.0.2",
     "@playplus/shared": "workspace:*",
     "drizzle-orm": "^0.45.1",
     "fastify": "^5.8.5",

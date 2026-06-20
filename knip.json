@@ -3,9 +3,8 @@
   "workspaces": {
     ".": {},
     "apps/api": {
-      "entry": ["src/index.ts", "src/drizzle.config.ts"],
-      "project": ["src/**/*.ts"],
-      "ignore": ["src/infra/database/schema.ts"]
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
     },
     "apps/admin": {
       "entry": ["src/index.ts"],
