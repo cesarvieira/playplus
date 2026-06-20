@@ -1,1 +1,3 @@
+import './config/env';
+
 export {};
