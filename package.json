@@ -5,6 +5,16 @@
   "engines": {
     "node": ">=20"
   },
+  "pnpm": {
+    "packageExtensions": {
+      "drizzle-kit": {
+        "dependencies": {
+          "drizzle-orm": "*",
+          "postgres": "*"
+        }
+      }
+    }
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",

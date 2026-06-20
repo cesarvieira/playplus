@@ -32,7 +32,7 @@ const envSchema = z.object({
   COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']),
 });
 
-export type Env = z.infer<typeof envSchema>;
+type Env = z.infer<typeof envSchema>;
 
 function formatEnvErrors(error: z.ZodError): string {
   const lines = error.issues.map((issue) => {

@@ -75,7 +75,7 @@ Na raiz do repositório:
 docker compose up -d
 ```
 
-Isso sobe **PostgreSQL**, **Valkey** e **MinIO** (com bucket `playplus` criado automaticamente). Verifique o status:
+Isso sobe **PostgreSQL**, **Valkey** e **MinIO** (com bucket `playplus` criado automaticamente).
 
 Para parar a infra:
 
@@ -83,7 +83,15 @@ Para parar a infra:
 docker compose down
 ```
 
-### 4. Rodar o monorepo em desenvolvimento
+### 4. Aplicar migrations do banco (API)
+
+Com PostgreSQL no ar e `.env` configurado na raiz, aplique as migrations Drizzle da API:
+
+```bash
+pnpm --filter @playplus/api db:migrate
+```
+
+### 5. Rodar o monorepo em desenvolvimento
 
 Com a infra no ar:
 
