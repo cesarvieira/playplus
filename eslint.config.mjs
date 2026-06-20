@@ -12,12 +12,96 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 const toolingFiles = [
   'eslint.config.mjs',
   '**/*.config.{js,mjs,cjs,ts}',
+  'vitest.shared.node.ts',
   'packages/worker/**/*.ts',
+];
+
+const enumFilePatterns = ['**/enums/**/*.ts'];
+
+const promiseRestrictedSyntax = [
+  {
+    selector: 'CallExpression[callee.property.name=\'then\']',
+    message: 'Use async/await instead of Promise.then()',
+  },
+  {
+    selector: 'CallExpression[callee.property.name=\'catch\']',
+    message: 'Use try/catch with await instead of Promise.catch()',
+  },
+  {
+    selector: 'CallExpression[callee.property.name=\'finally\']',
+    message: 'Use finally within try/catch/finally, not Promise.finally()',
+  },
+];
+
+const enumConstRestrictedSyntax = {
+  selector: 'VariableDeclarator > Identifier[name=/^[A-Z][a-z][a-zA-Z0-9]*$/]',
+  message:
+    'Constantes de enum devem usar UPPER_CASE (ex.: ERROR_CODE, não ErrorCode).',
+};
+
+const namingConventionBase = [
+  {
+    selector: 'default',
+    format: ['camelCase'],
+    leadingUnderscore: 'allow',
+  },
+  {
+    selector: 'variable',
+    format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+    leadingUnderscore: 'allow',
+  },
+  {
+    selector: 'function',
+    format: ['camelCase', 'PascalCase'],
+  },
+  {
+    selector: 'enum',
+    format: ['UPPER_CASE'],
+  },
+  {
+    selector: 'enumMember',
+    format: ['UPPER_CASE'],
+  },
+  {
+    selector: 'typeAlias',
+    format: ['PascalCase', 'UPPER_CASE'],
+  },
+  {
+    selector: 'typeLike',
+    format: ['PascalCase'],
+  },
+  {
+    selector: 'parameter',
+    format: ['camelCase'],
+    leadingUnderscore: 'allow',
+  },
+  {
+    selector: ['property', 'objectLiteralMethod'],
+    format: null,
+  },
+  {
+    selector: 'import',
+    format: null,
+  },
+];
+
+const namingConventionEnumFiles = [
+  ...namingConventionBase.filter((rule) => rule.selector !== 'variable'),
+  {
+    selector: 'variable',
+    format: ['UPPER_CASE'],
+    leadingUnderscore: 'allow',
+  },
+  {
+    selector: 'objectLiteralProperty',
+    format: ['UPPER_CASE'],
+  },
 ];
 
 export default defineConfig(
   globalIgnores([
     '**/dist/**',
+    '**/*.d.ts',
     '**/node_modules/**',
     '**/.turbo/**',
     '**/coverage/**',
@@ -43,7 +127,12 @@ export default defineConfig(
   }),
   {
     files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['vitest.config.ts'],
+    ignores: [
+      'vitest.config.ts',
+      'vitest.shared.node.ts',
+      '**/*.config.ts',
+      'packages/*/vitest.config.ts',
+    ],
     languageOptions: {
       parser: tsEslint.parser,
       parserOptions: {
@@ -150,48 +239,6 @@ export default defineConfig(
       ],
       '@stylistic/semi': ['error', 'always'],
       '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/naming-convention': [
-        'warn',
-        {
-          selector: 'default',
-          format: ['camelCase'],
-          leadingUnderscore: 'allow',
-        },
-        {
-          selector: 'variable',
-          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
-          leadingUnderscore: 'allow',
-        },
-        {
-          selector: 'function',
-          format: ['camelCase', 'PascalCase'],
-        },
-        {
-          selector: 'enum',
-          format: ['UPPER_CASE'],
-        },
-        {
-          selector: 'typeAlias',
-          format: ['PascalCase', 'UPPER_CASE'],
-        },
-        {
-          selector: 'typeLike',
-          format: ['PascalCase'],
-        },
-        {
-          selector: 'parameter',
-          format: ['camelCase'],
-          leadingUnderscore: 'allow',
-        },
-        {
-          selector: ['property', 'objectLiteralProperty', 'objectLiteralMethod', 'enumMember'],
-          format: null,
-        },
-        {
-          selector: 'import',
-          format: null,
-        },
-      ],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -204,24 +251,22 @@ export default defineConfig(
       'max-params': ['error', 4],
       'no-console': 'error',
       'no-debugger': 1,
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: 'CallExpression[callee.property.name=\'then\']',
-          message: 'Use async/await instead of Promise.then()',
-        },
-        {
-          selector: 'CallExpression[callee.property.name=\'catch\']',
-          message: 'Use try/catch with await instead of Promise.catch()',
-        },
-        {
-          selector: 'CallExpression[callee.property.name=\'finally\']',
-          message:
-            'Use finally within try/catch/finally, not Promise.finally()',
-        },
-      ],
+      'no-restricted-syntax': ['error', ...promiseRestrictedSyntax],
       quotes: ['error', 'single'],
       semi: ['error', 'always'],
+    },
+  },
+  {
+    ignores: enumFilePatterns,
+    rules: {
+      '@typescript-eslint/naming-convention': [
+        'warn',
+        ...namingConventionBase,
+        {
+          selector: 'objectLiteralProperty',
+          format: null,
+        },
+      ],
     },
   },
   {
@@ -248,7 +293,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['vitest.config.ts'],
+    files: ['vitest.config.ts', 'vitest.shared.node.ts'],
     ...vitest.configs.recommended,
     languageOptions: {
       parser: tsEslint.parser,
@@ -264,4 +309,25 @@ export default defineConfig(
     rules: { 'no-console': 'off' },
   },
   eslintConfigPrettier,
+  {
+    files: enumFilePatterns,
+    languageOptions: {
+      parser: tsEslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      '@typescript-eslint/naming-convention': [
+        'error',
+        ...namingConventionEnumFiles,
+      ],
+      'no-restricted-syntax': [
+        'error',
+        ...promiseRestrictedSyntax,
+        enumConstRestrictedSyntax,
+      ],
+    },
+  },
 );

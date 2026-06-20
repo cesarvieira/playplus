@@ -2,11 +2,23 @@
   "name": "@playplus/shared",
   "version": "0.0.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "node -e \"require('fs').mkdirSync('dist',{recursive:true})\"",
+    "build": "tsc -p tsconfig.build.json",
     "dev": "node -e \"setInterval(()=>{},86400000)\"",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "eslint src --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
   }
 }

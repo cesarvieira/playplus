@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 
-const run = (command, args) => {
-  const result = spawnSync(command, args, {
+const run = (command) => {
+  const result = spawnSync(command, {
     stdio: 'inherit',
     shell: true,
   });
@@ -11,7 +11,7 @@ const run = (command, args) => {
   }
 };
 
-run('pnpm', ['exec', 'lint-staged']);
-run('pnpm', ['exec', 'turbo', 'run', 'typecheck', '--filter=...[HEAD]']);
-run('pnpm', ['exec', 'turbo', 'run', 'test', '--filter=...[HEAD]']);
-run('pnpm', ['knip']);
+run('pnpm exec lint-staged');
+run('pnpm exec turbo run typecheck --filter=...[HEAD]');
+run('pnpm exec turbo run test --filter=...[HEAD]');
+run('pnpm knip');
