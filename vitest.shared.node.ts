@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     coverage: {
+      enabled: true,
       provider: 'v8',
       reporter: ['text', 'json-summary'],
       reportOnFailure: true,

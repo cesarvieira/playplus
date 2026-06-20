@@ -10,6 +10,7 @@ export default defineConfig({
     },
     pool: 'forks',
     coverage: {
+      enabled: true,
       provider: 'v8',
       reporter: ['text', 'json-summary'],
       reportOnFailure: true,
