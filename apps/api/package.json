@@ -7,12 +7,18 @@
     "dev": "node -e \"setInterval(()=>{},86400000)\"",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "db:migrate": "node --env-file=../../.env ./node_modules/drizzle-kit/bin.cjs migrate"
   },
   "dependencies": {
+    "drizzle-orm": "^0.45.1",
+    "ioredis": "^5.9.3",
+    "postgres": "^3.4.8",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.0.0"
+    "@types/node": "^26.0.0",
+    "drizzle-kit": "^0.31.9",
+    "tsx": "^4.21.0"
   }
 }
