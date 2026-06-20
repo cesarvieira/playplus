@@ -13,6 +13,7 @@ const toolingFiles = [
   'eslint.config.mjs',
   '**/*.config.{js,mjs,cjs,ts}',
   'vitest.shared.node.ts',
+  'vitest.shared.nuxt.ts',
   'packages/worker/**/*.ts',
 ];
 
@@ -130,6 +131,7 @@ export default defineConfig(
     ignores: [
       'vitest.config.ts',
       'vitest.shared.node.ts',
+      'vitest.shared.nuxt.ts',
       '**/*.config.ts',
       'packages/*/vitest.config.ts',
     ],
@@ -293,7 +295,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['vitest.config.ts', 'vitest.shared.node.ts'],
+    files: ['vitest.config.ts', 'vitest.shared.node.ts', 'vitest.shared.nuxt.ts'],
     ...vitest.configs.recommended,
     languageOptions: {
       parser: tsEslint.parser,
