@@ -88,7 +88,7 @@ docker compose down
 Com PostgreSQL no ar e `.env` configurado na raiz, aplique as migrations Drizzle da API:
 
 ```bash
-pnpm --filter @playplus/api db:migrate
+pnpm db:migrate
 ```
 
 ### 5. Rodar o monorepo em desenvolvimento

@@ -25,7 +25,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "pre-commit": "node scripts/pre-commit.mjs"
+    "pre-commit": "node scripts/pre-commit.mjs",
+    "db:migrate": "pnpm --filter @playplus/api db:migrate"
   },
   "devDependencies": {
     "@awmottaz/prettier-plugin-void-html": "^2.1.0",
