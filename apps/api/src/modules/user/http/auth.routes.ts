@@ -1,15 +1,22 @@
-import type { FastifyInstance, FastifyReply } from 'fastify';
-import { UnauthorizedError } from '@playplus/shared';
+import type { FastifyInstance } from 'fastify';
+import { InvalidTokenError, UnauthorizedError } from '@playplus/shared';
 
 import { env } from '#config/env';
 import { db } from '#infra/database/client';
 import { valkey } from '#infra/valkey/client';
 
 import { LoginUseCase } from '../application/login.use-case.ts';
+import { LogoutUseCase } from '../application/logout.use-case.ts';
+import { RefreshTokenUseCase } from '../application/refresh-token.use-case.ts';
 import type { InvalidCredentialsError } from '../domain/invalid-credentials.error.ts';
 import { JwtService } from '../infra/jwt.service.ts';
 import { RefreshTokenStore } from '../infra/refresh-token.store.ts';
 import { UserRepository } from '../infra/user.repository.ts';
+import {
+  clearRefreshTokenCookie,
+  getRefreshTokenFromCookies,
+  setRefreshTokenCookie,
+} from './auth-cookies.ts';
 import {
   loginBodySchema,
   loginResponseSchema,
@@ -28,48 +35,33 @@ function normalizeLoginBody(body: LoginRequestBody): LoginRequestBody {
   };
 }
 
-type ReplyWithCookie = FastifyReply & {
-  setCookie(
-    name: string,
-    value: string,
-    options?: {
-      httpOnly?: boolean;
-      path?: string;
-      maxAge?: number;
-      secure?: boolean;
-      sameSite?: 'lax' | 'strict' | 'none';
-    },
-  ): FastifyReply;
+const cookieOptions = {
+  maxAge: env.JWT_REFRESH_TTL_SECONDS,
+  secure: env.COOKIE_SECURE,
+  sameSite: env.COOKIE_SAME_SITE,
 };
 
-function setRefreshTokenCookie(
-  reply: FastifyReply,
-  refreshToken: string,
-  options: {
-    maxAge: number;
-    secure: boolean;
-    sameSite: 'lax' | 'strict' | 'none';
-  },
-): void {
-  (reply as ReplyWithCookie).setCookie('refresh_token', refreshToken, {
-    httpOnly: true,
-    path: '/',
-    maxAge: options.maxAge,
-    secure: options.secure,
-    sameSite: options.sameSite,
-  });
-}
-
 export default async function authRoutes(fastify: FastifyInstance): Promise<void> {
+  const jwtService = new JwtService({
+    secret: env.JWT_SECRET,
+    accessTtlSeconds: env.JWT_ACCESS_TTL_SECONDS,
+  });
+  const userRepository = new UserRepository(db);
+  const refreshTokenStore = new RefreshTokenStore(valkey, env.JWT_REFRESH_TTL_SECONDS);
+
   const loginUseCase = new LoginUseCase(
-    new UserRepository(db),
-    new JwtService({
-      secret: env.JWT_SECRET,
-      accessTtlSeconds: env.JWT_ACCESS_TTL_SECONDS,
-    }),
-    new RefreshTokenStore(valkey, env.JWT_REFRESH_TTL_SECONDS),
+    userRepository,
+    jwtService,
+    refreshTokenStore,
     env.JWT_ACCESS_TTL_SECONDS,
   );
+  const refreshTokenUseCase = new RefreshTokenUseCase(
+    refreshTokenStore,
+    userRepository,
+    jwtService,
+    env.JWT_ACCESS_TTL_SECONDS,
+  );
+  const logoutUseCase = new LogoutUseCase(refreshTokenStore);
 
   fastify.post(
     '/auth/login',
@@ -92,11 +84,7 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
       try {
         const result = await loginUseCase.execute(request.body as LoginRequestBody);
 
-        setRefreshTokenCookie(reply, result.refreshToken, {
-          maxAge: env.JWT_REFRESH_TTL_SECONDS,
-          secure: env.COOKIE_SECURE,
-          sameSite: env.COOKIE_SAME_SITE,
-        });
+        setRefreshTokenCookie(reply, result.refreshToken, cookieOptions);
 
         return reply.status(200).send({
           access_token: result.accessToken,
@@ -109,6 +97,57 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
 
         throw error;
       }
+    },
+  );
+
+  fastify.post(
+    '/auth/refresh',
+    {
+      schema: {
+        response: {
+          200: loginResponseSchema,
+          401: errorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      const refreshToken = getRefreshTokenFromCookies(request.cookies);
+
+      if (!refreshToken) {
+        throw new InvalidTokenError();
+      }
+
+      const result = await refreshTokenUseCase.execute(refreshToken);
+
+      setRefreshTokenCookie(reply, result.refreshToken, cookieOptions);
+
+      return reply.status(200).send({
+        access_token: result.accessToken,
+        expires_in: result.expiresIn,
+      });
+    },
+  );
+
+  fastify.post(
+    '/auth/logout',
+    {
+      schema: {
+        response: {
+          204: { type: 'null' },
+        },
+      },
+    },
+    async (request, reply) => {
+      const refreshToken = getRefreshTokenFromCookies(request.cookies);
+
+      await logoutUseCase.execute(refreshToken);
+
+      clearRefreshTokenCookie(reply, {
+        secure: env.COOKIE_SECURE,
+        sameSite: env.COOKIE_SAME_SITE,
+      });
+
+      return reply.status(204).send();
     },
   );
 }

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { USER_ROLE } from '@playplus/shared';
 
-import { seedAdminUser } from './admin-user.ts';
+import { seedAdminUser } from '../admin-user.ts';
 
 function createMockDb(existingEmail: boolean) {
   const insert = vi.fn().mockResolvedValue(undefined);

@@ -3,7 +3,7 @@ import Fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ERROR_CODE } from '@playplus/shared';
 
-import { InvalidCredentialsError } from '../domain/invalid-credentials.error.ts';
+import { InvalidCredentialsError } from '#modules/user/domain/invalid-credentials.error';
 
 const execute = vi.hoisted(() => vi.fn());
 
@@ -25,21 +25,21 @@ vi.mock('#infra/valkey/client', () => ({
   valkey: {},
 }));
 
-vi.mock('../application/login.use-case.ts', () => ({
+vi.mock('../../application/login.use-case.ts', () => ({
   LoginUseCase: class MockLoginUseCase {
     execute = execute;
   },
 }));
 
-vi.mock('../infra/user.repository.ts', () => ({
+vi.mock('../../infra/user.repository.ts', () => ({
   UserRepository: vi.fn(),
 }));
 
-vi.mock('../infra/jwt.service.ts', () => ({
+vi.mock('../../infra/jwt.service.ts', () => ({
   JwtService: vi.fn(),
 }));
 
-vi.mock('../infra/refresh-token.store.ts', () => ({
+vi.mock('../../infra/refresh-token.store.ts', () => ({
   RefreshTokenStore: vi.fn(),
 }));
 
@@ -50,8 +50,8 @@ describe('POST /v1/auth/login', () => {
     execute.mockReset();
 
     const [{ default: errorHandlerPlugin }, { default: authRoutes }] = await Promise.all([
-      import('../../../http/plugins/error-handler.ts'),
-      import('./auth.routes.ts'),
+      import('../../../../http/plugins/error-handler.ts'),
+      import('../auth.routes.ts'),
     ]);
 
     app = Fastify();

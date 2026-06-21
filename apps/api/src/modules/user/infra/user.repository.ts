@@ -35,4 +35,15 @@ export class UserRepository {
 
     return mapRowToEntity(row);
   }
+
+  async findById(id: string): Promise<UserEntity | null> {
+    const rows = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
+
+    const row = rows[0];
+    if (!row) {
+      return null;
+    }
+
+    return mapRowToEntity(row);
+  }
 }

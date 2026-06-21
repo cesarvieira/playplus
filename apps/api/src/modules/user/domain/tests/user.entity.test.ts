@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { USER_ROLE } from '@playplus/shared';
 
-import { UserEntity } from './user.entity.ts';
+import { UserEntity } from '../user.entity.ts';
 
 const persistenceProps = {
   id: 'user-id',

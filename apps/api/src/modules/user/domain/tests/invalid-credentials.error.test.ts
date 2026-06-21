@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { InvalidCredentialsError } from './invalid-credentials.error.ts';
+import { InvalidCredentialsError } from '../invalid-credentials.error.ts';
 
 describe('InvalidCredentialsError', () => {
   it('é instância de Error', () => {

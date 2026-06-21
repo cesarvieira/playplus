@@ -1,7 +1,7 @@
 import { hash } from '@node-rs/argon2';
 import { describe, expect, it } from 'vitest';
 
-import { verifyPassword } from './password.hasher.ts';
+import { verifyPassword } from '../password.hasher.ts';
 
 const ARGON2_OPTIONS = {
   memoryCost: 19456,

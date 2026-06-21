@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { RefreshTokenStore } from './refresh-token.store.ts';
+import { RefreshTokenStore } from '../refresh-token.store.ts';
 
 function createMockRedis() {
   const store = new Map<string, string>();

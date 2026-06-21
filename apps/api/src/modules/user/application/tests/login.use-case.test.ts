@@ -2,12 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { USER_ROLE } from '@playplus/shared';
 
-import { InvalidCredentialsError } from '../domain/invalid-credentials.error.ts';
-import { UserEntity } from '../domain/user.entity.ts';
-import type { JwtService } from '../infra/jwt.service.ts';
-import type { RefreshTokenStore } from '../infra/refresh-token.store.ts';
-import type { UserRepository } from '../infra/user.repository.ts';
-import { LoginUseCase } from './login.use-case.ts';
+import { InvalidCredentialsError } from '#modules/user/domain/invalid-credentials.error';
+import { UserEntity } from '#modules/user/domain/user.entity';
+import type { JwtService } from '#modules/user/infra/jwt.service';
+import type { RefreshTokenStore } from '#modules/user/infra/refresh-token.store';
+import type { UserRepository } from '#modules/user/infra/user.repository';
+import { LoginUseCase } from '../login.use-case.ts';
 
 const user = UserEntity.fromPersistence({
   id: 'user-id',

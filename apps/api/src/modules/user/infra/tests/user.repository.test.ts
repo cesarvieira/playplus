@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { USER_ROLE } from '@playplus/shared';
 
-import { UserEntity } from '../domain/user.entity.ts';
-import { UserRepository } from './user.repository.ts';
+import { UserEntity } from '#modules/user/domain/user.entity';
+import { UserRepository } from '../user.repository.ts';
 
 const userRow = {
   id: 'user-id',

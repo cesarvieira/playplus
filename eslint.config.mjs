@@ -21,23 +21,22 @@ const enumFilePatterns = ['**/enums/**/*.ts'];
 
 const promiseRestrictedSyntax = [
   {
-    selector: 'CallExpression[callee.property.name=\'then\']',
+    selector: "CallExpression[callee.property.name='then']",
     message: 'Use async/await instead of Promise.then()',
   },
   {
-    selector: 'CallExpression[callee.property.name=\'catch\']',
+    selector: "CallExpression[callee.property.name='catch']",
     message: 'Use try/catch with await instead of Promise.catch()',
   },
   {
-    selector: 'CallExpression[callee.property.name=\'finally\']',
+    selector: "CallExpression[callee.property.name='finally']",
     message: 'Use finally within try/catch/finally, not Promise.finally()',
   },
 ];
 
 const enumConstRestrictedSyntax = {
   selector: 'VariableDeclarator > Identifier[name=/^[A-Z][a-z][a-zA-Z0-9]*$/]',
-  message:
-    'Constantes de enum devem usar UPPER_CASE (ex.: ERROR_CODE, não ErrorCode).',
+  message: 'Constantes de enum devem usar UPPER_CASE (ex.: ERROR_CODE, não ErrorCode).',
 };
 
 const noDeepRelativeImports = {
@@ -109,26 +108,18 @@ const namingConventionEnumFiles = [
 ];
 
 export default defineConfig(
-  globalIgnores([
-    '**/dist/**',
-    '**/*.d.ts',
-    '**/node_modules/**',
-    '**/.turbo/**',
-    '**/coverage/**',
-  ]),
+  globalIgnores(['**/dist/**', '**/node_modules/**', '**/.turbo/**', '**/coverage/**']),
   js.configs.recommended,
   ...tsEslint.configs.strict,
   ...tsEslint.configs.stylistic,
-  ...(
-    await createConfigForNuxt({
-      features: {
-        standalone: true,
-        typescript: true,
-        recommended: true,
-        stylistic: true,
-      },
-    })
-  ),
+  ...(await createConfigForNuxt({
+    features: {
+      standalone: true,
+      typescript: true,
+      recommended: true,
+      stylistic: true,
+    },
+  })),
   ...eslintPluginVue.configs['flat/recommended'],
   ...defineConfigWithVueTs(vueTsConfigs.recommended),
   stylistic.configs.customize({
@@ -282,19 +273,13 @@ export default defineConfig(
     },
   },
   {
-    files: [
-      'app/layouts/**/*.vue',
-      'app/pages/**/*.vue',
-    ],
+    files: ['app/layouts/**/*.vue', 'app/pages/**/*.vue'],
     rules: {
       'vue/multi-word-component-names': 'off',
     },
   },
   {
-    files: [
-      'app/**/*.spec.ts',
-      'app/**/*.unit.spec.ts',
-    ],
+    files: ['app/**/*.spec.ts', 'app/**/*.unit.spec.ts'],
     ...vitest.configs.recommended,
     languageOptions: {
       parser: tsEslint.parser,
@@ -334,15 +319,8 @@ export default defineConfig(
       },
     },
     rules: {
-      '@typescript-eslint/naming-convention': [
-        'error',
-        ...namingConventionEnumFiles,
-      ],
-      'no-restricted-syntax': [
-        'error',
-        ...promiseRestrictedSyntax,
-        enumConstRestrictedSyntax,
-      ],
+      '@typescript-eslint/naming-convention': ['error', ...namingConventionEnumFiles],
+      'no-restricted-syntax': ['error', ...promiseRestrictedSyntax, enumConstRestrictedSyntax],
     },
   },
 );

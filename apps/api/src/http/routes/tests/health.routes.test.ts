@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HEALTH_CHECK_STATUS, HEALTH_STATUS } from '@playplus/shared';
-import healthRoutes from './health.routes.ts';
+import healthRoutes from '../health.routes.ts';
 
 const { pingDatabase, pingValkey } = vi.hoisted(() => ({
   pingDatabase: vi.fn<() => Promise<void>>(),

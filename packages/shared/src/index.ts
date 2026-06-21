@@ -13,6 +13,7 @@ export type { CreateVideoDto } from './dtos/create-video.dto.js';
 export type { HealthResponseDto } from './dtos/health-response.dto.js';
 
 export { UnauthorizedError } from './errors/unauthorized.error.js';
+export { InvalidTokenError } from './errors/invalid-token.error.js';
 export { ForbiddenError } from './errors/forbidden.error.js';
 export { ValidationError } from './errors/validation.error.js';
 export { UserNotFoundError } from './errors/user-not-found.error.js';

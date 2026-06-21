@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { USER_ROLE } from '@playplus/shared';
 
-import { canAccess } from './can-access.ts';
+import { canAccess } from '../can-access.ts';
 
 describe('canAccess', () => {
   it('permite viewer para admin', () => {

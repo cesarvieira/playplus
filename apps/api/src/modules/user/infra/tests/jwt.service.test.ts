@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { USER_ROLE } from '@playplus/shared';
 
-import { JwtService } from './jwt.service.ts';
+import { JwtService } from '../jwt.service.ts';
 
 const TEST_SECRET = 'test-secret-with-at-least-32-characters';
 
