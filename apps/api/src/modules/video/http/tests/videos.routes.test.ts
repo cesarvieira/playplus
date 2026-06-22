@@ -29,13 +29,17 @@ vi.mock('#infra/storage/storage.factory', () => ({
   createStorageClient: vi.fn(),
 }));
 
-vi.mock('../../application/create-video.use-case.ts', () => ({
+vi.mock('#modules/video/infra/transcode.queue', () => ({
+  createTranscodeQueue: vi.fn(() => ({})),
+}));
+
+vi.mock('#modules/video/application/create-video.use-case', () => ({
   CreateVideoUseCase: class MockCreateVideoUseCase {
     execute = execute;
   },
 }));
 
-vi.mock('../../infra/video.repository.ts', () => ({
+vi.mock('#modules/video/infra/video.repository', () => ({
   VideoRepository: vi.fn(),
 }));
 
@@ -49,9 +53,9 @@ describe('POST /v1/videos', () => {
 
     const [{ default: errorHandlerPlugin }, { JwtService }, { default: videosRoutes }] =
       await Promise.all([
-        import('../../../../http/plugins/error-handler.ts'),
-        import('../../../user/infra/jwt.service.ts'),
-        import('../videos.routes.ts'),
+        import('#http/plugins/error-handler'),
+        import('#modules/user/infra/jwt.service'),
+        import('#modules/video/http/videos.routes'),
       ]);
 
     const jwtService = new JwtService({

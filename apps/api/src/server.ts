@@ -10,6 +10,7 @@ import {
 } from './config/logger.ts';
 import { closeDatabase } from './infra/database/client.ts';
 import { closeValkey } from './infra/valkey/client.ts';
+import { closeTranscodeQueue } from './modules/video/infra/transcode.queue.ts';
 import errorHandlerPlugin from './http/plugins/error-handler.ts';
 import healthRoutes from './http/routes/health.routes.ts';
 import authRoutes from './modules/user/http/auth.routes.ts';
@@ -58,6 +59,7 @@ async function start(): Promise<void> {
 
     try {
       await server.close();
+      await closeTranscodeQueue();
       await closeDatabase();
       await closeValkey();
       process.exit(0);
