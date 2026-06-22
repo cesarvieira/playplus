@@ -65,6 +65,82 @@ export const enqueueTranscodeResponseSchema = {
   },
 } as const;
 
+export const listVideosQuerySchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+    status: { type: 'string', enum: ['ready', 'processing', 'error'] },
+  },
+} as const;
+
+export interface ListVideosQuerystring {
+  page?: number;
+  limit?: number;
+  status?: 'ready' | 'processing' | 'error';
+}
+
+const videoListItemSchema = {
+  type: 'object',
+  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'created_at'],
+  additionalProperties: false,
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    title: { type: 'string' },
+    duration: { type: ['integer', 'null'] },
+    thumbnail_url: { type: 'null' },
+    status: {
+      type: 'string',
+      enum: ['pending', 'queued', 'processing', 'ready', 'error'],
+    },
+    upload_complete: { type: 'boolean' },
+    created_at: { type: 'string', format: 'date-time' },
+  },
+} as const;
+
+export const listVideosResponseSchema = {
+  type: 'object',
+  required: ['data', 'meta'],
+  additionalProperties: false,
+  properties: {
+    data: {
+      type: 'array',
+      items: videoListItemSchema,
+    },
+    meta: {
+      type: 'object',
+      required: ['total', 'page', 'limit'],
+      additionalProperties: false,
+      properties: {
+        total: { type: 'integer', minimum: 0 },
+        page: { type: 'integer', minimum: 1 },
+        limit: { type: 'integer', minimum: 1 },
+      },
+    },
+  },
+} as const;
+
+export const getVideoResponseSchema = {
+  type: 'object',
+  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'progress', 'created_at'],
+  additionalProperties: false,
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    title: { type: 'string' },
+    duration: { type: ['integer', 'null'] },
+    thumbnail_url: { type: 'null' },
+    stream_url: { type: 'string' },
+    status: {
+      type: 'string',
+      enum: ['pending', 'queued', 'processing', 'ready', 'error'],
+    },
+    upload_complete: { type: 'boolean' },
+    progress: { type: 'null' },
+    created_at: { type: 'string', format: 'date-time' },
+  },
+} as const;
+
 export const errorResponseSchema = {
   type: 'object',
   required: ['error'],

@@ -9,6 +9,8 @@ import { JwtService } from '#modules/user/infra/jwt.service';
 
 import { CreateVideoUseCase } from '../application/create-video.use-case.ts';
 import { EnqueueTranscodeUseCase } from '../application/enqueue-transcode.use-case.ts';
+import { GetVideoQuery } from '../application/get-video.query.ts';
+import { ListVideosQuery } from '../application/list-videos.query.ts';
 import { RenewUploadUrlUseCase } from '../application/renew-upload-url.use-case.ts';
 import { createTranscodeQueue } from '../infra/transcode.queue.ts';
 import { VideoRepository } from '../infra/video.repository.ts';
@@ -17,6 +19,10 @@ import {
   createVideoResponseSchema,
   enqueueTranscodeResponseSchema,
   errorResponseSchema,
+  getVideoResponseSchema,
+  listVideosQuerySchema,
+  listVideosResponseSchema,
+  type ListVideosQuerystring,
   renewUploadUrlResponseSchema,
   type CreateVideoRequestBody,
   videoIdParamsSchema,
@@ -37,6 +43,74 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
     videoRepository,
     storageClient,
     transcodeQueue,
+  );
+  const listVideosQuery = new ListVideosQuery(videoRepository, storageClient);
+  const getVideoQuery = new GetVideoQuery(videoRepository, storageClient, env.CDN_BASE_URL);
+
+  fastify.get(
+    '/videos',
+    {
+      schema: {
+        querystring: listVideosQuerySchema,
+        response: {
+          200: listVideosResponseSchema,
+          401: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('viewer')],
+    },
+    async (request, reply) => {
+      const query = request.query as ListVideosQuerystring;
+      const result = await listVideosQuery.execute({
+        page: query.page,
+        limit: query.limit,
+        status: query.status,
+      });
+
+      return reply.status(200).send({
+        data: result.data.map((item) => ({
+          id: item.id,
+          title: item.title,
+          duration: item.duration,
+          thumbnail_url: item.thumbnailUrl,
+          status: item.status,
+          ...(item.uploadComplete !== undefined ? { upload_complete: item.uploadComplete } : {}),
+          created_at: item.createdAt,
+        })),
+        meta: result.meta,
+      });
+    },
+  );
+
+  fastify.get(
+    '/videos/:id',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        response: {
+          200: getVideoResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('viewer')],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const result = await getVideoQuery.execute(id);
+
+      return reply.status(200).send({
+        id: result.id,
+        title: result.title,
+        duration: result.duration,
+        thumbnail_url: result.thumbnailUrl,
+        ...(result.streamUrl !== undefined ? { stream_url: result.streamUrl } : {}),
+        status: result.status,
+        ...(result.uploadComplete !== undefined ? { upload_complete: result.uploadComplete } : {}),
+        progress: result.progress,
+        created_at: result.createdAt,
+      });
+    },
   );
 
   fastify.post(
