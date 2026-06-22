@@ -20,6 +20,10 @@ export function buildStorageOriginalKey(id: string, fileName: string): string {
   return `videos/${id}/original/${fileName}`;
 }
 
+export function buildStorageHlsPrefix(id: string): string {
+  return `videos/${id}/hls/`;
+}
+
 export class VideoEntity {
   readonly id: string;
   readonly title: string;
@@ -66,7 +70,7 @@ export class VideoEntity {
       status: VIDEO_STATUS.PENDING,
       uploadComplete: false,
       storageOriginalKey: buildStorageOriginalKey(id, input.fileName),
-      storageHlsPrefix: null,
+      storageHlsPrefix: buildStorageHlsPrefix(id),
       errorReason: null,
       createdAt: now,
       updatedAt: now,

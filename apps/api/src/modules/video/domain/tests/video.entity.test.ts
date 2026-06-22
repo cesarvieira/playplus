@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { VIDEO_STATUS } from '@playplus/shared';
 
-import { buildStorageOriginalKey, VideoEntity } from '../video.entity.ts';
+import { buildStorageHlsPrefix, buildStorageOriginalKey, VideoEntity } from '../video.entity.ts';
 
 describe('VideoEntity', () => {
   const persistenceProps = {
@@ -24,6 +24,10 @@ describe('VideoEntity', () => {
     expect(buildStorageOriginalKey('abc-123', 'clip.mkv')).toBe('videos/abc-123/original/clip.mkv');
   });
 
+  it('buildStorageHlsPrefix monta caminho esperado', () => {
+    expect(buildStorageHlsPrefix('abc-123')).toBe('videos/abc-123/hls/');
+  });
+
   it('createNew gera id, status pending e storage key correta', () => {
     vi.spyOn(crypto, 'randomUUID').mockReturnValue('00000000-0000-4000-8000-000000000001');
 
@@ -40,7 +44,7 @@ describe('VideoEntity', () => {
       'videos/00000000-0000-4000-8000-000000000001/original/upload.mp4',
     );
     expect(entity.duration).toBeNull();
-    expect(entity.storageHlsPrefix).toBeNull();
+    expect(entity.storageHlsPrefix).toBe('videos/00000000-0000-4000-8000-000000000001/hls/');
     expect(entity.errorReason).toBeNull();
   });
 

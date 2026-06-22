@@ -14,6 +14,7 @@ import errorHandlerPlugin from './http/plugins/error-handler.ts';
 import healthRoutes from './http/routes/health.routes.ts';
 import authRoutes from './modules/user/http/auth.routes.ts';
 import meRoutes from './modules/user/http/me.routes.ts';
+import videosRoutes from './modules/video/http/videos.routes.ts';
 
 export async function buildServer() {
   const fastify = Fastify({
@@ -38,6 +39,7 @@ export async function buildServer() {
   await fastify.register(healthRoutes);
   await fastify.register(authRoutes, { prefix: '/v1' });
   await fastify.register(meRoutes, { prefix: '/v1' });
+  await fastify.register(videosRoutes, { prefix: '/v1' });
 
   return fastify;
 }
