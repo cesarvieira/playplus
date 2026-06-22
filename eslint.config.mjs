@@ -15,6 +15,7 @@ const toolingFiles = [
   'vitest.shared.node.ts',
   'vitest.shared.nuxt.ts',
   'packages/worker/**/*.ts',
+  'apps/admin/nuxt.config.ts',
 ];
 
 const enumFilePatterns = ['**/enums/**/*.ts'];
@@ -273,7 +274,12 @@ export default defineConfig(
     },
   },
   {
-    files: ['app/layouts/**/*.vue', 'app/pages/**/*.vue'],
+    files: [
+      'app/layouts/**/*.vue',
+      'app/pages/**/*.vue',
+      'apps/*/app/layouts/**/*.vue',
+      'apps/*/app/pages/**/*.vue',
+    ],
     rules: {
       'vue/multi-word-component-names': 'off',
     },
@@ -306,6 +312,12 @@ export default defineConfig(
     rules: {
       'no-console': 'off',
       'no-restricted-imports': 'off',
+    },
+  },
+  {
+    files: ['apps/admin/nuxt.config.ts', '**/apps/admin/nuxt.config.ts', 'nuxt.config.ts'],
+    rules: {
+      'nuxt/nuxt-config-keys-order': 'off',
     },
   },
   eslintConfigPrettier,

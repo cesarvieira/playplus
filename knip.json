@@ -7,8 +7,8 @@
       "project": ["src/**/*.ts"]
     },
     "apps/admin": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.ts"]
+      "entry": [],
+      "project": ["app/**/*.{ts,vue}"]
     },
     "apps/web": {
       "entry": ["src/index.ts"],

@@ -11,6 +11,7 @@
     "sourceMap": true,
     "erasableSyntaxOnly": true,
     "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true
+    "rewriteRelativeImportExtensions": true,
+    "preserveSymlinks": false
   }
 }

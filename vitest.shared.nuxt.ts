@@ -21,6 +21,6 @@ export default defineConfig({
         statements: 80,
       },
     },
-    include: ['src/**/*.{test,spec}.ts'],
+    include: ['app/**/*.{test,spec}.ts', 'app/**/*.unit.spec.ts'],
   },
 });

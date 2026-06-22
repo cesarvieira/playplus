@@ -6,6 +6,11 @@ export default mergeConfig(
   defineConfig({
     test: {
       name: '@playplus/admin',
+      environment: 'node',
+      include: ['app/**/*.unit.spec.ts'],
+      coverage: {
+        include: ['app/utils/**/*.ts'],
+      },
     },
   }),
 );

@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+@config '../../../tailwind.config.ts';
+
+@layer base {
+  body {
+    @apply bg-peach-page font-sans text-peach-ink antialiased;
+  }
+
+  button:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
