@@ -3,9 +3,8 @@ import type { FastifyInstance } from 'fastify';
 import { env } from '#config/env';
 import { db } from '#infra/database/client';
 import { createStorageClient } from '#infra/storage/storage.factory';
-import { createAuthenticateMiddleware } from '#modules/user/http/authenticate.middleware';
+import { createAuthMiddleware } from '#modules/user/http/create-auth.middleware';
 import { requireRole } from '#modules/user/http/require-role.middleware';
-import { JwtService } from '#modules/user/infra/jwt.service';
 
 import { CreateVideoUseCase } from '../application/create-video.use-case.ts';
 import { EnqueueTranscodeUseCase } from '../application/enqueue-transcode.use-case.ts';
@@ -29,11 +28,7 @@ import {
 } from './videos.schemas.ts';
 
 export default async function videosRoutes(fastify: FastifyInstance): Promise<void> {
-  const jwtService = new JwtService({
-    secret: env.JWT_SECRET,
-    accessTtlSeconds: env.JWT_ACCESS_TTL_SECONDS,
-  });
-  const authenticate = createAuthenticateMiddleware(jwtService);
+  const authenticate = createAuthMiddleware();
   const videoRepository = new VideoRepository(db);
   const storageClient = createStorageClient();
   const transcodeQueue = createTranscodeQueue();
@@ -68,7 +63,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
       });
 
       return reply.status(200).send({
-        data: result.data.map((item) => ({
+        data: result.data.map(item => ({
           id: item.id,
           title: item.title,
           duration: item.duration,

@@ -1,0 +1,76 @@
+@layer components {
+  .error-page {
+    min-height: 100dvh;
+    background: radial-gradient(
+      120% 90% at 50% -10%,
+      var(--color-peach-error-grad-1) 0%,
+      var(--color-peach-error-grad-2) 42%,
+      var(--color-peach-error-grad-3) 100%
+    );
+  }
+
+  .error-tv-snow {
+    background-color: var(--color-error-tv-snow);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.7) 0 1px, transparent 1px 2px),
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0 1px, transparent 1px 2px);
+    background-size:
+      3px 3px,
+      2px 2px;
+  }
+
+  /* ── Offline TV illustration ── */
+  .error-tv-antenna-pole {
+    @apply absolute bottom-0 left-0 h-11.5 w-0.75 origin-bottom rounded-sm bg-error-tv-antenna;
+  }
+
+  .error-tv-antenna-tip {
+    @apply absolute -top-1.25 left-1/2 size-1.75 -translate-x-1/2 rounded-full bg-error-tv-knob;
+  }
+
+  .error-tv-body {
+    @apply absolute left-1/2 top-7.5 flex h-40.5 w-57.5 -translate-x-1/2 gap-3 rounded-3xl p-3.5 shadow-pl-tv-body;
+    background: linear-gradient(160deg, var(--color-error-tv-body-from) 0%, var(--color-error-tv-body-to) 100%);
+  }
+
+  .error-tv-screen {
+    @apply relative flex-1 overflow-hidden rounded-2xl bg-black shadow-pl-tv-screen;
+  }
+
+  .error-tv-screen-inner {
+    @apply absolute inset-1.25 overflow-hidden rounded-[11px];
+  }
+
+  .error-tv-scanlines {
+    background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px);
+  }
+
+  .error-tv-roll {
+    background-image: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+  }
+
+  .error-tv-vignette {
+    background-image: radial-gradient(circle at 50% 50%, transparent 52%, rgba(0, 0, 0, 0.6) 100%);
+  }
+
+  .error-tv-knob {
+    @apply size-5.25 rounded-full shadow-pl-tv-knob;
+    background: radial-gradient(circle at 34% 30%, var(--color-error-tv-knob-mid), var(--color-error-tv-knob-dark));
+  }
+
+  .error-tv-slot {
+    @apply h-0.5 rounded-sm bg-error-tv-slot;
+  }
+
+  .error-tv-foot {
+    @apply absolute bottom-1 h-2.75 w-4.25 rounded-b-[5px] bg-error-tv-feet;
+  }
+
+  .error-tv-foot--left {
+    left: calc(50% - 72px);
+  }
+
+  .error-tv-foot--right {
+    left: calc(50% + 55px);
+  }
+}

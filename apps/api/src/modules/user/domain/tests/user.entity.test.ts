@@ -6,7 +6,7 @@ import { UserEntity } from '../user.entity.ts';
 
 const persistenceProps = {
   id: 'user-id',
-  email: 'user@playplus.local',
+  email: 'user@playplus.localhost',
   role: USER_ROLE.ADMIN,
   passwordHash: '$argon2id$v=19$hashed',
   createdAt: new Date('2026-06-20T12:00:00.000Z'),

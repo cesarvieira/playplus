@@ -39,6 +39,7 @@ const cookieOptions = {
   maxAge: env.JWT_REFRESH_TTL_SECONDS,
   secure: env.COOKIE_SECURE,
   sameSite: env.COOKIE_SAME_SITE,
+  domain: env.COOKIE_DOMAIN,
 };
 
 export default async function authRoutes(fastify: FastifyInstance): Promise<void> {
@@ -145,6 +146,7 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
       clearRefreshTokenCookie(reply, {
         secure: env.COOKIE_SECURE,
         sameSite: env.COOKIE_SAME_SITE,
+        domain: env.COOKIE_DOMAIN,
       });
 
       return reply.status(204).send();

@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  IconAlertCircle,
-  IconCircleCheck,
-  IconInfoCircle,
-  IconX,
-} from '@tabler/icons-vue';
+import { IconAlertCircle, IconCircleCheck, IconInfoCircle, IconX } from '@tabler/icons-vue';
 import type { Component } from 'vue';
 import type { PlToastVariant } from '~/composables/usePlToast';
 import { usePlToast } from '~/composables/usePlToast';
@@ -42,7 +37,7 @@ const variantIcons: Record<PlToastVariant, Component> = {
       >
         <component
           :is="variantIcons[toast.variant]"
-          class="size-[19px] shrink-0"
+          class="size-pl-icon shrink-0"
           aria-hidden="true"
         />
         <span class="flex-1 text-sm font-semibold">{{ toast.message }}</span>
@@ -58,22 +53,3 @@ const variantIcons: Record<PlToastVariant, Component> = {
     </TransitionGroup>
   </Teleport>
 </template>
-
-<style>
-.pl-toast-enter-active,
-.pl-toast-leave-active {
-  transition:
-    opacity 0.28s ease,
-    transform 0.28s ease;
-}
-
-.pl-toast-move {
-  transition: transform 0.28s ease;
-}
-
-.pl-toast-enter-from,
-.pl-toast-leave-to {
-  opacity: 0;
-  transform: translateX(1rem);
-}
-</style>

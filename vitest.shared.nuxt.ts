@@ -21,6 +21,6 @@ export default defineConfig({
         statements: 80,
       },
     },
-    include: ['app/**/*.{test,spec}.ts', 'app/**/*.unit.spec.ts'],
+    include: ['app/**/tests/**/*.{test,spec}.ts'],
   },
 });

@@ -11,6 +11,7 @@ vi.mock('bullmq', () => ({
     add = queueAdd;
     getJob = queueGetJob;
     close = queueClose;
+    on = vi.fn();
   },
 }));
 

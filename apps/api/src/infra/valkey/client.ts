@@ -1,16 +1,33 @@
 import { Redis } from 'ioredis';
 
 import { env } from '#config/env';
+import { configureRedisClient, formatServiceConnectionError } from '#infra/connection-error';
 
-export const valkey = new Redis(env.VALKEY_URL, {
-  maxRetriesPerRequest: null,
-});
+const VALKEY_SERVICE_NAME = 'Valkey';
+
+function createValkeyClient(): Redis {
+  const client = new Redis(env.VALKEY_URL, {
+    maxRetriesPerRequest: null,
+  });
+
+  configureRedisClient(client, VALKEY_SERVICE_NAME, env.VALKEY_URL);
+
+  return client;
+}
+
+export const valkey = createValkeyClient();
 
 export async function pingValkey(): Promise<void> {
-  const response = await valkey.ping();
+  try {
+    const response = await valkey.ping();
 
-  if (response !== 'PONG') {
-    throw new Error(`Resposta inesperada do Valkey: ${response}`);
+    if (response !== 'PONG') {
+      throw new Error(`Resposta inesperada do Valkey: ${response}`);
+    }
+  } catch (error) {
+    throw new Error(formatServiceConnectionError(error, VALKEY_SERVICE_NAME, env.VALKEY_URL), {
+      cause: error,
+    });
   }
 }
 

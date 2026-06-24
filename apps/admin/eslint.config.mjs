@@ -1,6 +1,9 @@
 import withNuxt from './.nuxt/eslint.config.mjs';
-import rootConfig from '../../eslint.config.mjs';
+import { withNuxtBase } from '../../eslint.shared.nuxt.mjs';
 
-const sharedConfigs = Array.isArray(rootConfig) ? rootConfig : [rootConfig];
+/** @type {import('eslint-flat-config-utils').FlatConfigComposer} */
+const eslintConfig = withNuxtBase(withNuxt()).prepend({
+  ignores: ['mockups/**', 'dist/**', '**/*.json', '**/*.md'],
+});
 
-export default withNuxt(...sharedConfigs);
+export default eslintConfig;

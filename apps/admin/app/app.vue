@@ -2,13 +2,21 @@
 import { providePlToast } from '~/composables/usePlToast';
 
 providePlToast();
+
+const error = useError();
 </script>
 
 <template>
-  <div class="min-h-screen bg-peach-page">
+  <div v-if="!error" class="min-h-screen bg-peach-page">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
-    <PlToast />
   </div>
+  <NuxtPage v-else />
+  <DevOnly>
+    <ClientOnly>
+      <VitePluginChecker />
+    </ClientOnly>
+  </DevOnly>
+  <PlToast />
 </template>

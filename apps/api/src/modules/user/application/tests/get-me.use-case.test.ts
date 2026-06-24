@@ -8,7 +8,7 @@ import { GetMeUseCase } from '../get-me.use-case.ts';
 
 const user = UserEntity.fromPersistence({
   id: 'user-id',
-  email: 'viewer@playplus.local',
+  email: 'viewer@playplus.localhost',
   role: USER_ROLE.VIEWER,
   passwordHash: '$argon2id$v=19$hashed',
   createdAt: new Date('2026-06-20T12:00:00.000Z'),
@@ -27,7 +27,7 @@ describe('GetMeUseCase', () => {
     expect(userRepository.findById).toHaveBeenCalledWith('user-id');
     expect(result).toEqual({
       id: 'user-id',
-      email: 'viewer@playplus.local',
+      email: 'viewer@playplus.localhost',
       role: USER_ROLE.VIEWER,
       createdAt: '2026-06-20T12:00:00.000Z',
     });

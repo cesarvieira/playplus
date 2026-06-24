@@ -12,22 +12,18 @@ import PlayLogo from '~/components/PlayLogo.vue';
         aria-hidden="true"
       >
         <div class="flex items-center gap-3">
-          <div
-            class="flex size-[42px] items-center justify-center rounded-[13px] bg-white/90"
-          >
-            <PlayLogo class="text-peach-hero-to" />
-          </div>
-          <span class="text-[21px] font-extrabold tracking-tight text-white">Play+</span>
+          <PlayLogo bg-class="text-white/90" fg-class="text-peach-hero-to" />
+          <span class="text-pl-2xl font-extrabold tracking-tight text-white">Play+</span>
         </div>
 
         <div class="flex items-end gap-3.5">
-          <div class="h-[140px] w-24 rounded-pl-lg bg-white/30" />
-          <div class="h-[172px] w-24 rounded-pl-lg bg-white/45" />
-          <div class="h-[120px] w-24 rounded-pl-lg bg-white/20" />
+          <div class="h-35 w-24 rounded-pl-lg bg-white/30"></div>
+          <div class="h-43 w-24 rounded-pl-lg bg-white/45"></div>
+          <div class="h-30 w-24 rounded-pl-lg bg-white/20"></div>
         </div>
 
         <div>
-          <h2 class="text-[28px] font-extrabold leading-tight tracking-tight text-white">
+          <h2 class="text-pl-3xl font-extrabold leading-tight tracking-tight text-white">
             Seu cinema<br>particular.
           </h2>
           <p class="mt-2.5 text-sm font-medium text-white/85">
@@ -37,7 +33,7 @@ import PlayLogo from '~/components/PlayLogo.vue';
       </aside>
 
       <main class="flex w-full flex-1 flex-col justify-center p-8 md:p-14">
-        <slot />
+        <slot></slot>
       </main>
     </div>
   </div>

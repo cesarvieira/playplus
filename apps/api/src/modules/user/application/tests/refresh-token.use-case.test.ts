@@ -10,7 +10,7 @@ import { RefreshTokenUseCase } from '../refresh-token.use-case.ts';
 
 const user = UserEntity.fromPersistence({
   id: 'user-id',
-  email: 'admin@playplus.local',
+  email: 'admin@playplus.localhost',
   role: USER_ROLE.ADMIN,
   passwordHash: '$argon2id$v=19$hashed',
   createdAt: new Date('2026-06-20T12:00:00.000Z'),

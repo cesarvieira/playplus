@@ -14,6 +14,9 @@ vi.mock('#config/env', () => ({
     JWT_REFRESH_TTL_SECONDS: 604800,
     COOKIE_SECURE: false,
     COOKIE_SAME_SITE: 'lax',
+    M2M_SERVICE_TOKEN: 'm2m-service-token-with-at-least-32-characters',
+    DELEGATION_JWT_SECRET: 'delegation-secret-with-at-least-32-chars',
+    DELEGATION_JWT_TTL_SECONDS: 60,
   },
 }));
 
@@ -69,7 +72,7 @@ describe('POST /v1/auth/login', () => {
       method: 'POST',
       url: '/v1/auth/login',
       payload: {
-        email: 'admin@playplus.local',
+        email: 'admin@playplus.localhost',
         password: 'short',
       },
     });
@@ -91,7 +94,7 @@ describe('POST /v1/auth/login', () => {
       method: 'POST',
       url: '/v1/auth/login',
       payload: {
-        email: 'admin@playplus.local',
+        email: 'admin@playplus.localhost',
         password: 'wrong-password',
       },
     });
@@ -116,7 +119,7 @@ describe('POST /v1/auth/login', () => {
       method: 'POST',
       url: '/v1/auth/login',
       payload: {
-        email: '  Admin@PlayPlus.Local  ',
+        email: '  Admin@playplus.localhost  ',
         password: 'correct-password',
       },
     });
@@ -131,11 +134,11 @@ describe('POST /v1/auth/login', () => {
     expect(setCookie).toBeDefined();
     expect(setCookie).toEqual(expect.stringContaining('refresh_token=refresh-token-uuid'));
     expect(setCookie).toEqual(expect.stringContaining('HttpOnly'));
-    expect(setCookie).toEqual(expect.stringContaining('Path=/'));
+    expect(setCookie).toEqual(expect.stringContaining('Path=/v1/auth/refresh'));
     expect(setCookie).toEqual(expect.stringContaining('Max-Age='));
 
     expect(execute).toHaveBeenCalledWith({
-      email: 'admin@playplus.local',
+      email: 'admin@playplus.localhost',
       password: 'correct-password',
     });
   });

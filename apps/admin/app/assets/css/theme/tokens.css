@@ -1,0 +1,223 @@
+/*
+ * Play+ Admin — design tokens (fonte única de verdade)
+ *
+ * Convenções:
+ * - Novas cores → @theme, nunca hex nos .vue
+ * - Tamanhos repetidos → token pl-*
+ * - Padrão visual em 2+ lugares → components.css
+ */
+
+@theme {
+  /* ── Peach palette ── */
+  --color-peach-page: #fbf6f2;
+  --color-peach-canvas: #e9e1db;
+  --color-peach-surface: #ffffff;
+  --color-peach-ink: #231c18;
+  --color-peach-ink-hover: #3a2f28;
+  --color-peach-muted: #8a7f78;
+  --color-peach-subtle: #5c524c;
+  --color-peach-body: #6e635b;
+  --color-peach-label: #b59c8c;
+  --color-peach-border: #e6dcd3;
+  --color-peach-border-light: #efe6de;
+  --color-peach-chip: #f4ece5;
+  --color-peach-input: #fbf7f4;
+  --color-peach-accent: #e8956b;
+  --color-peach-pill-fg: #7a6f68;
+  --color-peach-footnote: #a8998d;
+  --color-peach-hero-from: #f4cda9;
+  --color-peach-hero-via: #ec9e84;
+  --color-peach-hero-to: #e07e7a;
+
+  /* Error page gradient stops */
+  --color-peach-error-grad-1: #fcefe4;
+  --color-peach-error-grad-2: #f4e4d8;
+  --color-peach-error-grad-3: #e9dbcf;
+
+  /* ── Status palette ── */
+  --color-status-pending: #fbe6d6;
+  --color-status-pending-fg: #a85b2a;
+  --color-status-queued: #dde8f5;
+  --color-status-queued-fg: #3a5f94;
+  --color-status-processing: #e7dcf2;
+  --color-status-processing-fg: #6b4e9e;
+  --color-status-ready: #d9ecdd;
+  --color-status-ready-fg: #3c7a4a;
+  --color-status-error: #f8dad9;
+  --color-status-error-fg: #b0413c;
+
+  /* ── Dev terminal palette ── */
+  --color-dev-accent: #ffd9b0;
+  --color-dev-bg: #1b1612;
+  --color-dev-bg-header: #211a14;
+  --color-dev-border: #34291f;
+  --color-dev-border-subtle: #2c2219;
+  --color-dev-text: #c9bcae;
+  --color-dev-text-muted: #7e7164;
+  --color-dev-text-dim: #6f6354;
+  --color-dev-text-key: #9c8e7e;
+  --color-dev-text-value: #e7d6c4;
+  --color-dev-text-error: #e0857e;
+  --color-dev-icon: #5f5648;
+  --color-dev-dot-red: #e06560;
+  --color-dev-dot-yellow: #e0a85e;
+  --color-dev-dot-green: #7fbf92;
+
+  /* ── Error TV illustration ── */
+  --color-error-tv-antenna: #39302a;
+  --color-error-tv-knob: #574739;
+  --color-error-tv-body-from: #4a3c33;
+  --color-error-tv-body-to: #2c231d;
+  --color-error-tv-screen-inset: #181210;
+  --color-error-tv-slot: #1c1510;
+  --color-error-tv-feet: #231b15;
+  --color-error-tv-knob-mid: #6e5c4d;
+  --color-error-tv-knob-dark: #291f19;
+  --color-error-tv-snow: #7c7c7c;
+
+  /* ── Typography ── */
+  --text-pl-2xs: 11.5px;
+  --text-pl-2xs--line-height: 1.4;
+  --text-pl-xs: 12.5px;
+  --text-pl-xs--line-height: 1.85;
+  --text-pl-sm: 13px;
+  --text-pl-sm--line-height: 1.5;
+  --text-pl-base: 15px;
+  --text-pl-base--line-height: 1.5;
+  --text-pl-md: 15.5px;
+  --text-pl-md--line-height: 1.5;
+  --text-pl-lg: 17px;
+  --text-pl-lg--line-height: 1.625;
+  --text-pl-xl: 19px;
+  --text-pl-xl--line-height: 1.3;
+  --text-pl-2xl: 25px;
+  --text-pl-2xl--line-height: 1.2;
+  --text-pl-3xl: 28px;
+  --text-pl-3xl--line-height: 1.15;
+  --text-pl-display: 38px;
+  --text-pl-display--line-height: 1.12;
+
+  /* ── Font families ── */
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ── Border radius ── */
+  --radius-pl-sm: 12px;
+  --radius-pl-md: 14px;
+  --radius-pl-lg: 16px;
+  --radius-pl-xl: 22px;
+  --radius-pl-2xl: 24px;
+  --radius-pl-btn: 15px;
+  --radius-pl-dev: 18px;
+  --radius-pl-visual: 34px;
+
+  /* ── Border width ── */
+  --border-width-pl: 1.5px;
+
+  /* ── Heights ── */
+  --height-header: 68px;
+  --height-pl-btn-lg: 54px;
+  --height-pl-input: 50px;
+
+  /* ── Sizes ── */
+  --size-pl-icon: 19px;
+  --size-dev-dot: 11px;
+  --height-pl-logo-sm: 26px;
+  --height-pl-logo-md: 32px;
+
+  /* ── Shadows ── */
+  --shadow-pl-card: 0 10px 34px rgba(80, 40, 20, 0.06);
+  --shadow-pl-elevated: 0 16px 40px rgba(80, 40, 20, 0.1);
+  --shadow-pl-modal: 0 24px 60px rgba(35, 20, 10, 0.32);
+  --shadow-pl-hero-visual: 0 26px 60px rgba(200, 90, 50, 0.3);
+  --shadow-pl-dev-panel: 0 18px 44px rgba(20, 12, 6, 0.35);
+  --shadow-pl-tv-body: 0 22px 46px rgba(40, 20, 10, 0.42), inset 0 2px 3px rgba(255, 255, 255, 0.12);
+  --shadow-pl-tv-screen: inset 0 0 0 4px #181210, inset 0 0 22px rgba(0, 0, 0, 0.9);
+  --shadow-pl-tv-knob: 0 2px 3px rgba(0, 0, 0, 0.5);
+
+  /* ── Animations ── */
+  --animate-pl-spin: pl-spin 0.7s linear infinite;
+  --animate-pl-pulse: pl-pulse 2s ease-in-out infinite;
+  --animate-ple-float: ple-float 5.5s ease-in-out infinite;
+  --animate-ple-flicker: ple-flicker 1.6s ease-in-out infinite;
+  --animate-ple-static: ple-static 0.9s linear infinite;
+  --animate-ple-snow: ple-snow 0.16s steps(4) infinite;
+  --animate-ple-roll: ple-roll 3.6s linear infinite;
+
+  @keyframes pl-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes pl-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  @keyframes ple-float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-2deg);
+    }
+
+    50% {
+      transform: translateY(-10px) rotate(2deg);
+    }
+  }
+
+  @keyframes ple-flicker {
+    0%,
+    100% {
+      opacity: 0.9;
+    }
+
+    45% {
+      opacity: 0.35;
+    }
+
+    55% {
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes ple-static {
+    0% {
+      background-position: 0 0;
+    }
+
+    100% {
+      background-position: 28px 0;
+    }
+  }
+
+  @keyframes ple-snow {
+    0% {
+      background-position:
+        0 0,
+        0 0;
+    }
+
+    100% {
+      background-position:
+        9px 7px,
+        -7px 9px;
+    }
+  }
+
+  @keyframes ple-roll {
+    0% {
+      transform: translateY(-34px);
+    }
+
+    100% {
+      transform: translateY(150px);
+    }
+  }
+}

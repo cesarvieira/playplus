@@ -9,6 +9,7 @@ export default mergeConfig(
     },
     test: {
       name: '@playplus/api',
+      setupFiles: ['./src/test/setup-env.ts'],
     },
   }),
 );

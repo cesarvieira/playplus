@@ -1,14 +1,23 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreUnresolved": ["/@vite-plugin-checker-runtime-entry", "./src/test/setup-env.ts"],
   "workspaces": {
-    ".": {},
+    ".": {
+      "vitest": {
+        "config": ["vitest.shared.node.ts", "vitest.shared.nuxt.ts", "apps/*/vitest.config.ts"]
+      }
+    },
     "apps/api": {
       "entry": ["src/index.ts"],
       "project": ["src/**/*.ts"]
     },
     "apps/admin": {
-      "entry": [],
-      "project": ["app/**/*.{ts,vue}"]
+      "project": ["app/**/*.{ts,vue}", "server/**/*.ts"],
+      "ignore": [
+        "app/components/PlModal.vue",
+        "app/components/PlProgressBar.vue",
+        "app/components/PlSkeleton.vue"
+      ]
     },
     "apps/web": {
       "entry": ["src/index.ts"],
@@ -18,5 +27,5 @@
       "project": ["src/**/*.ts"]
     }
   },
-  "ignoreDependencies": ["lint-staged", "pino-pretty"]
+  "ignoreDependencies": ["eslint-flat-config-utils", "lint-staged", "pino-pretty"]
 }

@@ -27,7 +27,7 @@ describe('seedAdminUser', () => {
 
     const result = await seedAdminUser(
       db as never,
-      { email: 'admin@playplus.local', password: 'secret' },
+      { email: 'admin@playplus.localhost', password: 'secret' },
       hashPassword,
     );
 
@@ -42,14 +42,14 @@ describe('seedAdminUser', () => {
 
     const result = await seedAdminUser(
       db as never,
-      { email: 'admin@playplus.local', password: 'secret' },
+      { email: 'admin@playplus.localhost', password: 'secret' },
       hashPassword,
     );
 
     expect(result).toBe('created');
     expect(hashPassword).toHaveBeenCalledWith('secret');
     expect(insert).toHaveBeenCalledWith({
-      email: 'admin@playplus.local',
+      email: 'admin@playplus.localhost',
       passwordHash: '$argon2id$v=19$hashed',
       role: USER_ROLE.ADMIN,
     });

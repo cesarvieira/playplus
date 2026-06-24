@@ -1,12 +1,33 @@
 import Fastify from 'fastify';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ERROR_CODE, USER_ROLE } from '@playplus/shared';
 
+import { DelegationJwtService } from '#modules/user/infra/delegation-jwt.service';
 import { JwtService } from '#modules/user/infra/jwt.service';
+import type { UserRepository } from '#modules/user/infra/user.repository';
 import { createAuthenticateMiddleware } from '../authenticate.middleware.ts';
 import { requireRole } from '../require-role.middleware.ts';
 
 const JWT_SECRET = 'test-secret-with-at-least-32-characters';
+const M2M_TOKEN = 'm2m-service-token-with-at-least-32-characters';
+const DELEGATION_SECRET = 'delegation-secret-with-at-least-32-chars';
+
+function createAuthMiddlewareForTests(jwtService: JwtService) {
+  const delegationJwtService = new DelegationJwtService({
+    secret: DELEGATION_SECRET,
+    ttlSeconds: 60,
+  });
+  const userRepository = {
+    findById: vi.fn(),
+  } as unknown as UserRepository;
+
+  return createAuthenticateMiddleware({
+    jwtService,
+    delegationJwtService,
+    m2mServiceToken: M2M_TOKEN,
+    userRepository,
+  });
+}
 
 describe('requireRole', () => {
   let app: ReturnType<typeof Fastify>;
@@ -14,7 +35,7 @@ describe('requireRole', () => {
 
   beforeEach(async () => {
     jwtService = new JwtService({ secret: JWT_SECRET, accessTtlSeconds: 900 });
-    const authenticate = createAuthenticateMiddleware(jwtService);
+    const authenticate = createAuthMiddlewareForTests(jwtService);
 
     const { default: errorHandlerPlugin } =
       await import('../../../../http/plugins/error-handler.ts');
@@ -67,7 +88,7 @@ describe('requireRole', () => {
   });
 
   it('autoriza viewer em rota viewer', async () => {
-    const authenticate = createAuthenticateMiddleware(jwtService);
+    const authenticate = createAuthMiddlewareForTests(jwtService);
     const viewerApp = Fastify();
     const { default: errorHandlerPlugin } =
       await import('../../../../http/plugins/error-handler.ts');

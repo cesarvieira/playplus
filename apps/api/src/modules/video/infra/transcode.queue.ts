@@ -8,20 +8,27 @@ import {
   type TranscodeJobPayload,
 } from '@playplus/shared';
 
+import { env } from '#config/env';
+import { logServiceConnectionError } from '#infra/connection-error';
 import { valkey } from '#infra/valkey/client';
 
 const ACTIVE_JOB_STATES = new Set(['waiting', 'active', 'delayed']);
+const VALKEY_SERVICE_NAME = 'Valkey';
 
 type TranscodeQueueClient = Queue<TranscodeJobPayload, unknown, typeof VIDEO_TRANSCODE_JOB_NAME>;
 
 export class TranscodeQueue {
   private readonly queue: TranscodeQueueClient;
 
-  constructor(connection: ConnectionOptions) {
+  constructor(connection: ConnectionOptions = valkey as ConnectionOptions) {
     this.queue = new Queue<TranscodeJobPayload, unknown, typeof VIDEO_TRANSCODE_JOB_NAME>(
       VIDEO_QUEUE_NAME,
       { connection },
     );
+
+    this.queue.on('error', (error) => {
+      logServiceConnectionError(error, VALKEY_SERVICE_NAME, env.VALKEY_URL);
+    });
   }
 
   async enqueue(payload: TranscodeJobPayload): Promise<void> {
@@ -65,7 +72,7 @@ let transcodeQueueInstance: TranscodeQueue | null = null;
 
 export function createTranscodeQueue(): TranscodeQueue {
   if (!transcodeQueueInstance) {
-    transcodeQueueInstance = new TranscodeQueue(valkey as ConnectionOptions);
+    transcodeQueueInstance = new TranscodeQueue();
   }
 
   return transcodeQueueInstance;

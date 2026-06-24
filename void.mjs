@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as voidPlugin from '@awmottaz/prettier-plugin-void-html';
 import { parsers } from 'prettier/plugins/html';
 

@@ -19,5 +19,5 @@ withDefaults(
     :class="pulse ? 'animate-pl-pulse' : 'animate-pulse'"
     :style="{ width, height }"
     aria-hidden="true"
-  />
+  ></div>
 </template>

@@ -12,6 +12,9 @@ vi.mock('#config/env', () => ({
     JWT_REFRESH_TTL_SECONDS: 604800,
     COOKIE_SECURE: false,
     COOKIE_SAME_SITE: 'lax',
+    M2M_SERVICE_TOKEN: 'm2m-service-token-with-at-least-32-characters',
+    DELEGATION_JWT_SECRET: 'delegation-secret-with-at-least-32-chars',
+    DELEGATION_JWT_TTL_SECONDS: 60,
   },
 }));
 
@@ -78,7 +81,7 @@ describe('GET /v1/me', () => {
   it('retorna 200 com perfil em snake_case', async () => {
     getMeExecute.mockResolvedValue({
       id: 'user-id',
-      email: 'admin@playplus.local',
+      email: 'admin@playplus.localhost',
       role: USER_ROLE.ADMIN,
       createdAt: '2026-06-20T12:00:00.000Z',
     });
@@ -92,7 +95,7 @@ describe('GET /v1/me', () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       id: 'user-id',
-      email: 'admin@playplus.local',
+      email: 'admin@playplus.localhost',
       role: USER_ROLE.ADMIN,
       created_at: '2026-06-20T12:00:00.000Z',
     });

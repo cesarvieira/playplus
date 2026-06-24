@@ -6,7 +6,7 @@ Padrão REST com WebSocket pontual para eventos em tempo real.
 
 ## Convenções
 
-**Base URL:** `https://api.playplus.local/v1`
+**Base URL:** `https://api.playplus.localhost/v1`
 
 **Padrão de URL:**
 
@@ -15,7 +15,16 @@ Padrão REST com WebSocket pontual para eventos em tempo real.
 /modulo/recurso/:id/acao   ← apenas quando não mapeável por verbo HTTP
 ```
 
-**Autenticação:** `Authorization: Bearer <access_token>` em todas as rotas protegidas.
+**Autenticação:** depende do caller:
+
+| Caller                 | Headers                                                                     |
+| ---------------------- | --------------------------------------------------------------------------- |
+| Browser / client admin | `Authorization: Bearer <access_token>` (JWT do usuário)                     |
+| Admin SSR (Nitro)      | `Authorization: Bearer <M2M_SERVICE_TOKEN>` + `X-User-Id: <delegation JWT>` |
+
+O JWT de delegação (`X-User-Id`) é HS256, claim `sub` = UUID do usuário, TTL curto (`DELEGATION_JWT_TTL_SECONDS`, default 60s). A API valida M2M **e** assinatura antes de confiar na identidade.
+
+Rotas protegidas aceitam **um dos dois modos** — nunca Bearer de usuário repassado pelo SSR.
 
 **Formato:** `Content-Type: application/json` em todas as requisições e respostas.
 
@@ -57,7 +66,19 @@ Autentica o usuário e retorna o par de tokens.
 }
 ```
 
-O `refresh_token` é retornado em cookie `httpOnly; Secure; SameSite=Strict` com TTL de 7 dias.
+O `refresh_token` é retornado em cookie:
+
+```
+refresh_token=<opaque>;
+  HttpOnly; Secure; SameSite=None;
+  Path=/v1/auth/refresh;
+  Domain=api.playplus.localhost   ← produção: api.playplus.com.br
+  Max-Age=604800
+```
+
+O `access_token` **não** é cookie da API — o body JSON é usado pelo browser para Pinia (Bearer client-side) e sincronizado no admin via `POST /api/session/sync` (cookie HttpOnly no domínio admin).
+
+**CORS com credentials:** `POST /v1/auth/login`, `/v1/auth/refresh` e `/v1/auth/logout` expõem `Access-Control-Allow-Credentials: true` para a origem do admin (`CORS_ADMIN_ORIGIN`). Demais rotas não usam credentials cross-origin — o client envia apenas `Authorization: Bearer`.
 
 ---
 
@@ -65,7 +86,11 @@ O `refresh_token` é retornado em cookie `httpOnly; Secure; SameSite=Strict` com
 
 Gera novo par de tokens. O refresh token atual é invalidado imediatamente (rotation).
 
-**Cookie:** `refresh_token` (automático)
+**Origem:** chamada cross-origin do admin (`credentials: 'include'`) ou proxy SSR repassando o header `Cookie`.
+
+**Cookie:** `refresh_token` (automático, domínio API)
+
+**CORS:** `Access-Control-Allow-Origin: <CORS_ADMIN_ORIGIN>` · `Allow-Credentials: true` · `Allow-Methods: POST`
 
 **Response `200`:**
 
@@ -82,9 +107,43 @@ Novo `refresh_token` retornado em cookie. O token anterior é removido do Valkey
 
 ### `POST /auth/logout`
 
-Invalida o refresh token no Valkey e limpa o cookie.
+Invalida o refresh token no Valkey e limpa o cookie da API.
+
+**Cookie:** `refresh_token` enviado automaticamente (domínio API).
 
 **Response `204`:** sem body.
+
+O admin também chama `POST /api/session/logout` (Nitro) para limpar o cookie `access_token` no domínio admin.
+
+---
+
+## Admin — rotas Nitro (sessão)
+
+Rotas internas do admin (`apps/admin`), same-origin. Não substituem a API.
+
+### `POST /api/session/sync`
+
+Grava o `access_token` recebido no login/refresh como cookie HttpOnly no domínio admin.
+
+**Body:**
+
+```json
+{ "access_token": "<jwt>", "expires_in": 900 }
+```
+
+**Response `200`:** `{ "ok": true }`
+
+Valida o JWT com `JWT_SECRET` antes de setar o cookie. Rejeita tokens inválidos com `401`.
+
+---
+
+### `POST /api/session/logout`
+
+Remove o cookie `access_token` do domínio admin.
+
+**Response `200`:** `{ "ok": true }`
+
+A revogação do refresh token continua em `POST /v1/auth/logout` na API.
 
 ---
 
@@ -317,7 +376,7 @@ Cria um novo usuário.
 
 ## WebSocket
 
-**Endpoint:** `wss://api.playplus.local/v1/ws?token=<access_token>`
+**Endpoint:** `wss://api.playplus.localhost/v1/ws?token=<access_token>`
 
 Autenticação via query param — necessário pois o browser não suporta headers customizados no handshake WebSocket.
 
@@ -391,28 +450,55 @@ O servidor persiste no banco via upsert em `watch_progress`.
 
 ## Fluxo de autenticação
 
+### Browser (client)
+
 ```
-1. POST /auth/login
-   → access_token (body) + refresh_token (cookie httpOnly)
+1. POST /auth/login (API, credentials)
+   → access_token (body) + refresh_token (cookie API)
 
-2. Requisições autenticadas
-   → Authorization: Bearer <access_token>
+2. POST /api/session/sync (admin Nitro)
+   → access_token (cookie HttpOnly admin)
 
-3. access_token expira (15min)
-   → POST /auth/refresh (cookie enviado automaticamente)
-   → novo access_token + refresh_token rotacionado
+3. Chamadas autenticadas client-side
+   → Authorization: Bearer <access_token da Pinia>
 
-4. POST /auth/logout
-   → refresh_token invalidado no Valkey
-   → cookie removido
+4. access_token expira (~15 min)
+   → POST /auth/refresh (API, credentials cross-origin)
+   → POST /api/session/sync
+   → retry da request original
+
+5. POST /auth/logout (API) + POST /api/session/logout (admin)
+   → refresh revogado no Valkey + cookies limpos
 ```
+
+### Admin SSR (Nitro)
+
+```
+1. Browser → GET /pagina (cookie access_token admin automático)
+
+2. SSR lê cookie → se expirado, POST /auth/refresh (forward Cookie)
+   → propaga Set-Cookie ao browser
+
+3. SSR → GET /v1/... na API
+   → Authorization: Bearer <M2M_SERVICE_TOKEN>
+   → X-User-Id: <delegation JWT com sub=userId>
+
+4. API valida M2M + delegação → dados → HTML
+```
+
+O token JWT do usuário **nunca** trafega do SSR para a API.
 
 **Duração dos tokens:**
 
-| Token           | Duração    | Armazenamento                         |
-| --------------- | ---------- | ------------------------------------- |
-| `access_token`  | 15 minutos | memória do cliente (não localStorage) |
-| `refresh_token` | 7 dias     | cookie `httpOnly` + Valkey (TTL)      |
+| Token                         | Duração | Armazenamento                                                |
+| ----------------------------- | ------- | ------------------------------------------------------------ |
+| `access_token` (admin cookie) | 15 min  | Cookie `HttpOnly; Secure; SameSite=Lax` no domínio admin     |
+| `access_token` (client)       | 15 min  | Pinia (memória) — Bearer e WebSocket                         |
+| `refresh_token`               | 7 dias  | Cookie `HttpOnly` domínio API + Valkey (whitelist, rotation) |
+| Delegation JWT (`X-User-Id`)  | ~60 s   | Gerado por request no Nitro — não persistido                 |
+| `M2M_SERVICE_TOKEN`           | manual  | `runtimeConfig` server-only (admin + env API)                |
+
+Checklist E2E: [checklist-auth-ssr-m2m.md](./checklist-auth-ssr-m2m.md)
 
 ---
 

@@ -9,6 +9,6 @@ defineProps<{
     :for="htmlFor"
     class="text-sm font-semibold text-peach-subtle"
   >
-    <slot />
+    <slot></slot>
   </label>
 </template>

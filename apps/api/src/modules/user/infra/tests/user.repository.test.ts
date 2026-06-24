@@ -7,7 +7,7 @@ import { UserRepository } from '../user.repository.ts';
 
 const userRow = {
   id: 'user-id',
-  email: 'user@playplus.local',
+  email: 'user@playplus.localhost',
   role: USER_ROLE.ADMIN,
   passwordHash: '$argon2id$v=19$hashed',
   createdAt: new Date('2026-06-20T12:00:00.000Z'),
@@ -32,7 +32,7 @@ describe('UserRepository', () => {
     const { db, selectChain } = createMockDb([userRow]);
     const repository = new UserRepository(db as never);
 
-    const result = await repository.findByEmail('user@playplus.local');
+    const result = await repository.findByEmail('user@playplus.localhost');
 
     expect(db.select).toHaveBeenCalled();
     expect(selectChain.from).toHaveBeenCalled();
@@ -49,7 +49,7 @@ describe('UserRepository', () => {
     const { db } = createMockDb([]);
     const repository = new UserRepository(db as never);
 
-    const result = await repository.findByEmail('missing@playplus.local');
+    const result = await repository.findByEmail('missing@playplus.localhost');
 
     expect(result).toBeNull();
   });

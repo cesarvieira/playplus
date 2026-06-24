@@ -1,0 +1,125 @@
+@layer components {
+  /* ── Error page layout ── */
+  .ple-brand {
+    @apply text-pl-xl font-extrabold tracking-tight;
+  }
+
+  .ple-pill {
+    @apply flex h-9.5 items-center gap-2 rounded-full bg-white/60 px-4 text-pl-sm font-semibold text-peach-pill-fg;
+  }
+
+  .ple-headline {
+    @apply text-balance text-pl-display font-extrabold leading-tight tracking-tight;
+  }
+
+  .ple-body {
+    @apply text-pretty text-pl-lg font-medium leading-relaxed text-peach-body;
+  }
+
+  .ple-footnote {
+    @apply text-pretty text-pl-sm font-medium leading-normal text-peach-footnote;
+  }
+
+  /* ── Error page buttons ── */
+  .ple-btn {
+    @apply inline-flex h-pl-btn-lg items-center gap-2.5 rounded-pl-btn px-6 text-pl-md font-bold transition-colors;
+  }
+
+  .ple-btn--primary {
+    @apply bg-peach-ink text-white hover:bg-peach-ink-hover;
+  }
+
+  .ple-btn--secondary {
+    @apply border-pl border-peach-border bg-white/75 text-peach-ink hover:bg-white;
+  }
+
+  /* ── Dev panel ── */
+  .ple-dev-toggle {
+    @apply flex w-full cursor-pointer items-center gap-2.5 text-left;
+  }
+
+  .ple-dev-badge {
+    @apply inline-flex h-8 items-center gap-1.75 rounded-full bg-peach-ink px-3 font-mono text-pl-2xs font-bold uppercase tracking-wider text-dev-accent;
+  }
+
+  .ple-dev-toggle-label {
+    @apply flex-1 text-pl-sm font-semibold text-peach-muted;
+  }
+
+  .ple-dev-chevron {
+    @apply text-peach-muted transition-transform duration-200;
+  }
+
+  .ple-dev-panel {
+    @apply mt-3.5 overflow-hidden rounded-pl-dev border border-dev-border bg-dev-bg font-mono shadow-pl-dev-panel;
+  }
+
+  .ple-dev-panel__header {
+    @apply flex items-center gap-2 border-b border-dev-border-subtle bg-dev-bg-header px-4 py-3;
+  }
+
+  .ple-dev-panel__dot {
+    @apply size-dev-dot rounded-full;
+  }
+
+  .ple-dev-panel__dot--red {
+    @apply bg-dev-dot-red;
+  }
+
+  .ple-dev-panel__dot--yellow {
+    @apply bg-dev-dot-yellow;
+  }
+
+  .ple-dev-panel__dot--green {
+    @apply bg-dev-dot-green;
+  }
+
+  .ple-dev-panel__filename {
+    @apply ml-2 text-pl-2xs tracking-wide text-dev-text-muted;
+  }
+
+  .ple-dev-panel__copy-btn {
+    @apply inline-flex size-7 items-center justify-center rounded-md text-dev-icon transition-colors hover:bg-dev-border-subtle hover:text-dev-text;
+  }
+
+  .ple-dev-panel__body {
+    @apply px-5 py-4.5 text-pl-xs leading-loose text-dev-text;
+  }
+
+  .ple-dev-panel__error-name {
+    @apply font-semibold text-dev-text-error;
+  }
+
+  .ple-dev-panel__error-sep {
+    @apply text-dev-text-muted;
+  }
+
+  .ple-dev-panel__error-message {
+    @apply text-dev-text-value;
+  }
+
+  .ple-dev-panel__stack-line {
+    @apply text-dev-text-muted;
+  }
+
+  .ple-dev-panel__meta {
+    @apply mt-4 grid grid-cols-[auto_1fr] gap-x-4.5 gap-y-1 text-dev-text-key;
+  }
+
+  .ple-dev-panel__meta-key {
+    @apply text-dev-text-dim;
+  }
+
+  .ple-dev-panel__meta-value--error {
+    @apply text-dev-text-error;
+  }
+
+  /* ── Error visual frames ── */
+  .error-visual-frame {
+    @apply absolute inset-0 rounded-3xl bg-linear-to-br from-peach-hero-from via-peach-hero-via to-peach-hero-to shadow-pl-hero-visual;
+  }
+
+  .error-visual-frame--lg {
+    @apply rounded-pl-visual;
+  }
+}

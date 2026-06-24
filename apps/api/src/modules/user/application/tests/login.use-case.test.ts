@@ -11,7 +11,7 @@ import { LoginUseCase } from '../login.use-case.ts';
 
 const user = UserEntity.fromPersistence({
   id: 'user-id',
-  email: 'admin@playplus.local',
+  email: 'admin@playplus.localhost',
   role: USER_ROLE.ADMIN,
   passwordHash: '$argon2id$v=19$hashed',
   createdAt: new Date('2026-06-20T12:00:00.000Z'),
@@ -49,7 +49,7 @@ describe('LoginUseCase', () => {
     const { useCase, jwtService, refreshTokenStore } = createUseCase();
 
     const result = await useCase.execute({
-      email: 'admin@playplus.local',
+      email: 'admin@playplus.localhost',
       password: 'correct-password',
     });
 
@@ -72,7 +72,7 @@ describe('LoginUseCase', () => {
     });
 
     await expect(
-      useCase.execute({ email: 'missing@playplus.local', password: 'password123' }),
+      useCase.execute({ email: 'missing@playplus.localhost', password: 'password123' }),
     ).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
 
@@ -82,7 +82,7 @@ describe('LoginUseCase', () => {
     const { useCase } = createUseCase();
 
     await expect(
-      useCase.execute({ email: 'admin@playplus.local', password: 'wrong-password' }),
+      useCase.execute({ email: 'admin@playplus.localhost', password: 'wrong-password' }),
     ).rejects.toBeInstanceOf(InvalidCredentialsError);
   });
 });

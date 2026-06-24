@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatBytes, formatDate, formatPercent } from './format';
+import { formatBytes, formatDate, formatPercent } from '../format';
 
 describe('formatDate', () => {
   it('formats a fixed date in pt-BR', () => {

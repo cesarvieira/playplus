@@ -8,19 +8,24 @@ import {
   createLoggerConfig,
   isDevelopmentLogger,
 } from './config/logger.ts';
+import { isTlsEnabled, loadTlsFileOptions } from './config/tls.ts';
 import { closeDatabase } from './infra/database/client.ts';
 import { closeValkey } from './infra/valkey/client.ts';
 import { closeTranscodeQueue } from './modules/video/infra/transcode.queue.ts';
 import errorHandlerPlugin from './http/plugins/error-handler.ts';
+import authCorsPlugin from './http/plugins/auth-cors.plugin.ts';
 import healthRoutes from './http/routes/health.routes.ts';
 import authRoutes from './modules/user/http/auth.routes.ts';
 import meRoutes from './modules/user/http/me.routes.ts';
 import videosRoutes from './modules/video/http/videos.routes.ts';
 
 export async function buildServer() {
+  const tlsOptions = loadTlsFileOptions(env.DEV_TLS_CERT, env.DEV_TLS_KEY);
+
   const fastify = Fastify({
     logger: createLoggerConfig(),
     disableRequestLogging: isDevelopmentLogger(),
+    ...(tlsOptions ? { https: tlsOptions } : {}),
   });
 
   if (isDevelopmentLogger()) {
@@ -32,8 +37,10 @@ export async function buildServer() {
     });
   }
 
+  await authCorsPlugin(fastify);
   await fastify.register(cors, {
     origin: env.NODE_ENV === 'development',
+    credentials: false,
   });
   await fastify.register(cookie);
   await errorHandlerPlugin(fastify);
@@ -78,10 +85,12 @@ async function start(): Promise<void> {
   });
 
   try {
+    const tlsEnabled = isTlsEnabled(env.DEV_TLS_CERT, env.DEV_TLS_KEY);
+
     await server.listen({
       port: env.API_PORT,
       host: env.API_HOST,
-      listenTextResolver: createListenTextResolver(env.API_PORT),
+      listenTextResolver: createListenTextResolver(env.API_PORT, { secure: tlsEnabled }),
     });
   } catch (error) {
     server.log.error(error);

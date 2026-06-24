@@ -1,4 +1,5 @@
 import type { FastifyServerOptions } from 'fastify';
+import pino, { type Logger, type LoggerOptions } from 'pino';
 
 import { env } from './env.ts';
 
@@ -6,7 +7,7 @@ export function isDevelopmentLogger(): boolean {
   return env.NODE_ENV === 'development';
 }
 
-export function createLoggerConfig(): FastifyServerOptions['logger'] {
+function createPinoOptions(): LoggerOptions | true {
   if (isDevelopmentLogger()) {
     return {
       transport: {
@@ -34,12 +35,36 @@ export function createLoggerConfig(): FastifyServerOptions['logger'] {
   return true;
 }
 
-export function createListenTextResolver(port: number): (address: string) => string {
+export function createLoggerConfig(): FastifyServerOptions['logger'] {
+  return createPinoOptions();
+}
+
+let infraLogger: Logger | undefined;
+
+export function getInfraLogger(): Logger {
+  if (!infraLogger) {
+    const options = createPinoOptions();
+    infraLogger = options === true ? pino() : pino(options);
+  }
+
+  return infraLogger;
+}
+
+export function createListenTextResolver(
+  port: number,
+  options?: { secure?: boolean },
+): (address: string) => string {
   return (address) => {
-    if (address.includes('127.0.0.1')) {
-      return `API em http://localhost:${port}`;
+    const protocol = options?.secure ? 'https' : 'http';
+
+    if (address.includes('127.0.0.1') || address.includes('0.0.0.0')) {
+      if (options?.secure) {
+        return `API em ${protocol}://api.playplus.localhost:${port}/v1`;
+      }
+
+      return `API em ${protocol}://localhost:${port}`;
     }
 
-    return `API em ${address}`;
+    return `API em ${protocol}://${address}`;
   };
 }

@@ -31,7 +31,7 @@ defineOptions({
 const inputId = computed(() => props.id ?? `pl-input-${useId()}`);
 
 const inputClasses = computed(() => [
-  'h-[50px] w-full rounded-pl-md border-[1.5px] bg-peach-input px-4 text-[15px] text-peach-ink',
+  'h-pl-input w-full rounded-pl-md border-pl bg-peach-input px-4 text-pl-base text-peach-ink',
   'placeholder:text-peach-muted',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-peach-accent',
   'disabled:cursor-not-allowed disabled:opacity-60',

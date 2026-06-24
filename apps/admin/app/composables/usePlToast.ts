@@ -21,7 +21,7 @@ export function providePlToast() {
   const timers = new Map<string, ReturnType<typeof setTimeout>>();
 
   function dismiss(id: string) {
-    toasts.value = toasts.value.filter((toast) => toast.id !== id);
+    toasts.value = toasts.value.filter(toast => toast.id !== id);
     const timer = timers.get(id);
     if (timer) {
       clearTimeout(timer);

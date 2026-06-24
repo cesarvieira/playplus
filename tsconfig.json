@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true
   },
-  "include": ["vitest.config.ts", "vitest.shared.node.ts", "vitest.shared.nuxt.ts"]
+  "include": ["*.mjs", "*.ts", "scripts/**/*.mjs"]
 }

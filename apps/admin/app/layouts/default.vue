@@ -5,7 +5,7 @@
   <div class="flex min-h-screen flex-col bg-peach-page">
     <AppHeader />
     <main class="flex-1 px-7 py-6">
-      <slot />
+      <slot></slot>
     </main>
   </div>
 </template>

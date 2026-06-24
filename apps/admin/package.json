@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "node --env-file=../../.env ./node_modules/nuxt/bin/nuxt.mjs dev",
     "postinstall": "nuxt prepare",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "nuxt prepare && vue-tsc -p .nuxt/tsconfig.node.json --noEmit && vue-tsc -p .nuxt/tsconfig.app.json --noEmit",
@@ -15,20 +15,27 @@
     "@pinia/nuxt": "^0.11.2",
     "@playplus/shared": "workspace:*",
     "@tabler/icons-vue": "^3.44.0",
+    "gravatar-url": "^4.0.2",
+    "h3": "^1.15.11",
+    "jsonwebtoken": "^9.0.2",
     "nuxt": "^4.0.3",
+    "ofetch": "^1.5.1",
     "pinia": "^3.0.3",
-    "vue": "^3.5.18"
+    "vue": "^3.5.18",
+    "vue-router": "^5.1.0"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.16.0",
     "@nuxtjs/google-fonts": "^3.2.0",
     "@nuxtjs/tailwindcss": "7.0.0-beta.1",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.0.0",
     "eslint": "^10.5.0",
-    "happy-dom": "^20.0.2",
+    "nuxt-security": "^2.6.0",
     "tailwindcss": "^4.1.11",
     "typescript": "^6.0.3",
-    "unstorage": "^1.17.0",
+    "vite-plugin-checker": "^0.14.4",
     "vite-plugin-eslint2": "^5.2.0",
-    "vue-tsc": "^3.0.5"
+    "vue-tsc": "^3.3.5"
   }
 }

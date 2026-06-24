@@ -9,7 +9,7 @@ Base URL de exemplo: `http://localhost:3000/v1`
 ```bash
 curl -s -c cookies.txt -X POST http://localhost:3000/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@playplus.local","password":"<senha>"}'
+  -d '{"email":"admin@playplus.localhost","password":"<senha>"}'
 ```
 
 Guarde o `access_token` da resposta. O cookie `refresh_token` fica em `cookies.txt`.

@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  IconAlertCircle,
-  IconCircleCheck,
-  IconInfoCircle,
-  IconX,
-} from '@tabler/icons-vue';
+import { IconAlertCircle, IconCircleCheck, IconInfoCircle, IconX } from '@tabler/icons-vue';
 import type { Component } from 'vue';
 
 type AlertVariant = 'error' | 'info' | 'success';
@@ -54,11 +49,11 @@ function dismiss() {
     >
       <component
         :is="variantIcons[variant]"
-        class="size-[19px] shrink-0"
+        class="size-pl-icon shrink-0"
         aria-hidden="true"
       />
       <div class="flex-1 text-sm font-semibold">
-        <slot />
+        <slot></slot>
       </div>
       <button
         v-if="dismissible"
@@ -72,16 +67,3 @@ function dismiss() {
     </div>
   </Transition>
 </template>
-
-<style>
-.pl-alert-leave-active {
-  transition:
-    opacity 0.22s ease,
-    transform 0.22s ease;
-}
-
-.pl-alert-leave-to {
-  opacity: 0;
-  transform: translateY(-0.25rem);
-}
-</style>

@@ -1,0 +1,29 @@
+/* Vue transition classes — PlAlert */
+.pl-alert-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.pl-alert-leave-to {
+  opacity: 0;
+  transform: translateY(-0.25rem);
+}
+
+/* Vue transition classes — PlToast */
+.pl-toast-enter-active,
+.pl-toast-leave-active {
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease;
+}
+
+.pl-toast-move {
+  transition: transform 0.28s ease;
+}
+
+.pl-toast-enter-from,
+.pl-toast-leave-to {
+  opacity: 0;
+  transform: translateX(1rem);
+}

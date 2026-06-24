@@ -4,6 +4,7 @@ interface CookieOptions {
   maxAge: number;
   secure: boolean;
   sameSite: 'lax' | 'strict' | 'none';
+  domain?: string;
 }
 
 type ReplyWithCookie = FastifyReply & {
@@ -29,13 +30,19 @@ type ReplyWithCookie = FastifyReply & {
 };
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
+const REFRESH_COOKIE_PATH = '/v1/auth/refresh';
 
-function cookieAttributes(options: Pick<CookieOptions, 'secure' | 'sameSite'>) {
+interface CookieAttributeOptions extends Pick<CookieOptions, 'secure' | 'sameSite'> {
+  domain?: string;
+}
+
+function cookieAttributes(options: CookieAttributeOptions) {
   return {
     httpOnly: true,
-    path: '/',
+    path: REFRESH_COOKIE_PATH,
     secure: options.secure,
     sameSite: options.sameSite,
+    ...(options.domain ? { domain: options.domain } : {}),
   };
 }
 
@@ -45,14 +52,18 @@ export function setRefreshTokenCookie(
   options: CookieOptions,
 ): void {
   (reply as ReplyWithCookie).setCookie(REFRESH_TOKEN_COOKIE, refreshToken, {
-    ...cookieAttributes(options),
+    ...cookieAttributes({
+      secure: options.secure,
+      sameSite: options.sameSite,
+      domain: options.domain,
+    }),
     maxAge: options.maxAge,
   });
 }
 
 export function clearRefreshTokenCookie(
   reply: FastifyReply,
-  options: Pick<CookieOptions, 'secure' | 'sameSite'>,
+  options: CookieAttributeOptions,
 ): void {
   (reply as ReplyWithCookie).clearCookie(REFRESH_TOKEN_COOKIE, cookieAttributes(options));
 }

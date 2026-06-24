@@ -28,7 +28,8 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const buttonClasses = computed(() => [
-  'inline-flex cursor-pointer items-center justify-center gap-2.5 rounded-pl-md px-5 py-3 text-[15px] font-bold',
+  'inline-flex h-pl-btn-lg cursor-pointer items-center justify-center gap-2.5',
+  'rounded-pl-btn px-5 text-pl-base font-bold',
   'transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-peach-accent',
   'disabled:cursor-not-allowed',
   variantClasses[props.variant],
@@ -36,17 +37,12 @@ const buttonClasses = computed(() => [
 </script>
 
 <template>
-  <button
-    :type="type"
-    :disabled="disabled || loading"
-    :class="buttonClasses"
-    v-bind="$attrs"
-  >
+  <button :type="type" :disabled="disabled || loading" :class="buttonClasses" v-bind="$attrs">
     <span
       v-if="loading"
-      class="size-[18px] shrink-0 animate-pl-spin rounded-full border-2 border-current/35 border-t-current motion-reduce:animate-none"
+      class="size-4.5 shrink-0 animate-pl-spin rounded-full border-2 border-current/35 border-t-current motion-reduce:animate-none"
       aria-hidden="true"
-    />
-    <slot />
+    ></span>
+    <slot></slot>
   </button>
 </template>
