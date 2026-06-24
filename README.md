@@ -173,7 +173,15 @@ Com a infra no ar:
 pnpm dev          # HTTP — localhost
 ```
 
-O Turbo executa o script `dev` de cada app/package em paralelo. Nesta fase inicial (`ETD-01`), os apps ainda são stubs — a API, worker, web e admin passam a responder conforme forem implementados nas ETDs seguintes.
+O Turbo executa o script `dev` de cada app/package em paralelo — **API**, **worker** (fila BullMQ), web e admin.
+
+Ordem recomendada: infra Docker → migrations → `pnpm dev`. O worker conecta PostgreSQL, Valkey e MinIO via `.env` (localhost) e consome jobs `video.transcode` (processor noop até a ETD-05).
+
+Para subir apenas o worker:
+
+```bash
+pnpm --filter @playplus/worker dev
+```
 
 ### Comandos úteis
 
