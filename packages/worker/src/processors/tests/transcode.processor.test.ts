@@ -11,6 +11,9 @@ const payload = {
 
 describe('noopTranscodeProcessor', () => {
   it('resolve sem executar FFmpeg', async () => {
-    await expect(noopTranscodeProcessor.transcode(payload)).resolves.toBeUndefined();
+    await expect(noopTranscodeProcessor.transcode(payload)).resolves.toEqual({
+      durationSeconds: 0,
+      storageHlsPrefix: 'videos/00000000-0000-4000-8000-000000000001/hls/',
+    });
   });
 });

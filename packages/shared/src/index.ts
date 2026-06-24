@@ -21,3 +21,10 @@ export { ForbiddenError } from './errors/forbidden.error.ts';
 export { ValidationError } from './errors/validation.error.ts';
 export { UserNotFoundError } from './errors/user-not-found.error.ts';
 export { VideoNotFoundError } from './errors/video-not-found.error.ts';
+export { InvalidVideoStatusTransitionError } from './errors/invalid-video-status-transition.error.ts';
+
+export { buildStorageHlsPrefix, buildStorageOriginalKey } from './paths/video-storage.ts';
+export {
+  VALID_TRANSITIONS,
+  assertValidStatusTransition,
+} from './domain/video-status.transitions.ts';

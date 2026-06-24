@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { UnrecoverableError, type Job } from 'bullmq';
+import { type Job } from 'bullmq';
 
 import { VIDEO_STATUS } from '@playplus/shared';
 
@@ -34,14 +34,14 @@ function createJob(
   } as Job<typeof validPayload>;
 }
 
-describe('processTranscodeJob — pub/sub video.status', () => {
+describe('processTranscodeJob — ready', () => {
   const processor: TranscodeProcessor = {
     transcode: vi.fn(),
   };
 
   const videoRepo: VideoRepository = {
+    findStatusById: vi.fn(),
     updateStatus: vi.fn(),
-    findStatusById: vi.fn().mockResolvedValue(VIDEO_STATUS.PENDING),
   };
 
   const eventPublisher: VideoEventPublisher = {
@@ -54,7 +54,19 @@ describe('processTranscodeJob — pub/sub video.status', () => {
     vi.mocked(eventPublisher.publishVideoStatus).mockReset().mockResolvedValue(undefined);
   });
 
-  it('publica processing progress 0 e repassa onProgress ao processor', async () => {
+  it('marca ready com duration e storageHlsPrefix após sucesso', async () => {
+    const job = createJob(validPayload);
+
+    await processTranscodeJob(job, { processor, videoRepo });
+
+    expect(videoRepo.updateStatus).toHaveBeenCalledWith(videoId, VIDEO_STATUS.PROCESSING);
+    expect(videoRepo.updateStatus).toHaveBeenCalledWith(videoId, VIDEO_STATUS.READY, {
+      duration: 120,
+      storageHlsPrefix: `videos/${videoId}/hls/`,
+    });
+  });
+
+  it('publica video.status ready após persistir no banco', async () => {
     const job = createJob(validPayload);
 
     await processTranscodeJob(job, { processor, videoRepo, eventPublisher });
@@ -65,19 +77,22 @@ describe('processTranscodeJob — pub/sub video.status', () => {
       status: VIDEO_STATUS.PROCESSING,
       progress: 0,
     });
-    expect(processor.transcode).toHaveBeenCalledWith(validPayload, {
-      jobId: 'transcode:job',
-      onProgress: expect.any(Function),
+    expect(eventPublisher.publishVideoStatus).toHaveBeenCalledWith({
+      video_id: videoId,
+      job_id: 'transcode:job',
+      status: VIDEO_STATUS.READY,
     });
   });
 
-  it('rejeita payload inválido sem publicar eventos', async () => {
-    const job = createJob({ ...validPayload, videoId: 'not-a-uuid' });
+  it('não marca processing novamente em retry', async () => {
+    const job = createJob(validPayload, { attemptsMade: 1, attempts: 3 });
 
-    await expect(
-      processTranscodeJob(job, { processor, videoRepo, eventPublisher }),
-    ).rejects.toBeInstanceOf(UnrecoverableError);
+    await processTranscodeJob(job, { processor, videoRepo });
 
-    expect(eventPublisher.publishVideoStatus).not.toHaveBeenCalled();
+    expect(videoRepo.updateStatus).toHaveBeenCalledTimes(1);
+    expect(videoRepo.updateStatus).toHaveBeenCalledWith(videoId, VIDEO_STATUS.READY, {
+      duration: 120,
+      storageHlsPrefix: `videos/${videoId}/hls/`,
+    });
   });
 });

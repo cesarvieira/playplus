@@ -23,28 +23,40 @@ describe('VideoRepository', () => {
   });
 
   it('atualiza status sem error_reason', async () => {
+    query
+      .mockResolvedValueOnce([{ status: VIDEO_STATUS.QUEUED }])
+      .mockResolvedValueOnce([]);
+
     await repository.updateStatus('00000000-0000-4000-8000-000000000001', VIDEO_STATUS.PROCESSING);
 
-    expect(query).toHaveBeenCalledOnce();
+    expect(query).toHaveBeenCalledTimes(2);
   });
 
   it('atualiza status com error_reason', async () => {
+    query
+      .mockResolvedValueOnce([{ status: VIDEO_STATUS.PROCESSING }])
+      .mockResolvedValueOnce([]);
+
     await repository.updateStatus(
       '00000000-0000-4000-8000-000000000001',
       VIDEO_STATUS.ERROR,
       { errorReason: 'FFmpeg falhou' },
     );
 
-    expect(query).toHaveBeenCalledOnce();
+    expect(query).toHaveBeenCalledTimes(2);
   });
 
   it('atualiza status com error_reason nulo', async () => {
+    query
+      .mockResolvedValueOnce([{ status: VIDEO_STATUS.PROCESSING }])
+      .mockResolvedValueOnce([]);
+
     await repository.updateStatus(
       '00000000-0000-4000-8000-000000000001',
       VIDEO_STATUS.ERROR,
       { errorReason: null },
     );
 
-    expect(query).toHaveBeenCalledOnce();
+    expect(query).toHaveBeenCalledTimes(2);
   });
 });

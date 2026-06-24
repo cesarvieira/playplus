@@ -23,7 +23,7 @@ const payload = {
   fileSize: 1024,
 };
 
-describe('createFfmpegTranscodeProcessor', () => {
+describe('createFfmpegTranscodeProcessor — upload HLS', () => {
   const download = vi.fn();
   const upload = vi.fn();
 
@@ -40,7 +40,7 @@ describe('createFfmpegTranscodeProcessor', () => {
     });
   });
 
-  it('baixa original, transcodifica e limpa workspace', async () => {
+  it('baixa, transcodifica, faz upload HLS e retorna metadados', async () => {
     const onProgress = vi.fn();
     const processor = createFfmpegTranscodeProcessor({
       download,
@@ -49,7 +49,7 @@ describe('createFfmpegTranscodeProcessor', () => {
       ffmpegPath: 'ffmpeg',
     });
 
-    await processor.transcode(payload, { jobId: 'transcode:job', onProgress });
+    const result = await processor.transcode(payload, { jobId: 'transcode:job', onProgress });
 
     expect(download).toHaveBeenCalledWith(
       payload.storageOriginalKey,
@@ -63,15 +63,23 @@ describe('createFfmpegTranscodeProcessor', () => {
         ffmpegPath: 'ffmpeg',
       }),
     );
+    expect(upload).toHaveBeenCalledWith(
+      path.join('/tmp/playplus-transcode-workspace', 'hls'),
+      `videos/${payload.videoId}/hls/`,
+    );
     expect(onProgress).toHaveBeenCalledWith(100);
+    expect(result).toEqual({
+      durationSeconds: 30,
+      storageHlsPrefix: `videos/${payload.videoId}/hls/`,
+    });
     expect(rmMock).toHaveBeenCalledWith('/tmp/playplus-transcode-workspace', {
       recursive: true,
       force: true,
     });
   });
 
-  it('limpa workspace mesmo quando transcode falha', async () => {
-    transcodeToHlsMock.mockRejectedValue(new Error('FFmpeg falhou'));
+  it('limpa workspace quando upload falha', async () => {
+    upload.mockRejectedValue(new Error('upload falhou'));
 
     const processor = createFfmpegTranscodeProcessor({
       download,
@@ -81,7 +89,7 @@ describe('createFfmpegTranscodeProcessor', () => {
     });
 
     await expect(processor.transcode(payload, { jobId: 'transcode:job' })).rejects.toThrow(
-      'FFmpeg falhou',
+      'upload falhou',
     );
 
     expect(rmMock).toHaveBeenCalled();

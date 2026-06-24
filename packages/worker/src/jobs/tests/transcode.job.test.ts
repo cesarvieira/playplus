@@ -16,6 +16,11 @@ const validPayload = {
   fileSize: 1024,
 };
 
+const transcodeResult = {
+  durationSeconds: 120,
+  storageHlsPrefix: `videos/${videoId}/hls/`,
+};
+
 function createJob(
   data: unknown,
   options: { attemptsMade?: number; attempts?: number; id?: string } = {},
@@ -35,10 +40,11 @@ describe('processTranscodeJob', () => {
 
   const videoRepo: VideoRepository = {
     updateStatus: vi.fn(),
+    findStatusById: vi.fn().mockResolvedValue(VIDEO_STATUS.PENDING),
   };
 
   beforeEach(() => {
-    vi.mocked(processor.transcode).mockReset().mockResolvedValue(undefined);
+    vi.mocked(processor.transcode).mockReset().mockResolvedValue(transcodeResult);
     vi.mocked(videoRepo.updateStatus).mockReset().mockResolvedValue(undefined);
   });
 
@@ -48,7 +54,11 @@ describe('processTranscodeJob', () => {
     await processTranscodeJob(job, { processor, videoRepo });
 
     expect(videoRepo.updateStatus).toHaveBeenCalledWith(videoId, VIDEO_STATUS.PROCESSING);
-    expect(processor.transcode).toHaveBeenCalledWith(validPayload);
+    expect(videoRepo.updateStatus).toHaveBeenCalledWith(videoId, VIDEO_STATUS.READY, {
+      duration: 120,
+      storageHlsPrefix: `videos/${videoId}/hls/`,
+    });
+    expect(processor.transcode).toHaveBeenCalledWith(validPayload, { jobId: 'transcode:job' });
   });
 
   it('rejeita payload inválido sem chamar processor', async () => {
@@ -70,7 +80,7 @@ describe('processTranscodeJob', () => {
 
     await expect(processTranscodeJob(job, { processor, videoRepo })).rejects.toThrow('FFmpeg falhou');
 
-    expect(videoRepo.updateStatus).toHaveBeenCalledWith(videoId, VIDEO_STATUS.PROCESSING);
+    expect(videoRepo.updateStatus).toHaveBeenCalledTimes(1);
     expect(videoRepo.updateStatus).toHaveBeenCalledWith(videoId, VIDEO_STATUS.ERROR, {
       errorReason: 'FFmpeg falhou',
     });

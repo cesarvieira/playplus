@@ -1,7 +1,11 @@
 import { UnrecoverableError, type Job } from 'bullmq';
 import { z } from 'zod';
 
-import { VIDEO_STATUS, type TranscodeJobPayload } from '@playplus/shared';
+import {
+  VIDEO_STATUS,
+  assertValidStatusTransition,
+  type TranscodeJobPayload,
+} from '@playplus/shared';
 
 import { logger } from '../config/logger.ts';
 import type { VideoRepository } from '../infra/database/video.repository.ts';
@@ -11,7 +15,7 @@ import {
   createVideoEventPublisher,
   type VideoEventPublisher,
 } from '../infra/events/video-events.ts';
-import type { TranscodeProcessor } from '../processors/transcode.processor.ts';
+import type { TranscodeProcessor, TranscodeResult } from '../processors/transcode.processor.ts';
 import { createFfmpegTranscodeProcessor } from '../processors/transcode.processor.ts';
 
 const transcodeJobPayloadSchema = z.object({
@@ -80,7 +84,9 @@ export async function processTranscodeJob(
     'Transcode job recebido',
   );
 
-  await deps.videoRepo.updateStatus(payload.videoId, VIDEO_STATUS.PROCESSING);
+  if (job.attemptsMade === 0) {
+    await deps.videoRepo.updateStatus(payload.videoId, VIDEO_STATUS.PROCESSING);
+  }
 
   const progressThrottle = createProgressThrottle((progress) => {
     if (!shouldPublishProgress) {
@@ -105,18 +111,35 @@ export async function processTranscodeJob(
   }
 
   try {
+    const transcodeContext = shouldPublishProgress
+      ? {
+          jobId,
+          onProgress: (progress: number) => {
+            progressThrottle.report(progress);
+          },
+        }
+      : { jobId };
+
+    const result: TranscodeResult = await deps.processor.transcode(payload, transcodeContext);
+
     if (shouldPublishProgress) {
-      await deps.processor.transcode(payload, {
-        jobId,
-        onProgress: (progress) => {
-          progressThrottle.report(progress);
-        },
-      });
       progressThrottle.flush(100);
-      return;
     }
 
-    await deps.processor.transcode(payload);
+    assertValidStatusTransition(VIDEO_STATUS.PROCESSING, VIDEO_STATUS.READY);
+
+    await deps.videoRepo.updateStatus(payload.videoId, VIDEO_STATUS.READY, {
+      duration: result.durationSeconds,
+      storageHlsPrefix: result.storageHlsPrefix,
+    });
+
+    if (shouldPublishProgress) {
+      await eventPublisher.publishVideoStatus({
+        video_id: payload.videoId,
+        job_id: jobId,
+        status: VIDEO_STATUS.READY,
+      });
+    }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Falha na transcodificação';
 

@@ -1,16 +1,12 @@
 import type { VideoStatus } from '@playplus/shared';
-import { VIDEO_STATUS } from '@playplus/shared';
+import {
+  InvalidVideoStatusTransitionError,
+  VIDEO_STATUS,
+  assertValidStatusTransition as assertValidStatusTransitionShared,
+} from '@playplus/shared';
 
 import { InvalidVideoStatusError } from './invalid-video-status.error.ts';
 import { JobAlreadyQueuedError } from './job-already-queued.error.ts';
-
-const VALID_TRANSITIONS: Record<VideoStatus, VideoStatus[]> = {
-  [VIDEO_STATUS.PENDING]: [VIDEO_STATUS.QUEUED],
-  [VIDEO_STATUS.QUEUED]: [VIDEO_STATUS.PROCESSING],
-  [VIDEO_STATUS.PROCESSING]: [VIDEO_STATUS.READY, VIDEO_STATUS.ERROR],
-  [VIDEO_STATUS.READY]: [],
-  [VIDEO_STATUS.ERROR]: [VIDEO_STATUS.QUEUED],
-};
 
 export function assertCanRenewUploadUrl(status: VideoStatus): void {
   if (status !== VIDEO_STATUS.PENDING) {
@@ -33,9 +29,13 @@ export function assertCanEnqueueTranscode(status: VideoStatus): void {
 }
 
 export function assertValidStatusTransition(from: VideoStatus, to: VideoStatus): void {
-  const allowed = VALID_TRANSITIONS[from];
+  try {
+    assertValidStatusTransitionShared(from, to);
+  } catch (error) {
+    if (error instanceof InvalidVideoStatusTransitionError) {
+      throw new InvalidVideoStatusError(error.message);
+    }
 
-  if (!allowed.includes(to)) {
-    throw new InvalidVideoStatusError(`Transição de status inválida: ${from} → ${to}`);
+    throw error;
   }
 }

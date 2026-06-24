@@ -2,12 +2,17 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import type { TranscodeJobPayload } from '@playplus/shared';
+import { buildStorageHlsPrefix, type TranscodeJobPayload } from '@playplus/shared';
 
 import { env } from '../config/env.ts';
 import { logger } from '../config/logger.ts';
-import { downloadObject } from '../infra/storage.ts';
+import { downloadObject, uploadHlsDirectory } from '../infra/storage.ts';
 import { transcodeToHls } from './ffmpeg/hls-transcoder.ts';
+
+export interface TranscodeResult {
+  durationSeconds: number;
+  storageHlsPrefix: string;
+}
 
 export interface TranscodeContext {
   jobId: string;
@@ -15,7 +20,7 @@ export interface TranscodeContext {
 }
 
 export interface TranscodeProcessor {
-  transcode(payload: TranscodeJobPayload, context?: TranscodeContext): Promise<void>;
+  transcode(payload: TranscodeJobPayload, context?: TranscodeContext): Promise<TranscodeResult>;
 }
 
 export const noopTranscodeProcessor: TranscodeProcessor = {
@@ -24,18 +29,25 @@ export const noopTranscodeProcessor: TranscodeProcessor = {
       { videoId: payload.videoId, storageOriginalKey: payload.storageOriginalKey },
       'Transcode processor noop — FFmpeg pendente',
     );
+
+    return {
+      durationSeconds: 0,
+      storageHlsPrefix: buildStorageHlsPrefix(payload.videoId),
+    };
   },
 };
 
 interface FfmpegTranscodeProcessorDeps {
   download: (key: string, destPath: string) => Promise<void>;
   transcode: typeof transcodeToHls;
+  upload: (localDir: string, keyPrefix: string) => Promise<void>;
   ffmpegPath: string;
 }
 
 const defaultFfmpegDeps: FfmpegTranscodeProcessorDeps = {
   download: downloadObject,
   transcode: transcodeToHls,
+  upload: uploadHlsDirectory,
   ffmpegPath: env.FFMPEG_PATH,
 };
 
@@ -47,6 +59,7 @@ export function createFfmpegTranscodeProcessor(
       const workspaceDir = await mkdtemp(path.join(os.tmpdir(), `playplus-transcode-${payload.videoId}-`));
       const inputPath = path.join(workspaceDir, payload.fileName);
       const outputDir = path.join(workspaceDir, 'hls');
+      const storageHlsPrefix = buildStorageHlsPrefix(payload.videoId);
 
       try {
         logger.info(
@@ -67,6 +80,8 @@ export function createFfmpegTranscodeProcessor(
           onProgress: context?.onProgress,
         });
 
+        await deps.upload(outputDir, storageHlsPrefix);
+
         context?.onProgress?.(100);
 
         logger.info(
@@ -75,9 +90,15 @@ export function createFfmpegTranscodeProcessor(
             jobId: context?.jobId,
             durationSeconds: result.durationSeconds,
             renditions: result.renditions,
+            storageHlsPrefix,
           },
-          'Transcodificação HLS concluída (upload pendente)',
+          'Transcodificação HLS concluída e artefatos enviados ao storage',
         );
+
+        return {
+          durationSeconds: result.durationSeconds,
+          storageHlsPrefix,
+        };
       } finally {
         await rm(workspaceDir, { recursive: true, force: true });
       }

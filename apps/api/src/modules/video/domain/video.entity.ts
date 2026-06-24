@@ -1,5 +1,11 @@
 import type { CreateVideoDto, Video, VideoStatus } from '@playplus/shared';
-import { VIDEO_STATUS } from '@playplus/shared';
+import {
+  VIDEO_STATUS,
+  buildStorageHlsPrefix,
+  buildStorageOriginalKey,
+} from '@playplus/shared';
+
+export { buildStorageHlsPrefix, buildStorageOriginalKey };
 
 interface VideoPersistenceProps {
   id: string;
@@ -14,14 +20,6 @@ interface VideoPersistenceProps {
   errorReason: string | null;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export function buildStorageOriginalKey(id: string, fileName: string): string {
-  return `videos/${id}/original/${fileName}`;
-}
-
-export function buildStorageHlsPrefix(id: string): string {
-  return `videos/${id}/hls/`;
 }
 
 export class VideoEntity {
