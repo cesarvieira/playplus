@@ -14,6 +14,7 @@ import { closeValkey } from './infra/valkey/client.ts';
 import { closeTranscodeQueue } from './modules/video/infra/transcode.queue.ts';
 import errorHandlerPlugin from './http/plugins/error-handler.ts';
 import authCorsPlugin from './http/plugins/auth-cors.plugin.ts';
+import wsPlugin from './infra/websocket/ws.plugin.ts';
 import healthRoutes from './http/routes/health.routes.ts';
 import authRoutes from './modules/user/http/auth.routes.ts';
 import meRoutes from './modules/user/http/me.routes.ts';
@@ -44,6 +45,7 @@ export async function buildServer() {
   });
   await fastify.register(cookie);
   await errorHandlerPlugin(fastify);
+  await fastify.register(wsPlugin, { prefix: '/v1' });
   await fastify.register(healthRoutes);
   await fastify.register(authRoutes, { prefix: '/v1' });
   await fastify.register(meRoutes, { prefix: '/v1' });
