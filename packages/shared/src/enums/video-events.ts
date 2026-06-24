@@ -11,3 +11,12 @@ export interface VideoStatusEvent {
     progress?: number;
   };
 }
+
+export interface VideoErrorEvent {
+  type: 'video.error';
+  payload: {
+    video_id: string;
+    job_id: string;
+    reason: string;
+  };
+}

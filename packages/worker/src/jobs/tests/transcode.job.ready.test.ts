@@ -46,6 +46,7 @@ describe('processTranscodeJob — ready', () => {
 
   const eventPublisher: VideoEventPublisher = {
     publishVideoStatus: vi.fn(),
+    publishVideoError: vi.fn(),
   };
 
   beforeEach(() => {
@@ -81,6 +82,7 @@ describe('processTranscodeJob — ready', () => {
       video_id: videoId,
       job_id: 'transcode:job',
       status: VIDEO_STATUS.READY,
+      progress: 100,
     });
   });
 

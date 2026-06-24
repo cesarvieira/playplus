@@ -15,6 +15,7 @@ import {
   createVideoEventPublisher,
   type VideoEventPublisher,
 } from '../infra/events/video-events.ts';
+import { FfmpegProcessError } from '../processors/ffmpeg/errors.ts';
 import type { TranscodeProcessor, TranscodeResult } from '../processors/transcode.processor.ts';
 import { createFfmpegTranscodeProcessor } from '../processors/transcode.processor.ts';
 
@@ -35,6 +36,9 @@ const noopEventPublisher: VideoEventPublisher = {
   async publishVideoStatus() {
     void Promise.resolve();
   },
+  async publishVideoError() {
+    void Promise.resolve();
+  },
 };
 
 const defaultDeps: ProcessTranscodeJobDeps = {
@@ -53,6 +57,18 @@ function isLastAttempt(job: Job<TranscodeJobPayload>): boolean {
 
 function resolveJobId(job: Job<TranscodeJobPayload>): string {
   return job.id ?? `transcode:${job.data.videoId}`;
+}
+
+function resolveVideoErrorReason(error: unknown): string {
+  if (error instanceof FfmpegProcessError) {
+    return error.reason;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'transcode_failed';
 }
 
 export async function processTranscodeJob(
@@ -138,6 +154,7 @@ export async function processTranscodeJob(
         video_id: payload.videoId,
         job_id: jobId,
         status: VIDEO_STATUS.READY,
+        progress: 100,
       });
     }
   } catch (error: unknown) {
@@ -147,6 +164,15 @@ export async function processTranscodeJob(
       await deps.videoRepo.updateStatus(payload.videoId, VIDEO_STATUS.ERROR, {
         errorReason: message,
       });
+
+      if (shouldPublishProgress) {
+        await eventPublisher.publishVideoError({
+          video_id: payload.videoId,
+          job_id: jobId,
+          reason: resolveVideoErrorReason(error),
+        });
+      }
+
       logger.error(
         { jobId, videoId: payload.videoId, err: error },
         'Transcode esgotou tentativas',
