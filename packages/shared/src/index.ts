@@ -4,6 +4,7 @@ export * from './enums/error-code.ts';
 export * from './enums/health-check-status.ts';
 export * from './enums/health-status.ts';
 export * from './enums/video-queue.ts';
+export * from './enums/video-events.ts';
 
 export type { User } from './types/user.ts';
 export type { Video } from './types/video.ts';

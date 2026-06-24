@@ -19,6 +19,7 @@ export const workerEnvSchema = z.object({
   STORAGE_SECRET_KEY: z.string().min(1),
   STORAGE_REGION: z.string().min(1),
   NODE_ENV: z.enum(['development', 'production', 'test']),
+  FFMPEG_PATH: z.string().min(1).optional(),
 });
 
 export type WorkerEnv = z.infer<typeof workerEnvSchema>;

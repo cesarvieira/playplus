@@ -50,6 +50,16 @@ Um projeto pessoal, feito com cuidado.
 - [Node.js](https://nodejs.org/) ≥ 24
 - [pnpm](https://pnpm.io/) 9.x (o projeto usa `packageManager: pnpm@9.15.4`)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine + Compose)
+- **FFmpeg** — obrigatório para o worker de transcodificação HLS (roda no host, não no Docker Compose atual)
+
+| SO                    | Comando                   |
+| --------------------- | ------------------------- |
+| Windows (Scoop)       | `scoop install ffmpeg`    |
+| Windows (Chocolatey)  | `choco install ffmpeg`    |
+| macOS (Homebrew)      | `brew install ffmpeg`     |
+| Linux (Debian/Ubuntu) | `sudo apt install ffmpeg` |
+
+Confirme com `ffmpeg -version` antes de subir o worker. Caminho customizado: `FFMPEG_PATH` no `.env` (opcional; default `ffmpeg` no PATH).
 
 ### 1. Instalar dependências
 
@@ -173,9 +183,9 @@ Com a infra no ar:
 pnpm dev          # HTTP — localhost
 ```
 
-O Turbo executa o script `dev` de cada app/package em paralelo — **API**, **worker** (fila BullMQ), web e admin.
+O Turbo executa o script `dev` de cada app/package em paralelo — **API**, **worker** (fila BullMQ + FFmpeg HLS), web e admin.
 
-Ordem recomendada: infra Docker → migrations → `pnpm dev`. O worker conecta PostgreSQL, Valkey e MinIO via `.env` (localhost) e consome jobs `video.transcode` (processor noop até a ETD-05).
+Ordem recomendada: infra Docker → migrations → FFmpeg instalado → `pnpm dev`. O worker conecta PostgreSQL, Valkey e MinIO via `.env` (localhost), valida FFmpeg no startup e consome jobs `video.transcode`.
 
 Para subir apenas o worker:
 

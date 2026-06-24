@@ -1,4 +1,7 @@
-import { HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
+
+import { GetObjectCommand, HeadBucketCommand, S3Client } from '@aws-sdk/client-s3';
 
 import { env } from '../config/env.ts';
 
@@ -26,4 +29,19 @@ export async function pingStorage(): Promise<void> {
       Bucket: env.STORAGE_BUCKET,
     }),
   );
+}
+
+export async function downloadObject(key: string, destPath: string): Promise<void> {
+  const response = await getStorageClient().send(
+    new GetObjectCommand({
+      Bucket: env.STORAGE_BUCKET,
+      Key: key,
+    }),
+  );
+
+  if (!response.Body) {
+    throw new Error(`Objeto vazio no storage: ${key}`);
+  }
+
+  await pipeline(response.Body as NodeJS.ReadableStream, createWriteStream(destPath));
 }
