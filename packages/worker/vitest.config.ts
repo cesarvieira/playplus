@@ -6,6 +6,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       name: '@playplus/worker',
+      setupFiles: ['./src/test/setup-env.ts'],
     },
   }),
 );

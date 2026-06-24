@@ -4,7 +4,7 @@ import { env } from '../config/env.ts';
 
 let sql: postgres.Sql | null = null;
 
-function getSql(): postgres.Sql {
+export function getSql(): postgres.Sql {
   if (!sql) {
     sql = postgres(env.DATABASE_URL, { max: 2 });
   }

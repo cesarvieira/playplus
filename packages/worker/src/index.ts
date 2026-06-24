@@ -4,7 +4,7 @@ import { logger } from './config/logger.ts';
 import { closeDatabase, pingDatabase } from './infra/database.ts';
 import { closeValkey, getValkeyClient, pingValkey } from './infra/valkey.ts';
 import { pingStorage } from './infra/storage.ts';
-import { closeTranscodeWorker, createTranscodeWorker } from './workers/transcode.worker.ts';
+import { closeTranscodeWorker, createTranscodeWorker } from './infra/queue/transcode.worker.ts';
 
 async function main(): Promise<void> {
   logger.info('Verificando conexões com PostgreSQL, Valkey e MinIO...');
@@ -15,7 +15,7 @@ async function main(): Promise<void> {
 
   const worker = createTranscodeWorker(getValkeyClient() as ConnectionOptions);
 
-  logger.info('Worker BullMQ em execução (processor noop)');
+  logger.info('Worker BullMQ em execução');
 
   let isShuttingDown = false;
 

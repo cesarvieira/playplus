@@ -5,6 +5,7 @@ import {
   buildTranscodeJobId,
   VIDEO_QUEUE_NAME,
   VIDEO_TRANSCODE_JOB_NAME,
+  VIDEO_TRANSCODE_JOB_OPTIONS,
   type TranscodeJobPayload,
 } from '@playplus/shared';
 
@@ -23,7 +24,7 @@ export class TranscodeQueue {
   constructor(connection: ConnectionOptions = valkey as ConnectionOptions) {
     this.queue = new Queue<TranscodeJobPayload, unknown, typeof VIDEO_TRANSCODE_JOB_NAME>(
       VIDEO_QUEUE_NAME,
-      { connection },
+      { connection, defaultJobOptions: VIDEO_TRANSCODE_JOB_OPTIONS },
     );
 
     this.queue.on('error', (error) => {

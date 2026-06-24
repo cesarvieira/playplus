@@ -7,7 +7,8 @@ import {
   type TranscodeJobPayload,
 } from '@playplus/shared';
 
-import { logger } from '../config/logger.ts';
+import { logger } from '../../config/logger.ts';
+import { processTranscodeJob } from '../../jobs/transcode.job.ts';
 
 export function createTranscodeWorker(connection: ConnectionOptions): Worker<TranscodeJobPayload> {
   const worker = new Worker<TranscodeJobPayload>(
@@ -18,10 +19,7 @@ export function createTranscodeWorker(connection: ConnectionOptions): Worker<Tra
         return;
       }
 
-      logger.info(
-        { jobId: job.id, videoId: job.data.videoId },
-        'Transcode job recebido (noop)',
-      );
+      await processTranscodeJob(job);
     },
     {
       connection,
@@ -29,8 +27,27 @@ export function createTranscodeWorker(connection: ConnectionOptions): Worker<Tra
     },
   );
 
+  worker.on('completed', (job) => {
+    logger.info(
+      {
+        jobId: job.id,
+        videoId: job.data.videoId,
+        attemptsMade: job.attemptsMade,
+      },
+      'Job concluído',
+    );
+  });
+
   worker.on('failed', (job, error) => {
-    logger.error({ jobId: job?.id, err: error }, 'Job falhou');
+    logger.error(
+      {
+        jobId: job?.id,
+        videoId: job?.data.videoId,
+        attemptsMade: job?.attemptsMade,
+        err: error,
+      },
+      'Job falhou',
+    );
   });
 
   return worker;
