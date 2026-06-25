@@ -37,7 +37,7 @@ export default defineNuxtConfig({
     delegationJwtTtlSeconds: Number(process.env.DELEGATION_JWT_TTL_SECONDS ?? 60),
     public: {
       apiUrl: process.env.NUXT_PUBLIC_API_URL ?? 'http://localhost:3000/v1',
-      wsUrl: process.env.NUXT_PUBLIC_WS_URL ?? 'ws://localhost:3000/ws',
+      wsUrl: process.env.NUXT_PUBLIC_WS_URL ?? 'ws://localhost:3000/v1/ws',
       webUrl: process.env.NUXT_PUBLIC_WEB_URL ?? 'http://localhost:3001',
     },
   },

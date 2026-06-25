@@ -112,7 +112,7 @@ Na raiz do repositório:
 
 ```bash
 mkdir certs
-mkcert -cert-file certs/playplus.pem -key-file certs/playplus-key.pem admin.playplus.localhost api.playplus.localhost storage.playplus.localhost localhost 127.0.0.1
+mkcert -cert-file certs/playplus.pem -key-file certs/playplus-key.pem admin.playplus.localhost api.playplus.localhost storage.playplus.localhost minio localhost 127.0.0.1
 ```
 
 A pasta `certs/` não é versionada (`.gitignore`).

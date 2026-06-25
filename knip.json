@@ -13,7 +13,7 @@
     },
     "apps/admin": {
       "project": ["app/**/*.{ts,vue}", "server/**/*.ts"],
-      "ignore": ["app/components/PlSkeleton.vue"]
+      "ignore": ["app/components/ConfirmDialog.vue"]
     },
     "apps/web": {
       "entry": ["src/index.ts"],

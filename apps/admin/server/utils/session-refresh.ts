@@ -7,6 +7,16 @@ import { setAccessTokenCookie } from './access-cookie';
 import { getServerRuntimeConfig } from './runtime-config';
 import { readSessionFromEvent, verifyAccessToken, type SessionPayload } from './session';
 
+const SERVER_SESSION_CONTEXT_KEY = 'playplusServerSession';
+
+function getCachedServerSession(event: H3Event): SessionPayload | null | undefined {
+  return event.context[SERVER_SESSION_CONTEXT_KEY] as SessionPayload | null | undefined;
+}
+
+function setCachedServerSession(event: H3Event, session: SessionPayload | null): void {
+  event.context[SERVER_SESSION_CONTEXT_KEY] = session;
+}
+
 function appendSetCookieHeaders(event: H3Event, setCookieHeaders: string[]): void {
   for (const header of setCookieHeaders) {
     appendResponseHeader(event, 'set-cookie', header);
@@ -58,12 +68,21 @@ export async function refreshServerSession(event: H3Event): Promise<SessionPaylo
 }
 
 export async function ensureServerSession(event: H3Event): Promise<SessionPayload | null> {
+  const cached = getCachedServerSession(event);
+
+  if (cached !== undefined) {
+    return cached;
+  }
+
   const config = getServerRuntimeConfig();
   const session = readSessionFromEvent(event, config.jwtSecret);
 
   if (session) {
+    setCachedServerSession(event, session);
     return session;
   }
 
-  return refreshServerSession(event);
+  const refreshed = await refreshServerSession(event);
+  setCachedServerSession(event, refreshed);
+  return refreshed;
 }

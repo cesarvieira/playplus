@@ -33,3 +33,20 @@ export function formatPercent(value: number, decimals = 0): string {
   const clamped = Math.min(100, Math.max(0, value));
   return `${clamped.toFixed(decimals)}%`;
 }
+
+export function formatDuration(totalSeconds: number | null): string | null {
+  if (totalSeconds === null || !Number.isFinite(totalSeconds) || totalSeconds < 0) {
+    return null;
+  }
+
+  const seconds = Math.floor(totalSeconds);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  }
+
+  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+}

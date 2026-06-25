@@ -8,7 +8,8 @@ export async function apiFetch<T>(path: string, options: ApiClientOptions = {}):
   const { headers: extraHeaders, method, body } = options;
 
   if (import.meta.server) {
-    const event = useRequestEvent();
+    const nuxtApp = useNuxtApp();
+    const event = nuxtApp.ssrContext?.event ?? useRequestEvent();
 
     if (!event) {
       throw new Error('apiFetch no servidor exige um request event ativo.');

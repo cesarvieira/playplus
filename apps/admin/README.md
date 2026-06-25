@@ -12,11 +12,11 @@ O app sobe em [http://localhost:3002](http://localhost:3002).
 
 ## Variáveis de ambiente
 
-| Variável              | Descrição                 | Default (dev)              |
-| --------------------- | ------------------------- | -------------------------- |
-| `NUXT_PUBLIC_API_URL` | Base URL da API (`/v1`)   | `http://localhost:3000/v1` |
-| `NUXT_PUBLIC_WS_URL`  | WebSocket da API          | `ws://localhost:3000/ws`   |
-| `NUXT_PUBLIC_WEB_URL` | Frontend público (viewer) | `http://localhost:3001`    |
+| Variável              | Descrição                 | Default (dev)               |
+| --------------------- | ------------------------- | --------------------------- |
+| `NUXT_PUBLIC_API_URL` | Base URL da API (`/v1`)   | `http://localhost:3000/v1`  |
+| `NUXT_PUBLIC_WS_URL`  | WebSocket da API          | `ws://localhost:3000/v1/ws` |
+| `NUXT_PUBLIC_WEB_URL` | Frontend público (viewer) | `http://localhost:3001`     |
 
 Copie a seção Admin do `.env.example` na raiz do monorepo para um `.env` local, se necessário.
 

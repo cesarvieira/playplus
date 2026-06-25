@@ -50,6 +50,10 @@ services:
       timeout: 5s
       retries: 12
       start_period: 10s
+    networks:
+      default:
+        aliases:
+          - storage.playplus.localhost
     restart: no
 
   minio-init:
@@ -64,8 +68,8 @@ services:
       STORAGE_BUCKET: ${STORAGE_BUCKET:-playplus}
     entrypoint: >
       /bin/sh -c "
-      mc alias set local https://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD --insecure &&
-      mc mb --ignore-existing local/$$STORAGE_BUCKET &&
+      mc --insecure alias set local https://storage.playplus.localhost:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+      mc --insecure mb --ignore-existing local/$$STORAGE_BUCKET &&
       exit 0
       "
 

@@ -1,11 +1,62 @@
+import type { VideoStatus } from '@playplus/shared';
+
 export interface ApiVideoListItem {
   id: string;
   title: string;
   duration: number | null;
   thumbnail_url: string | null;
-  status: string;
+  status: VideoStatus;
   upload_complete?: boolean;
   created_at: string;
+}
+
+export interface VideoLivePatch {
+  status: VideoStatus;
+  progress?: number;
+  errorReason?: string;
+}
+
+export interface DisplayVideoRow extends ApiVideoListItem {
+  progress?: number;
+  errorReason?: string;
+}
+
+export type VideoListFilter = 'all' | 'ready' | 'active' | 'error';
+
+export function buildVideosListPath(
+  filter: VideoListFilter,
+  page: number,
+  limit: number,
+): string {
+  const params = new URLSearchParams();
+  params.set('page', String(page));
+  params.set('limit', String(limit));
+
+  if (filter === 'ready') {
+    params.set('status', 'ready');
+  } else if (filter === 'error') {
+    params.set('status', 'error');
+  }
+
+  return `/videos?${params.toString()}`;
+}
+
+export function mergeVideoRow(
+  item: ApiVideoListItem,
+  patch?: VideoLivePatch,
+): DisplayVideoRow {
+  return {
+    ...item,
+    status: patch?.status ?? item.status,
+    progress: patch?.progress,
+    errorReason: patch?.errorReason,
+  };
+}
+
+export function filterActiveVideos(rows: DisplayVideoRow[]): DisplayVideoRow[] {
+  return rows.filter(
+    row => row.status === 'queued' || row.status === 'processing',
+  );
 }
 
 export interface ApiListVideosResponse {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatBytes, formatDate, formatPercent } from '../format';
+import { formatBytes, formatDate, formatDuration, formatPercent } from '../format';
 
 describe('formatDate', () => {
   it('formats a fixed date in pt-BR', () => {
@@ -43,5 +43,20 @@ describe('formatPercent', () => {
 
   it('clamps negative values to zero', () => {
     expect(formatPercent(-5)).toBe('0%');
+  });
+});
+
+describe('formatDuration', () => {
+  it('formats minutes and seconds', () => {
+    expect(formatDuration(724)).toBe('12:04');
+  });
+
+  it('formats hours when necessário', () => {
+    expect(formatDuration(7240)).toBe('2:00:40');
+  });
+
+  it('returns null for invalid values', () => {
+    expect(formatDuration(null)).toBeNull();
+    expect(formatDuration(-1)).toBeNull();
   });
 });

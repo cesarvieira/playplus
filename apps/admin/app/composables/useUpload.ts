@@ -139,7 +139,7 @@ export function useUpload() {
       });
 
       try {
-        await refreshNuxtData('admin-videos');
+        await refreshNuxtData('videos-list');
       } catch {
         // A lista será atualizada no próximo acesso se o refresh falhar.
       }
