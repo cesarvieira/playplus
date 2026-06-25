@@ -1,6 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreUnresolved": ["./src/test/setup-env.ts"],
   "workspaces": {
     ".": {
       "vitest": {
@@ -31,7 +30,9 @@
         "app/components/PlButton.vue",
         "app/components/PlInput.vue",
         "app/components/PlLabel.vue",
-        "app/components/PlSkeleton.vue"
+        "app/components/PlSkeleton.vue",
+        "app/components/AppHeader.vue",
+        "app/components/PlayLogo.vue"
       ]
     },
     "packages/*": {

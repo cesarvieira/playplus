@@ -90,6 +90,7 @@ export default defineNuxtConfig({
         '@vue/devtools-core',
         '@vue/devtools-kit',
         '@tabler/icons-vue',
+        'gravatar-url',
       ],
     },
   },

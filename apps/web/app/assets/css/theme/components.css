@@ -79,4 +79,21 @@
   .pl-alert-dismiss {
     @apply shrink-0 cursor-pointer rounded-pl-sm p-1 opacity-70 transition-opacity hover:opacity-100;
   }
+
+  /* ── App header ── */
+  .pl-header-nav-link {
+    @apply rounded-full px-3.5 py-1.5 text-pl-sm font-bold text-night-text transition-colors hover:bg-night-skeleton/60;
+  }
+
+  .pl-header-nav-link--active {
+    @apply bg-night-skeleton;
+  }
+
+  .pl-header-profile-chip {
+    @apply flex items-center gap-2 rounded-full border border-night-border bg-night-input py-0.5 pl-0.5 pr-3.5;
+  }
+
+  .pl-header-logout-btn {
+    @apply flex size-pl-btn-icon shrink-0 items-center justify-center rounded-full border border-night-border bg-night-input text-night-muted transition-colors hover:bg-night-surface;
+  }
 }

@@ -108,6 +108,9 @@
   --height-pl-logo-sm: 26px;
   --height-pl-logo-md: 32px;
 
+  /* ── Layout widths ── */
+  --width-pl-hero-aside: 480px;
+
   /* ── Z-index ── */
   --z-index-pl-modal: 50;
   --z-index-pl-banner: 35;
