@@ -8,7 +8,14 @@ export async function apiFetch<T>(path: string, options: ApiClientOptions = {}):
   const { headers: extraHeaders, method, body } = options;
 
   if (import.meta.server) {
-    throw new Error('apiFetch no servidor ainda não implementado — ver issue #55.');
+    const event = useRequestEvent();
+
+    if (!event) {
+      throw new Error('apiFetch no servidor requer useRequestEvent().');
+    }
+
+    const { serverApiFetch } = await import('~/utils/api-client.server');
+    return serverApiFetch<T>(event, path, { method, body, headers: extraHeaders });
   }
 
   const config = useRuntimeConfig();

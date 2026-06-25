@@ -8,6 +8,7 @@ const webRoot = dirname(fileURLToPath(import.meta.url));
 export default defineVitestConfig({
   resolve: {
     alias: {
+      '#server': resolve(webRoot, 'server'),
       '~': resolve(webRoot, 'app'),
     },
   },
@@ -31,9 +32,19 @@ export default defineVitestConfig({
         branches: 70,
         statements: 80,
       },
-      include: ['app/**/*.ts'],
-      exclude: ['app/**/tests/**', '**/*.spec.ts', 'app/test-utils/**'],
+      include: [
+        'app/utils/**/*.ts',
+        'app/composables/**/*.ts',
+        'app/middleware/**/*.ts',
+        'app/plugins/**/*.ts',
+        'server/utils/**/*.ts',
+      ],
+      exclude: [
+        'app/**/tests/**',
+        'server/**/tests/**',
+        '**/*.spec.ts',
+      ],
     },
-    include: ['app/**/tests/**/*.{test,spec}.ts'],
+    include: ['app/**/tests/**/*.{test,spec}.ts', 'server/**/tests/**/*.{test,spec}.ts'],
   },
 });

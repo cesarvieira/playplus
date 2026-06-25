@@ -5,9 +5,9 @@ import { ofetch } from 'ofetch';
 import {
   type ApiAuthResponse,
   type ApiMeResponse,
-  mapAuthResponse,
   mapMeResponse,
 } from '~/utils/auth';
+import { clearWebSessionCookie, persistAuthResponse } from '~/utils/session-bridge';
 
 export const useAuthStore = defineStore('auth', () => {
   const config = useRuntimeConfig();
@@ -47,7 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
         credentials: 'include',
       });
 
-      const { accessToken: token } = mapAuthResponse(data);
+      const { accessToken: token } = await persistAuthResponse(data);
       accessToken.value = token;
       await fetchMe();
     } catch (error) {
@@ -64,7 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
         credentials: 'include',
       });
 
-      const { accessToken: token } = mapAuthResponse(data);
+      const { accessToken: token } = await persistAuthResponse(data);
       accessToken.value = token;
 
       if (!user.value) {
@@ -107,6 +107,7 @@ export const useAuthStore = defineStore('auth', () => {
         headers: accessToken.value ? { Authorization: `Bearer ${accessToken.value}` } : undefined,
       });
     } finally {
+      await clearWebSessionCookie();
       clearSession();
     }
   }

@@ -3,6 +3,7 @@ import type { FetchOptions } from 'ofetch';
 import { apiFetch } from '~/utils/api-client';
 import { buildApiFetchOptions } from '~/utils/api-fetch';
 import { isUnauthorizedError } from '~/utils/auth';
+import { clearWebSessionCookie } from '~/utils/session-bridge';
 
 type ApiOptions = Pick<FetchOptions<'json'>, 'method' | 'body' | 'headers'> & {
   _retry?: boolean;
@@ -47,6 +48,8 @@ export function useApi() {
         authStore.clearSession();
 
         if (import.meta.client) {
+          await clearWebSessionCookie();
+
           const route = useRoute();
           const redirect = encodeURIComponent(route.fullPath);
           await navigateTo(`/login?reason=session_expired&redirect=${redirect}`);

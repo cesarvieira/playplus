@@ -25,6 +25,10 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: true },
   runtimeConfig: {
+    m2mServiceToken: process.env.M2M_SERVICE_TOKEN ?? '',
+    delegationJwtSecret: process.env.DELEGATION_JWT_SECRET ?? '',
+    jwtSecret: process.env.JWT_SECRET ?? '',
+    delegationJwtTtlSeconds: Number(process.env.DELEGATION_JWT_TTL_SECONDS ?? 60),
     public: {
       apiUrl: publicApiUrl,
       /** URL canônica deste app (viewer). Override: NUXT_PUBLIC_WEB_URL. */

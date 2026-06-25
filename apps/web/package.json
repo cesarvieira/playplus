@@ -15,12 +15,15 @@
     "@pinia/nuxt": "^0.11.2",
     "@playplus/shared": "workspace:*",
     "@tabler/icons-vue": "^3.44.0",
+    "h3": "^1.15.11",
+    "jsonwebtoken": "^9.0.2",
     "nuxt": "^4.0.3",
     "ofetch": "^1.5.1",
     "pinia": "^3.0.3",
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "@nuxt/eslint": "^1.16.0",
     "@nuxt/test-utils": "^4.0.3",
     "@nuxtjs/google-fonts": "^3.2.0",
