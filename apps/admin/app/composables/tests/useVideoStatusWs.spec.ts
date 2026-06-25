@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { applyVideoEventToPatches } from '../useVideoEvents';
+import { applyVideoEventToPatches } from '../useVideoStatusWs';
 
 describe('applyVideoEventToPatches', () => {
   it('atualiza status e progresso em video.status', () => {

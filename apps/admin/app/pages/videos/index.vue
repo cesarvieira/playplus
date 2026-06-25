@@ -12,7 +12,7 @@ const {
   mergedRows,
   meta,
   totalPages,
-  pending,
+  isLoading,
   error,
   refresh,
   isEmpty,
@@ -21,10 +21,7 @@ const {
   enqueueTranscode,
   setFilter,
   goToPage,
-  ready,
 } = useVideosList();
-
-await ready;
 
 const showPagination = computed(() => meta.value.total > meta.value.limit);
 
@@ -47,7 +44,7 @@ const emptyMessage = computed(() =>
           Meus vídeos
         </h1>
         <p
-          v-if="!pending && !error"
+          v-if="!isLoading && !error"
           class="pl-page-lead"
         >
           {{ subtitle }}
@@ -65,7 +62,7 @@ const emptyMessage = computed(() =>
       </div>
     </div>
 
-    <LoadingSkeleton v-if="pending" />
+    <LoadingSkeleton v-if="isLoading" />
 
     <div
       v-else-if="error"

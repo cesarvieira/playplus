@@ -8,7 +8,7 @@ describe('security-headers', () => {
     const originalWs = process.env.NUXT_PUBLIC_WS_URL;
 
     process.env.NUXT_PUBLIC_API_URL = 'https://api.playplus.localhost:3000/v1';
-    process.env.NUXT_PUBLIC_WS_URL = 'wss://api.playplus.localhost:3000/ws';
+    process.env.NUXT_PUBLIC_WS_URL = 'wss://api.playplus.localhost:3000/v1/ws';
 
     expect(buildConnectSrc(false)).toEqual(
       expect.arrayContaining([

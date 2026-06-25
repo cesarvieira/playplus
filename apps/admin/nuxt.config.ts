@@ -1,5 +1,6 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveVideoStatusWsUrl } from './app/utils/ws-url';
 import { loadDevTlsHttps } from './dev-tls';
 import { createSecurityHeaders } from './security-headers';
 
@@ -8,6 +9,11 @@ const sharedEntry = resolve(adminRoot, '../../packages/shared/src/index.ts');
 const devTlsHttps = loadDevTlsHttps();
 const isDev = process.env.NODE_ENV !== 'production';
 const securityHeaders = createSecurityHeaders(isDev);
+const publicApiUrl = process.env.NUXT_PUBLIC_API_URL ?? 'http://localhost:3000/v1';
+const publicWsUrl = resolveVideoStatusWsUrl(
+  publicApiUrl,
+  process.env.NUXT_PUBLIC_WS_URL ?? 'ws://localhost:3000/v1/ws',
+);
 
 export default defineNuxtConfig({
   modules: [
@@ -36,8 +42,8 @@ export default defineNuxtConfig({
     jwtSecret: process.env.JWT_SECRET ?? '',
     delegationJwtTtlSeconds: Number(process.env.DELEGATION_JWT_TTL_SECONDS ?? 60),
     public: {
-      apiUrl: process.env.NUXT_PUBLIC_API_URL ?? 'http://localhost:3000/v1',
-      wsUrl: process.env.NUXT_PUBLIC_WS_URL ?? 'ws://localhost:3000/v1/ws',
+      apiUrl: publicApiUrl,
+      wsUrl: publicWsUrl,
       webUrl: process.env.NUXT_PUBLIC_WEB_URL ?? 'http://localhost:3001',
     },
   },

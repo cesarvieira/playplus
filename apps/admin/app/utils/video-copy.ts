@@ -2,6 +2,29 @@ import { VIDEO_STATUS, type VideoStatus } from '@playplus/shared';
 
 export const VIDEO_ERROR_ROW_COPY = 'Falha na transcodificação após 3 tentativas.';
 
+const FFMPEG_EXIT_REASON_PATTERN = /^ffmpeg_exit_code_\d+$/;
+const MACHINE_REASON_PATTERN = /^[a-z0-9_]+$/;
+
+export function resolveVideoErrorReason(reason?: string): string {
+  if (!reason) {
+    return VIDEO_ERROR_ROW_COPY;
+  }
+
+  if (FFMPEG_EXIT_REASON_PATTERN.test(reason)) {
+    return 'O FFmpeg encerrou com erro durante a transcodificação.';
+  }
+
+  if (reason === 'Falha na transcodificação') {
+    return VIDEO_ERROR_ROW_COPY;
+  }
+
+  if (!MACHINE_REASON_PATTERN.test(reason)) {
+    return reason;
+  }
+
+  return VIDEO_ERROR_ROW_COPY;
+}
+
 export type VideoRowPrimaryAction = 'watch' | 'transcode' | 'retry' | null;
 
 export function getStatusBadgeLabel(status: VideoStatus): string {

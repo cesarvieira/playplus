@@ -8,6 +8,7 @@ import { getServerRuntimeConfig } from './runtime-config';
 import { readSessionFromEvent, verifyAccessToken, type SessionPayload } from './session';
 
 const SERVER_SESSION_CONTEXT_KEY = 'playplusServerSession';
+const SERVER_SESSION_IN_FLIGHT_CONTEXT_KEY = 'playplusServerSessionInFlight';
 
 function getCachedServerSession(event: H3Event): SessionPayload | null | undefined {
   return event.context[SERVER_SESSION_CONTEXT_KEY] as SessionPayload | null | undefined;
@@ -74,6 +75,23 @@ export async function ensureServerSession(event: H3Event): Promise<SessionPayloa
     return cached;
   }
 
+  const inFlight = event.context[SERVER_SESSION_IN_FLIGHT_CONTEXT_KEY] as Promise<SessionPayload | null> | undefined;
+
+  if (inFlight) {
+    return inFlight;
+  }
+
+  const promise = resolveServerSession(event);
+  event.context[SERVER_SESSION_IN_FLIGHT_CONTEXT_KEY] = promise;
+
+  try {
+    return await promise;
+  } finally {
+    event.context[SERVER_SESSION_IN_FLIGHT_CONTEXT_KEY] = undefined;
+  }
+}
+
+async function resolveServerSession(event: H3Event): Promise<SessionPayload | null> {
   const config = getServerRuntimeConfig();
   const session = readSessionFromEvent(event, config.jwtSecret);
 

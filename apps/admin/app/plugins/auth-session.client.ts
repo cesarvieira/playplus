@@ -1,28 +1,28 @@
-export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.hook('app:mounted', async () => {
-    const authStore = useAuthStore();
-    const authUser = useAuthUser();
+export default defineNuxtPlugin(async () => {
+  const authStore = useAuthStore();
+  const authUser = useAuthUser();
 
-    if (authUser.value && !authStore.user) {
-      authStore.user = authUser.value;
-      authStore.status = 'authenticated';
-    }
+  if (authUser.value && !authStore.user) {
+    authStore.user = authUser.value;
+    authStore.status = 'authenticated';
+  }
 
-    if (authStore.isAuthenticated) {
-      return;
-    }
+  if (authStore.isAuthenticated) {
+    return;
+  }
 
-    const route = useRoute();
+  const route = useRoute();
 
-    if (route.path === '/login' && !hasClientSessionHint()) {
-      return;
-    }
+  if (route.path === '/login' && !hasClientSessionHint()) {
+    return;
+  }
 
-    const { ensureSession } = useAuth();
-    const hasSession = await ensureSession();
+  const { ensureSession } = useAuth();
+  const hasSession = await ensureSession();
 
-    if (hasSession && authStore.user) {
+  if (hasSession) {
+    if (authStore.user) {
       authUser.value = authStore.user;
     }
-  });
+  }
 });

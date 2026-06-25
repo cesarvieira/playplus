@@ -130,7 +130,7 @@ COOKIE_DOMAIN=api.playplus.localhost
 CORS_ADMIN_ORIGIN=https://admin.playplus.localhost:3001
 STORAGE_ENDPOINT=https://storage.playplus.localhost:9000
 NUXT_PUBLIC_API_URL=https://api.playplus.localhost:3000/v1
-NUXT_PUBLIC_WS_URL=wss://api.playplus.localhost:3000/ws
+NUXT_PUBLIC_WS_URL=wss://api.playplus.localhost:3000/v1/ws
 NUXT_PUBLIC_WEB_URL=https://admin.playplus.localhost:3001
 ```
 

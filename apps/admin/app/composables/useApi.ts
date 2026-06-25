@@ -15,9 +15,16 @@ async function refreshWithQueue(authStore: ReturnType<typeof useAuthStore>): Pro
 
 export function useApi() {
   const authStore = useAuthStore();
+  const { ensureSession } = useAuth();
 
   async function api<T>(path: string, options: ApiOptions = {}): Promise<T> {
     const { _retry = false, headers, method, body } = options;
+    const isAuthPath = path.startsWith('/auth/');
+
+    if (import.meta.client && !authStore.accessToken && !isAuthPath) {
+      await ensureSession();
+    }
+
     const { headers: apiHeaders } = buildApiFetchOptions(headers);
 
     if (import.meta.client && authStore.accessToken) {
@@ -31,8 +38,6 @@ export function useApi() {
         headers: apiHeaders,
       });
     } catch (error) {
-      const isAuthPath = path.startsWith('/auth/');
-
       if (!isAuthPath && !_retry && isUnauthorizedError(error)) {
         const refreshed = await refreshWithQueue(authStore);
 

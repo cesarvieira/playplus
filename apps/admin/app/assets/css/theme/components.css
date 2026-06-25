@@ -247,6 +247,16 @@
     @apply text-pl-xs font-medium text-peach-muted;
   }
 
+  /* ── WS reconnect banner ── */
+  .pl-ws-reconnect-banner {
+    @apply sticky z-pl-banner flex items-center justify-center gap-2 border-b border-peach-border-light bg-peach-chip px-4 py-2.5;
+    top: var(--height-header);
+  }
+
+  .pl-ws-reconnect-banner__text {
+    @apply text-pl-sm font-semibold text-peach-subtle;
+  }
+
   /* ── Toast ── */
   .pl-toast-host {
     @apply pointer-events-none fixed right-4 z-pl-toast flex flex-col items-end gap-2;

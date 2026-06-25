@@ -1,8 +1,8 @@
-import { computed, readonly, ref, watch, type ComputedRef, type Ref } from 'vue';
+import { computed, onMounted, readonly, ref, watch, type ComputedRef, type Ref } from 'vue';
 
 import { useApi } from '~/composables/useApi';
 import { usePlToast } from '~/composables/usePlToast';
-import { useVideoEvents } from '~/composables/useVideoEvents';
+import { useVideoStatusWs } from '~/composables/useVideoStatusWs';
 import { parseApiError } from '~/utils/auth';
 import { resolveErrorMessage } from '~/utils/error-messages';
 import {
@@ -16,6 +16,7 @@ import {
 } from '~/utils/videos';
 
 const LIST_REFRESH_DEBOUNCE_MS = 500;
+const CLIENT_ONLY = { server: false, immediate: false } as const;
 
 export interface UseVideosListReturn {
   filter: Ref<VideoListFilter>;
@@ -24,7 +25,7 @@ export interface UseVideosListReturn {
   mergedRows: ComputedRef<DisplayVideoRow[]>;
   meta: ComputedRef<ApiListVideosResponse['meta']>;
   totalPages: ComputedRef<number>;
-  pending: Ref<boolean>;
+  isLoading: ComputedRef<boolean>;
   error: Ref<unknown>;
   refresh: () => Promise<void>;
   isEmpty: ComputedRef<boolean>;
@@ -35,29 +36,64 @@ export interface UseVideosListReturn {
   goToPage: (nextPage: number) => void;
 }
 
-export function useVideosList(): UseVideosListReturn & { ready: Promise<void> } {
+export function useVideosList(): UseVideosListReturn {
   const { api } = useApi();
   const { show } = usePlToast();
-  const { patches } = useVideoEvents();
+  const { patches } = useVideoStatusWs();
 
   const filter = ref<VideoListFilter>('all');
   const page = ref(1);
   const limit = ref(20);
   const transcodeLoadingId = ref<string | null>(null);
 
-  const listAsync = useAsyncData(
+  const listAsync = useLazyAsyncData(
     'videos-list',
     () => api<ApiListVideosResponse>(buildVideosListPath(filter.value, page.value, limit.value)),
-    { watch: [filter, page] },
+    CLIENT_ONLY,
   );
 
-  const statsAsync = useAsyncData(
+  const statsAsync = useLazyAsyncData(
     'videos-stats',
     () => api<ApiListVideosResponse>('/videos?limit=100'),
+    CLIENT_ONLY,
   );
 
-  const { data, pending, error, refresh } = listAsync;
-  const { data: statsData } = statsAsync;
+  const { data, pending, error, refresh: refreshListData, execute: executeList } = listAsync;
+  const { data: statsData, refresh: refreshStatsData, execute: executeStats } = statsAsync;
+
+  const isLoading = computed(() => {
+    if (import.meta.server) {
+      return true;
+    }
+
+    if (pending.value) {
+      return true;
+    }
+
+    if (error.value) {
+      return false;
+    }
+
+    return data.value === undefined;
+  });
+
+  async function loadVideos() {
+    await Promise.all([executeList(), executeStats()]);
+  }
+
+  async function refresh() {
+    await Promise.all([refreshListData(), refreshStatsData()]);
+  }
+
+  onMounted(() => {
+    void loadVideos();
+  });
+
+  watch([filter, page], () => {
+    if (import.meta.client && data.value !== undefined) {
+      void refreshListData();
+    }
+  });
 
   let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -69,7 +105,6 @@ export function useVideosList(): UseVideosListReturn & { ready: Promise<void> } 
     refreshTimer = setTimeout(() => {
       refreshTimer = null;
       void refresh();
-      void refreshNuxtData('videos-stats');
     }, LIST_REFRESH_DEBOUNCE_MS);
   }
 
@@ -141,7 +176,7 @@ export function useVideosList(): UseVideosListReturn & { ready: Promise<void> } 
       await api<ApiEnqueueTranscodeResponse>(`/videos/${videoId}/transcode`, {
         method: 'POST',
       });
-      await refresh();
+      await refreshListData();
     } catch (err) {
       const apiError = parseApiError(err);
       show(
@@ -162,14 +197,6 @@ export function useVideosList(): UseVideosListReturn & { ready: Promise<void> } 
     page.value = Math.min(Math.max(1, nextPage), totalPages.value);
   }
 
-  async function refreshList() {
-    await refresh();
-  }
-
-  async function waitForInitialData(): Promise<void> {
-    await Promise.all([listAsync, statsAsync]);
-  }
-
   return {
     filter,
     page,
@@ -177,15 +204,14 @@ export function useVideosList(): UseVideosListReturn & { ready: Promise<void> } 
     mergedRows,
     meta,
     totalPages,
-    pending,
+    isLoading,
     error,
-    refresh: refreshList,
+    refresh,
     isEmpty,
     subtitle,
     transcodeLoadingId: readonly(transcodeLoadingId),
     enqueueTranscode,
     setFilter,
     goToPage,
-    ready: waitForInitialData(),
   };
 }

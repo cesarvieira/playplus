@@ -6,7 +6,7 @@ import { formatDate, formatDuration } from '~/utils/format';
 import {
   getRowPrimaryAction,
   getRowSecondaryText,
-  VIDEO_ERROR_ROW_COPY,
+  resolveVideoErrorReason,
 } from '~/utils/video-copy';
 import type { DisplayVideoRow } from '~/utils/videos';
 
@@ -48,7 +48,7 @@ const showProgress = computed(
   () => props.video.status === VIDEO_STATUS.PROCESSING && props.video.progress !== undefined,
 );
 
-const errorCopy = computed(() => props.video.errorReason ?? VIDEO_ERROR_ROW_COPY);
+const errorCopy = computed(() => resolveVideoErrorReason(props.video.errorReason));
 </script>
 
 <template>

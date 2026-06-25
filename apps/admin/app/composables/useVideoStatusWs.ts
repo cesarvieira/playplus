@@ -4,16 +4,17 @@ import {
   type VideoStatus,
   type VideoStatusEvent,
 } from '@playplus/shared';
-import { onMounted, onUnmounted, readonly, ref, watch } from 'vue';
+import { computed, readonly, ref, watch } from 'vue';
 
 import { parseVideoEvent } from '~/utils/parse-video-event';
+import { resolveVideoStatusWsUrl } from '~/utils/ws-url';
 import type { VideoLivePatch } from '~/utils/videos';
 
-export type VideoEventsConnectionState = 'connecting' | 'open' | 'closed';
+export type VideoStatusWsConnectionState = 'connecting' | 'open' | 'closed';
 
 const WS_CLOSE_NORMAL = 1000;
 const INITIAL_BACKOFF_MS = 1000;
-const MAX_BACKOFF_MS = 5000;
+export const MAX_BACKOFF_MS = 30000;
 
 export function applyVideoEventToPatches(
   patches: Record<string, VideoLivePatch>,
@@ -42,17 +43,39 @@ export function applyVideoEventToPatches(
   };
 }
 
-export function useVideoEvents() {
+export function computeNextBackoffMs(currentMs: number, maxMs = MAX_BACKOFF_MS): number {
+  return Math.min(currentMs * 2, maxMs);
+}
+
+export function shouldRefetchOnReconnectOpen(hasEverOpened: boolean): boolean {
+  return hasEverOpened;
+}
+
+export function computeIsReconnecting(
+  hasEverOpened: boolean,
+  connectionState: VideoStatusWsConnectionState,
+): boolean {
+  return hasEverOpened && connectionState !== 'open';
+}
+
+let sharedInstance: ReturnType<typeof createVideoStatusWs> | null = null;
+
+function createVideoStatusWs() {
   const config = useRuntimeConfig();
   const authStore = useAuthStore();
 
   const patches = ref<Record<string, VideoLivePatch>>({});
-  const connectionState = ref<VideoEventsConnectionState>('closed');
+  const connectionState = ref<VideoStatusWsConnectionState>('closed');
+  const hasEverOpened = ref(false);
 
   let socket: WebSocket | null = null;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   let backoffMs = INITIAL_BACKOFF_MS;
   let intentionalClose = false;
+
+  const isReconnecting = computed(() =>
+    computeIsReconnecting(hasEverOpened.value, connectionState.value),
+  );
 
   function clearReconnectTimer() {
     if (reconnectTimer !== null) {
@@ -70,6 +93,20 @@ export function useVideoEvents() {
     patches.value = applyVideoEventToPatches(patches.value, event);
   }
 
+  async function attemptReconnect() {
+    if (!import.meta.client || intentionalClose) {
+      return;
+    }
+
+    const refreshed = await authStore.refresh();
+    if (!refreshed) {
+      return;
+    }
+
+    // Rotação de token dispara connect() no watch(accessToken).
+    backoffMs = computeNextBackoffMs(backoffMs);
+  }
+
   function scheduleReconnect() {
     if (!import.meta.client || intentionalClose || !authStore.accessToken) {
       return;
@@ -78,8 +115,7 @@ export function useVideoEvents() {
     clearReconnectTimer();
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;
-      connect();
-      backoffMs = Math.min(backoffMs * 2, MAX_BACKOFF_MS);
+      void attemptReconnect();
     }, backoffMs);
   }
 
@@ -93,16 +129,31 @@ export function useVideoEvents() {
       return;
     }
 
-    disconnect(false);
+    clearReconnectTimer();
+
+    if (socket) {
+      intentionalClose = true;
+      socket.close(WS_CLOSE_NORMAL);
+      socket = null;
+    }
+
     intentionalClose = false;
     connectionState.value = 'connecting';
 
-    const url = `${config.public.wsUrl}?token=${encodeURIComponent(token)}`;
+    const wsBase = resolveVideoStatusWsUrl(config.public.apiUrl, config.public.wsUrl);
+    const url = `${wsBase}?token=${encodeURIComponent(token)}`;
     socket = new WebSocket(url);
 
     socket.onopen = () => {
+      const wasReconnect = hasEverOpened.value;
+      hasEverOpened.value = true;
       connectionState.value = 'open';
       backoffMs = INITIAL_BACKOFF_MS;
+
+      if (shouldRefetchOnReconnectOpen(wasReconnect)) {
+        void refreshNuxtData('videos-list');
+        void refreshNuxtData('videos-stats');
+      }
     };
 
     socket.onmessage = (event) => {
@@ -135,15 +186,11 @@ export function useVideoEvents() {
     }
 
     connectionState.value = 'closed';
+
+    if (intentional) {
+      hasEverOpened.value = false;
+    }
   }
-
-  onMounted(() => {
-    connect();
-  });
-
-  onUnmounted(() => {
-    disconnect(true);
-  });
 
   watch(
     () => authStore.accessToken,
@@ -153,7 +200,7 @@ export function useVideoEvents() {
         return;
       }
 
-      if (token !== previousToken) {
+      if (previousToken && token !== previousToken) {
         connect();
       }
     },
@@ -162,5 +209,16 @@ export function useVideoEvents() {
   return {
     patches: readonly(patches),
     connectionState: readonly(connectionState),
+    isReconnecting,
+    connect,
+    disconnect,
   };
+}
+
+export function useVideoStatusWs() {
+  if (!sharedInstance) {
+    sharedInstance = createVideoStatusWs();
+  }
+
+  return sharedInstance;
 }

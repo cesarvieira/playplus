@@ -133,6 +133,7 @@
 
   /* ── Z-index ── */
   --z-index-pl-modal: 50;
+  --z-index-pl-banner: 35;
   --z-index-pl-toast: 60;
 
   /* ── Upload play glyph ── */

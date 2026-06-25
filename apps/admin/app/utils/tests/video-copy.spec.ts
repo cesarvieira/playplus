@@ -5,6 +5,7 @@ import {
   getRowPrimaryAction,
   getRowSecondaryText,
   getStatusBadgeLabel,
+  resolveVideoErrorReason,
   VIDEO_ERROR_ROW_COPY,
 } from '../video-copy';
 
@@ -28,5 +29,25 @@ describe('video-copy', () => {
 
   it('expõe copy de erro da linha', () => {
     expect(getRowSecondaryText(VIDEO_STATUS.ERROR)).toBe(VIDEO_ERROR_ROW_COPY);
+  });
+
+  it('humaniza reason de FFmpeg', () => {
+    expect(resolveVideoErrorReason('ffmpeg_exit_code_1')).toBe(
+      'O FFmpeg encerrou com erro durante a transcodificação.',
+    );
+  });
+
+  it('usa fallback para reason desconhecido em formato de código', () => {
+    expect(resolveVideoErrorReason('unknown_machine_code')).toBe(VIDEO_ERROR_ROW_COPY);
+  });
+
+  it('preserva mensagens legíveis do worker', () => {
+    expect(resolveVideoErrorReason('Arquivo de entrada corrompido.')).toBe(
+      'Arquivo de entrada corrompido.',
+    );
+  });
+
+  it('retorna fallback quando reason está ausente', () => {
+    expect(resolveVideoErrorReason()).toBe(VIDEO_ERROR_ROW_COPY);
   });
 });

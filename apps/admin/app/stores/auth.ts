@@ -76,8 +76,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  let refreshInFlight: Promise<boolean> | null = null;
+
   async function refresh(): Promise<boolean> {
-    return await doRefresh();
+    if (refreshInFlight) {
+      return refreshInFlight;
+    }
+
+    refreshInFlight = (async () => {
+      try {
+        return await doRefresh();
+      } finally {
+        refreshInFlight = null;
+      }
+    })();
+
+    return refreshInFlight;
   }
 
   async function logout() {
