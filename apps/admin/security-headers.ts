@@ -33,7 +33,7 @@ export function buildConnectSrc(isDev: boolean): string[] {
   }
 
   if (isDev) {
-    sources.add('ws://localhost:3001');
+    sources.add('ws://localhost:3002');
     sources.add('ws://localhost:24678');
     sources.add('wss://admin.playplus.localhost:3001');
     sources.add('https://admin.playplus.localhost:3001');

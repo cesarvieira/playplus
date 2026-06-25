@@ -103,7 +103,7 @@ Confirme o prompt do sistema. O browser passará a confiar nos certificados gera
 Edite `C:\Windows\System32\drivers\etc\hosts` (Windows, como administrador) ou `/etc/hosts` (macOS/Linux):
 
 ```text
-127.0.0.1 admin.playplus.localhost api.playplus.localhost storage.playplus.localhost
+127.0.0.1 admin.playplus.localhost api.playplus.localhost storage.playplus.localhost web.playplus.localhost
 ```
 
 **3.4. Gerar certificados**
@@ -112,7 +112,7 @@ Na raiz do repositório:
 
 ```bash
 mkdir certs
-mkcert -cert-file certs/playplus.pem -key-file certs/playplus-key.pem admin.playplus.localhost api.playplus.localhost storage.playplus.localhost minio localhost 127.0.0.1
+mkcert -cert-file certs/playplus.pem -key-file certs/playplus-key.pem admin.playplus.localhost api.playplus.localhost storage.playplus.localhost web.playplus.localhost minio localhost 127.0.0.1
 ```
 
 A pasta `certs/` não é versionada (`.gitignore`).
@@ -127,11 +127,11 @@ DEV_TLS_KEY=certs/playplus-key.pem
 COOKIE_SECURE=true
 COOKIE_SAME_SITE=none
 COOKIE_DOMAIN=api.playplus.localhost
-CORS_ADMIN_ORIGIN=https://admin.playplus.localhost:3001
+CORS_ADMIN_ORIGIN=https://admin.playplus.localhost:3002
 STORAGE_ENDPOINT=https://storage.playplus.localhost:9000
 NUXT_PUBLIC_API_URL=https://api.playplus.localhost:3000/v1
 NUXT_PUBLIC_WS_URL=wss://api.playplus.localhost:3000/v1/ws
-NUXT_PUBLIC_WEB_URL=https://admin.playplus.localhost:3001
+NUXT_PUBLIC_WEB_URL=https://web.playplus.localhost:3001
 ```
 
 O MinIO serve HTTPS diretamente na porta **9000** com os certificados mkcert (`certs/playplus.pem` montados no container). Requer `mkcert -install` no host para que API e worker confiem no certificado (`--use-system-ca`).
@@ -145,7 +145,8 @@ pnpm dev
 
 URLs esperadas:
 
-- Admin: `https://admin.playplus.localhost:3001`
+- Web (viewer): `https://web.playplus.localhost:3001`
+- Admin: `https://admin.playplus.localhost:3002`
 - API: `https://api.playplus.localhost:3000/v1`
 - Storage: `https://storage.playplus.localhost:9000`
 
@@ -189,6 +190,11 @@ pnpm dev          # HTTP — localhost
 ```
 
 O Turbo executa o script `dev` de cada app/package em paralelo — **API**, **worker** (fila BullMQ + FFmpeg HLS), web e admin.
+
+URLs HTTP em dev:
+
+- Web (viewer): `http://localhost:3001` — `pnpm --filter @playplus/web dev`
+- Admin: `http://localhost:3002` — `pnpm --filter @playplus/admin dev`
 
 Ordem recomendada: infra Docker → migrations → FFmpeg instalado → `pnpm dev`. O worker conecta PostgreSQL, Valkey e MinIO via `.env` (localhost), valida FFmpeg no startup e consome jobs `video.transcode`.
 

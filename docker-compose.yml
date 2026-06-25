@@ -39,7 +39,7 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
       MINIO_SERVER_URL: https://storage.playplus.localhost:9000
-      MINIO_API_CORS_ALLOW_ORIGIN: http://localhost:3001,http://localhost:3002,https://admin.playplus.localhost:3001
+      MINIO_API_CORS_ALLOW_ORIGIN: http://localhost:3001,http://localhost:3002,https://admin.playplus.localhost:3002,https://web.playplus.localhost:3001
     volumes:
       - minio_data:/data
       - ./certs/playplus.pem:/certs/public.crt:ro

@@ -1,4 +1,5 @@
 import { resolveVideoStatusWsUrl } from '../../app/utils/ws-url';
+import { resolveViewerPublicUrl } from '../../dev-tls';
 
 export interface ServerRuntimeConfig {
   m2mServiceToken: string;
@@ -26,7 +27,7 @@ export function getServerRuntimeConfig(): ServerRuntimeConfig {
         publicApiUrl,
         process.env.NUXT_PUBLIC_WS_URL ?? 'ws://localhost:3000/v1/ws',
       ),
-      webUrl: process.env.NUXT_PUBLIC_WEB_URL ?? 'http://localhost:3001',
+      webUrl: resolveViewerPublicUrl(),
     },
   };
 }

@@ -13,8 +13,8 @@ export function loadDevTlsHttps(): {
     return undefined;
   }
 
-  const adminRoot = dirname(fileURLToPath(import.meta.url));
-  const repoRoot = resolve(adminRoot, '../..');
+  const webRoot = dirname(fileURLToPath(import.meta.url));
+  const repoRoot = resolve(webRoot, '../..');
   const certFile = resolve(repoRoot, certPath);
   const keyFile = resolve(repoRoot, keyPath);
 
@@ -32,8 +32,8 @@ export function isDevTlsEnabled(): boolean {
   return loadDevTlsHttps() !== undefined;
 }
 
-/** URL do viewer (apps/web) — usada em links "assistir" no admin. */
-export function resolveViewerPublicUrl(): string {
+/** URL pública do viewer (apps/web) — usada como siteUrl neste app. */
+export function resolveWebSiteUrl(): string {
   if (process.env.NUXT_PUBLIC_WEB_URL) {
     return process.env.NUXT_PUBLIC_WEB_URL;
   }

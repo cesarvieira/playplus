@@ -1,7 +1,7 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolveVideoStatusWsUrl } from './app/utils/ws-url';
-import { loadDevTlsHttps } from './dev-tls';
+import { loadDevTlsHttps, resolveViewerPublicUrl } from './dev-tls';
 import { createSecurityHeaders } from './security-headers';
 
 const adminRoot = dirname(fileURLToPath(import.meta.url));
@@ -44,7 +44,7 @@ export default defineNuxtConfig({
     public: {
       apiUrl: publicApiUrl,
       wsUrl: publicWsUrl,
-      webUrl: process.env.NUXT_PUBLIC_WEB_URL ?? 'http://localhost:3001',
+      webUrl: resolveViewerPublicUrl(),
     },
   },
   security: {
@@ -61,7 +61,7 @@ export default defineNuxtConfig({
     '@playplus/shared': sharedEntry,
   },
   devServer: {
-    port: 3001,
+    port: 3002,
     ...(devTlsHttps
       ? {
           host: 'admin.playplus.localhost',

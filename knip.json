@@ -16,8 +16,7 @@
       "ignore": ["app/components/ConfirmDialog.vue"]
     },
     "apps/web": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.ts"]
+      "project": ["app/**/*.{ts,vue}"]
     },
     "packages/*": {
       "project": ["src/**/*.ts"]

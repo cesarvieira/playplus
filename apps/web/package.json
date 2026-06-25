@@ -2,11 +2,29 @@
   "name": "@playplus/web",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "node -e \"require('fs').mkdirSync('dist',{recursive:true})\"",
-    "dev": "node -e \"setInterval(()=>{},86400000)\"",
+    "build": "nuxt build",
+    "dev": "node --env-file=../../.env ./node_modules/nuxt/bin/nuxt.mjs dev",
+    "postinstall": "nuxt prepare",
     "lint": "eslint . --max-warnings 0",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "nuxt prepare && vue-tsc -p .nuxt/tsconfig.node.json --noEmit && vue-tsc -p .nuxt/tsconfig.app.json --noEmit",
     "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.11.2",
+    "@playplus/shared": "workspace:*",
+    "nuxt": "^4.0.3",
+    "pinia": "^3.0.3"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.16.0",
+    "@nuxtjs/google-fonts": "^3.2.0",
+    "@nuxtjs/tailwindcss": "7.0.0-beta.1",
+    "@types/node": "^26.0.0",
+    "eslint": "^10.5.0",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.5"
   }
 }
