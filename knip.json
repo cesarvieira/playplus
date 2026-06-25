@@ -4,19 +4,28 @@
   "workspaces": {
     ".": {
       "vitest": {
-        "config": ["vitest.shared.node.ts", "vitest.shared.nuxt.ts", "apps/*/vitest.config.ts"]
+        "config": ["vitest.shared.node.ts", "vitest.shared.nuxt.ts"]
       }
     },
     "apps/api": {
       "entry": ["src/index.ts"],
-      "project": ["src/**/*.ts"]
+      "project": ["src/**/*.ts"],
+      "vitest": {
+        "config": ["vitest.config.ts"]
+      }
     },
     "apps/admin": {
       "project": ["app/**/*.{ts,vue}", "server/**/*.ts"],
+      "vitest": {
+        "config": ["vitest.config.ts"]
+      },
       "ignore": ["app/components/ConfirmDialog.vue"]
     },
     "apps/web": {
       "project": ["app/**/*.{ts,vue}"],
+      "vitest": {
+        "config": ["vitest.config.ts"]
+      },
       "ignore": [
         "app/components/PlAlert.vue",
         "app/components/PlButton.vue",

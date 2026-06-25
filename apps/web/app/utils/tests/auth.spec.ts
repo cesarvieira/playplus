@@ -1,0 +1,127 @@
+import { describe, expect, it } from 'vitest';
+
+import {
+  getDisplayNameFromEmail,
+  getInitialFromEmail,
+  isUnauthorizedError,
+  isValidRedirect,
+  mapAuthResponse,
+  mapMeResponse,
+  parseApiError,
+  resolvePostLoginRedirect,
+} from '../auth';
+
+describe('mapAuthResponse', () => {
+  it('maps snake_case API response to camelCase', () => {
+    expect(mapAuthResponse({ access_token: 'tok', expires_in: 900 })).toEqual({
+      accessToken: 'tok',
+      expiresIn: 900,
+    });
+  });
+});
+
+describe('mapMeResponse', () => {
+  it('maps snake_case user fields', () => {
+    expect(
+      mapMeResponse({
+        id: 'uuid',
+        email: 'viewer@playplus.localhost',
+        role: 'viewer',
+        created_at: '2025-01-01T00:00:00Z',
+      }),
+    ).toEqual({
+      id: 'uuid',
+      email: 'viewer@playplus.localhost',
+      role: 'viewer',
+      createdAt: '2025-01-01T00:00:00Z',
+    });
+  });
+});
+
+describe('isValidRedirect', () => {
+  it('accepts internal paths', () => {
+    expect(isValidRedirect('/')).toBe(true);
+    expect(isValidRedirect('/abc123')).toBe(true);
+  });
+
+  it('rejects external and protocol-relative URLs', () => {
+    expect(isValidRedirect('//evil.com')).toBe(false);
+    expect(isValidRedirect('https://evil.com')).toBe(false);
+    expect(isValidRedirect('/\\evil.com')).toBe(false);
+  });
+});
+
+describe('resolvePostLoginRedirect', () => {
+  it('returns default path when redirect is absent', () => {
+    expect(resolvePostLoginRedirect({})).toBe('/');
+  });
+
+  it('returns valid internal redirect', () => {
+    expect(resolvePostLoginRedirect({ redirect: '/abc123' })).toBe('/abc123');
+  });
+
+  it('ignores invalid redirect values', () => {
+    expect(resolvePostLoginRedirect({ redirect: '//evil.com' })).toBe('/');
+  });
+
+  it('uses the first value when redirect is an array', () => {
+    expect(resolvePostLoginRedirect({ redirect: ['/abc123', '/ignored'] })).toBe('/abc123');
+  });
+});
+
+describe('getInitialFromEmail', () => {
+  it('returns uppercase first letter', () => {
+    expect(getInitialFromEmail('viewer@playplus.localhost')).toBe('V');
+  });
+
+  it('returns fallback for empty email', () => {
+    expect(getInitialFromEmail('')).toBe('?');
+  });
+});
+
+describe('getDisplayNameFromEmail', () => {
+  it('capitalizes the local part of the email', () => {
+    expect(getDisplayNameFromEmail('viewer@playplus.local')).toBe('Viewer');
+    expect(getDisplayNameFromEmail('rafael@playplus.local')).toBe('Rafael');
+  });
+
+  it('returns fallback for empty email', () => {
+    expect(getDisplayNameFromEmail('')).toBe('Viewer');
+  });
+});
+
+describe('parseApiError', () => {
+  it('extracts API error body from fetch error', () => {
+    const error = {
+      data: {
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Credenciais inválidas',
+        },
+      },
+    };
+
+    expect(parseApiError(error)).toEqual({
+      code: 'UNAUTHORIZED',
+      message: 'Credenciais inválidas',
+    });
+  });
+
+  it('returns null for malformed API error payloads', () => {
+    expect(parseApiError(null)).toBeNull();
+    expect(parseApiError({ data: null })).toBeNull();
+    expect(parseApiError({ data: { error: { code: 1, message: 'x' } } })).toBeNull();
+  });
+});
+
+describe('isUnauthorizedError', () => {
+  it('detects 401 fetch errors', () => {
+    expect(isUnauthorizedError({ statusCode: 401 })).toBe(true);
+    expect(isUnauthorizedError({ statusCode: 500 })).toBe(false);
+  });
+
+  it('returns false for non-object errors', () => {
+    expect(isUnauthorizedError(null)).toBe(false);
+    expect(isUnauthorizedError('401')).toBe(false);
+  });
+});

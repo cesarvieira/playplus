@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/tailwindcss',
     '@nuxtjs/google-fonts',
+    ...(process.env.VITEST ? ['@nuxt/test-utils/module'] as const : []),
   ],
   app: {
     head: {
@@ -84,6 +85,7 @@ export default defineNuxtConfig({
       include: [
         '@vue/devtools-core',
         '@vue/devtools-kit',
+        '@tabler/icons-vue',
       ],
     },
   },
