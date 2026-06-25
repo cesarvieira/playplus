@@ -16,7 +16,14 @@
       "ignore": ["app/components/ConfirmDialog.vue"]
     },
     "apps/web": {
-      "project": ["app/**/*.{ts,vue}"]
+      "project": ["app/**/*.{ts,vue}"],
+      "ignore": [
+        "app/components/PlAlert.vue",
+        "app/components/PlButton.vue",
+        "app/components/PlInput.vue",
+        "app/components/PlLabel.vue",
+        "app/components/PlSkeleton.vue"
+      ]
     },
     "packages/*": {
       "project": ["src/**/*.ts"]

@@ -23,7 +23,60 @@
     @apply animate-pl-pulse rounded-pl-sm bg-night-skeleton;
   }
 
+  .pl-skeleton--text {
+    @apply w-full;
+    height: 1rem;
+  }
+
+  .pl-skeleton--card {
+    @apply w-full rounded-pl-md;
+    height: 7.5rem;
+  }
+
   .pl-spinner {
-    @apply size-pl-icon-sm animate-pl-spin rounded-full border-2 border-night-ink/30 border-t-night-ink;
+    @apply size-pl-icon-sm shrink-0 animate-pl-spin rounded-full border-2 border-night-ink/30 border-t-night-ink motion-reduce:animate-none;
+  }
+
+  /* ── Buttons ── */
+  .pl-btn {
+    @apply inline-flex cursor-pointer items-center justify-center font-bold transition-colors disabled:cursor-not-allowed;
+  }
+
+  .pl-btn--cta {
+    @apply h-pl-btn-lg gap-2.5 rounded-pl-btn bg-cta-gradient px-5 text-pl-md font-extrabold text-night-ink hover:opacity-95 disabled:opacity-60;
+  }
+
+  .pl-btn--secondary {
+    @apply h-pl-btn-lg gap-2.5 rounded-pl-btn border-pl border-night-border-strong bg-night-input px-5 text-pl-base text-night-text hover:bg-night-panel disabled:opacity-60;
+  }
+
+  .pl-btn--ghost {
+    @apply h-pl-btn-lg gap-2.5 rounded-pl-btn bg-transparent px-5 text-pl-base text-night-subtle hover:bg-night-surface disabled:opacity-60;
+  }
+
+  .pl-btn--icon {
+    @apply size-pl-btn-icon shrink-0 rounded-full border border-night-border bg-night-input disabled:opacity-60;
+  }
+
+  /* ── Form fields ── */
+  .pl-label {
+    @apply text-pl-sm font-semibold text-night-body;
+  }
+
+  .pl-input {
+    @apply h-pl-input w-full rounded-pl-md border-pl border-night-border-strong bg-night-input px-4 text-pl-base text-night-text placeholder:text-night-muted disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .pl-input--error {
+    background-color: var(--color-feedback-error-bg);
+    border-color: var(--color-feedback-error-border);
+  }
+
+  .pl-field-error {
+    @apply text-pl-sm font-medium text-feedback-error-fg;
+  }
+
+  .pl-alert-dismiss {
+    @apply shrink-0 cursor-pointer rounded-pl-sm p-1 opacity-70 transition-opacity hover:opacity-100;
   }
 }

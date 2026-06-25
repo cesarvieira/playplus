@@ -1,3 +1,15 @@
+/* Vue transition classes — PlAlert */
+.pl-alert-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.pl-alert-leave-to {
+  opacity: 0;
+  transform: translateY(-0.25rem);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pl-spinner,
   .pl-skeleton,

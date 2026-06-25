@@ -94,11 +94,12 @@
 
   /* ── Heights ── */
   --height-header: 68px;
-  --height-pl-btn-lg: 54px;
+  --height-pl-btn-lg: 52px;
   --height-pl-btn-sm: 42px;
   --height-pl-input: 50px;
 
   /* ── Sizes ── */
+  --size-pl-btn-icon: 40px;
   --size-pl-icon: 19px;
   --size-pl-icon-sm: 16px;
   --size-pl-icon-md: 24px;
