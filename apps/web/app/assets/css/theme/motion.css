@@ -1,0 +1,8 @@
+@media (prefers-reduced-motion: reduce) {
+  .pl-spinner,
+  .pl-skeleton,
+  .animate-pl-spin,
+  .animate-pl-pulse {
+    animation: none !important;
+  }
+}

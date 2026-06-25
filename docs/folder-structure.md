@@ -99,6 +99,7 @@ Nenhum app importa diretamente o código de outro app. A comunicação entre `ap
 | Alias `~`  | Aponta para `app/`                                                                                     |
 | Config     | `nuxt.config.ts`, `tailwind.config.ts` na raiz do app                                                  |
 | Tema admin | `apps/admin/app/assets/css/theme/` — guia em [`apps/admin/docs/theme.md`](../apps/admin/docs/theme.md) |
+| Tema web   | `apps/web/app/assets/css/theme/` — guia em [`apps/web/docs/theme.md`](../apps/web/docs/theme.md)       |
 
 Ver **ETD-05** (admin), **ETD-06** (web auth + catálogo) e **ETD-07** (web player).
 

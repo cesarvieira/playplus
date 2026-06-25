@@ -1,2 +1,14 @@
 @import 'tailwindcss';
 @config "../../../tailwind.config.ts";
+
+@import './theme/index.css';
+
+@layer base {
+  body {
+    @apply min-h-screen bg-night-canvas font-sans text-night-text antialiased;
+  }
+
+  button:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}

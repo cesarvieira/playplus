@@ -17,6 +17,9 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Play+',
+      meta: [
+        { name: 'theme-color', content: '#14100D' },
+      ],
     },
   },
   devtools: { enabled: true },

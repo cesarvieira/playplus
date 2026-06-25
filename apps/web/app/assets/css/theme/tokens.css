@@ -1,0 +1,143 @@
+/*
+ * Play+ Web — design tokens (fonte única de verdade)
+ *
+ * Convenções:
+ * - Novas cores → @theme, nunca hex nos .vue
+ * - Tamanhos repetidos → token pl-*
+ * - Padrão visual em 2+ lugares → components.css
+ * - Guia completo para IA → apps/web/docs/theme.md
+ */
+
+@theme {
+  /* ── Night palette ── */
+  --color-night-canvas: #14100d;
+  --color-night-panel: #1b1511;
+  --color-night-surface: #211a15;
+  --color-night-card: #1f1813;
+  --color-night-input: #241d17;
+  --color-night-skeleton: #2a231e;
+  --color-night-text: #f5eee8;
+  --color-night-body: #c7bbb1;
+  --color-night-muted: #9a8c82;
+  --color-night-label: #8a7b6f;
+  --color-night-subtle: #b59c8c;
+  --color-night-border: #322620;
+  --color-night-border-strong: #382c24;
+  --color-night-border-panel: #2c231d;
+  --color-night-accent: #e8956b;
+  --color-night-accent-soft: #e89b8e;
+  --color-night-ink: #2a1410;
+  --color-night-sand: #f3c9a6;
+
+  /* ── Feedback palette ── */
+  --color-feedback-error-fg: #e89890;
+  --color-feedback-error-bg: rgb(176 65 60 / 0.16);
+  --color-feedback-error-border: rgb(216 138 133 / 0.4);
+  --color-feedback-info-fg: #e89b8e;
+  --color-feedback-info-bg: rgb(232 155 142 / 0.12);
+  --color-feedback-info-border: rgb(232 155 142 / 0.35);
+
+  /* ── Status palette ── */
+  --color-status-pending: #fbe6d6;
+  --color-status-pending-fg: #a85b2a;
+  --color-status-queued: #dde8f5;
+  --color-status-queued-fg: #3a5f94;
+  --color-status-processing: #e7dcf2;
+  --color-status-processing-fg: #6b4e9e;
+  --color-status-ready: #d9ecdd;
+  --color-status-ready-fg: #3c7a4a;
+  --color-status-error: #f8dad9;
+  --color-status-error-fg: #b0413c;
+
+  /* ── Typography ── */
+  --text-pl-2xs: 11.5px;
+  --text-pl-2xs--line-height: 1.4;
+  --text-pl-xs: 12.5px;
+  --text-pl-xs--line-height: 1.85;
+  --text-pl-sm: 13px;
+  --text-pl-sm--line-height: 1.5;
+  --text-pl-base: 15px;
+  --text-pl-base--line-height: 1.5;
+  --text-pl-md: 15.5px;
+  --text-pl-md--line-height: 1.5;
+  --text-pl-lg: 17px;
+  --text-pl-lg--line-height: 1.625;
+  --text-pl-xl: 19px;
+  --text-pl-xl--line-height: 1.3;
+  --text-pl-2xl: 25px;
+  --text-pl-2xl--line-height: 1.2;
+  --text-pl-3xl: 28px;
+  --text-pl-3xl--line-height: 1.15;
+  --text-pl-display: 38px;
+  --text-pl-display--line-height: 1.12;
+  --text-pl-hero: 28px;
+  --text-pl-hero--line-height: 1.2;
+
+  /* ── Letter spacing ── */
+  --tracking-pl-tight: -0.02em;
+
+  /* ── Font families ── */
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ── Border radius ── */
+  --radius-pl-sm: 12px;
+  --radius-pl-md: 14px;
+  --radius-pl-lg: 16px;
+  --radius-pl-xl: 22px;
+  --radius-pl-2xl: 24px;
+  --radius-pl-btn: 15px;
+  --radius-pl-visual: 34px;
+
+  /* ── Border width ── */
+  --border-width-pl: 1.5px;
+
+  /* ── Heights ── */
+  --height-header: 68px;
+  --height-pl-btn-lg: 54px;
+  --height-pl-btn-sm: 42px;
+  --height-pl-input: 50px;
+
+  /* ── Sizes ── */
+  --size-pl-icon: 19px;
+  --size-pl-icon-sm: 16px;
+  --size-pl-icon-md: 24px;
+  --size-pl-media-lg: 3rem;
+  --size-pl-media-md: 2.5rem;
+  --height-pl-logo-sm: 26px;
+  --height-pl-logo-md: 32px;
+
+  /* ── Z-index ── */
+  --z-index-pl-modal: 50;
+  --z-index-pl-banner: 35;
+  --z-index-pl-toast: 60;
+
+  /* ── Background images ── */
+  --background-image-hero-login: linear-gradient(150deg, #f4cda9 0%, #ec9e84 55%, #e07e7a 100%);
+  --background-image-cta-gradient: linear-gradient(135deg, #f0b894, #e07e7a);
+
+  /* ── Shadows ── */
+  --shadow-night-panel: 0 24px 60px rgb(0 0 0 / 0.45);
+  --shadow-night-card: 0 6px 20px rgb(0 0 0 / 0.25);
+
+  /* ── Animations ── */
+  --animate-pl-spin: pl-spin 0.7s linear infinite;
+  --animate-pl-pulse: pl-pulse 2s ease-in-out infinite;
+
+  @keyframes pl-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes pl-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.45;
+    }
+  }
+}

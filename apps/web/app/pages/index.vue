@@ -7,10 +7,10 @@ const readyStatus: VideoStatus = VIDEO_STATUS.READY;
 <template>
   <main class="flex min-h-screen items-center justify-center p-8">
     <div class="text-center">
-      <h1 class="text-2xl font-semibold">
+      <h1 class="text-pl-2xl font-semibold">
         Play+ Web
       </h1>
-      <p class="mt-2 text-sm text-neutral-500">
+      <p class="mt-2 text-pl-sm text-night-muted">
         Scaffold Nuxt 4 — status de referência: {{ readyStatus }}
       </p>
     </div>

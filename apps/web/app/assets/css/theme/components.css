@@ -1,0 +1,29 @@
+@layer components {
+  .pl-focus-ring {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-night-accent;
+  }
+
+  .pl-text-muted {
+    @apply text-pl-sm font-medium text-night-muted;
+  }
+
+  .pl-feedback-error {
+    @apply flex items-center gap-3 rounded-pl-md border px-4 py-3 text-pl-sm font-semibold text-feedback-error-fg;
+    background-color: var(--color-feedback-error-bg);
+    border-color: var(--color-feedback-error-border);
+  }
+
+  .pl-feedback-info {
+    @apply flex items-center gap-3 rounded-pl-md border px-4 py-3 text-pl-sm font-semibold text-feedback-info-fg;
+    background-color: var(--color-feedback-info-bg);
+    border-color: var(--color-feedback-info-border);
+  }
+
+  .pl-skeleton {
+    @apply animate-pl-pulse rounded-pl-sm bg-night-skeleton;
+  }
+
+  .pl-spinner {
+    @apply size-pl-icon-sm animate-pl-spin rounded-full border-2 border-night-ink/30 border-t-night-ink;
+  }
+}
