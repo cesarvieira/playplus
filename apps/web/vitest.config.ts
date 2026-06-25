@@ -16,6 +16,10 @@ export default mergeConfig(
     },
     test: {
       name: '@playplus/web',
+      coverage: {
+        include: ['app/**/*.ts'],
+        exclude: ['app/**/tests/**', '**/*.spec.ts'],
+      },
     },
   }),
 );

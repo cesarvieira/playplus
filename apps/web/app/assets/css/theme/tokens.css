@@ -117,6 +117,13 @@
   --background-image-hero-login: linear-gradient(150deg, #f4cda9 0%, #ec9e84 55%, #e07e7a 100%);
   --background-image-cta-gradient: linear-gradient(135deg, #f0b894, #e07e7a);
 
+  /* ── Placeholder gradients (MediaCard — ETD-06 §4.3) ── */
+  --background-image-placeholder-peach: linear-gradient(135deg, #f3c9a6, #e89b8e);
+  --background-image-placeholder-green: linear-gradient(135deg, #cfe6d2, #7fb98c);
+  --background-image-placeholder-lavender: linear-gradient(135deg, #d9c9ee, #b9a3e0);
+  --background-image-placeholder-blue: linear-gradient(135deg, #c9d8f0, #9dbcec);
+  --background-image-placeholder-neutral: linear-gradient(135deg, #e7d2c0, #cda98c);
+
   /* ── Shadows ── */
   --shadow-night-panel: 0 24px 60px rgb(0 0 0 / 0.45);
   --shadow-night-card: 0 6px 20px rgb(0 0 0 / 0.25);
