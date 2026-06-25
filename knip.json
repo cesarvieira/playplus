@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreUnresolved": ["/@vite-plugin-checker-runtime-entry", "./src/test/setup-env.ts"],
+  "ignoreUnresolved": ["./src/test/setup-env.ts"],
   "workspaces": {
     ".": {
       "vitest": {
@@ -13,11 +13,7 @@
     },
     "apps/admin": {
       "project": ["app/**/*.{ts,vue}", "server/**/*.ts"],
-      "ignore": [
-        "app/components/PlModal.vue",
-        "app/components/PlProgressBar.vue",
-        "app/components/PlSkeleton.vue"
-      ]
+      "ignore": ["app/components/PlSkeleton.vue"]
     },
     "apps/web": {
       "entry": ["src/index.ts"],

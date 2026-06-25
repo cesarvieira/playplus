@@ -92,10 +92,20 @@ apps/admin → packages/shared packages/worker → packages/shared
 - Config e plugins em `src/config/`
 
 ### Frontend (`apps/web`, `apps/admin`)
-- Pages por rota (`pages/`)
 - Composables para lógica reutilizável (`usePlayer`, `useProgress`, `useAuth`, etc.)
 - Stores Pinia para estado global (`auth`, `catalog`)
 - Player HLS via `hls.js` ou `@nuxtjs/video-player`
+
+### Admin — tema visual (obrigatório para IA)
+
+Em `apps/admin`, **sempre** use o tema em `app/assets/css/theme/` — guia completo em [`apps/admin/docs/theme.md`](apps/admin/docs/theme.md).
+
+- Cores: tokens `peach-*` e `status-*` — nunca hex nem `gray-*`/`white`/`red-*` nos `.vue`
+- Tipografia: `text-pl-*` — evite `text-sm`, `text-xs`, `text-2xl`
+- Tamanhos de ícone/mídia: `size-pl-icon*`, `size-pl-media-*` — evite `size-4`/`size-12`
+- Padrão visual em 2+ lugares → classe `pl-*` em `theme/components.css`, não utilitários copiados
+- Overlays/toast → classes do tema (`pl-toast-host`, `z-pl-toast`) — evite `z-[60]`, `top-20`
+- Novos tokens → `theme/tokens.css` (`@theme`); carregamento via `main.css` apenas
 
 ### Worker (`packages/worker`)
 - Jobs em `jobs/` (transcode, thumbnail, cleanup)

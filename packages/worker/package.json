@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "dev": "node --watch --env-file=../../.env src/index.ts",
+    "dev": "node --inspect=9230 --watch --use-system-ca --env-file=../../.env src/index.ts",
     "start": "node --env-file=../../.env dist/index.js",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",

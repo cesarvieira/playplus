@@ -5,11 +5,13 @@ const props = withDefaults(
     title?: string;
     subtitle?: string;
     closeOnBackdrop?: boolean;
+    closeOnEscape?: boolean;
   }>(),
   {
     title: undefined,
     subtitle: undefined,
     closeOnBackdrop: true,
+    closeOnEscape: true,
   },
 );
 
@@ -26,7 +28,7 @@ function onBackdropClick() {
 }
 
 function onKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape' && props.open) {
+  if (event.key === 'Escape' && props.open && props.closeOnEscape) {
     emit('close');
   }
 }

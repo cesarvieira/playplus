@@ -1,4 +1,5 @@
 import type { Ref } from 'vue';
+import { inject, provide, ref } from 'vue';
 
 export type PlToastVariant = 'info' | 'success' | 'error';
 

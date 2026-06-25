@@ -69,6 +69,7 @@ Antes de planejar ou implementar, leia (somente leitura):
 - [`docs/stack.md`](../../../docs/stack.md) — Fastify, BullMQ, FFmpeg, R2/CDN, Sentry
 - [`docs/folder-structure.md`](../../../docs/folder-structure.md) — superfícies e módulos planejados
 - [`reference.md`](reference.md) — padrões por superfície, checklist, anti-patterns, exemplos
+- [`apps/admin/docs/theme.md`](../../../apps/admin/docs/theme.md) — tema visual admin (obrigatório em UI)
 - [`../FLUXO.md`](../FLUXO.md) — posição no pipeline e handoffs
 - Task/US, breakdown do `planning-agent` ou critérios de aceite (quando fornecidos)
 
@@ -117,6 +118,7 @@ Não implemente frontend antes de contratos em `shared` e rotas/eventos definido
 - Tratamento de loading e error state em toda chamada assíncrona
 - `access_token` em memória — nunca localStorage; refresh via cookie httpOnly
 - Player HLS: tratar `409 VIDEO_NOT_READY`; progresso via WebSocket, não polling
+- **Admin UI:** seguir [`apps/admin/docs/theme.md`](../../../apps/admin/docs/theme.md) — tokens `peach-*`/`status-*`, `text-pl-*`, classes `pl-*` em `theme/components.css`; nunca utilitários Tailwind genéricos para cores/tipografia/tamanhos em `.vue` novos ou alterados
 
 ## Regras sobre testes
 

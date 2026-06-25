@@ -22,6 +22,28 @@ describe('security-headers', () => {
     process.env.NUXT_PUBLIC_WS_URL = originalWs;
   });
 
+  it('inclui origem do storage em connect-src', () => {
+    const originalStorage = process.env.STORAGE_ENDPOINT;
+
+    process.env.STORAGE_ENDPOINT = 'https://storage.playplus.localhost:9000';
+
+    expect(buildConnectSrc(false)).toEqual(
+      expect.arrayContaining([
+        'https://storage.playplus.localhost:9000',
+      ]),
+    );
+
+    expect(buildConnectSrc(true)).toEqual(
+      expect.arrayContaining([
+        'http://localhost:9000',
+        'https://storage.playplus.localhost:9000',
+        'wss://admin.playplus.localhost:3001',
+      ]),
+    );
+
+    process.env.STORAGE_ENDPOINT = originalStorage;
+  });
+
   it('usa nonce em produção e unsafe-inline em dev', () => {
     const prod = createContentSecurityPolicy(false);
     const dev = createContentSecurityPolicy(true);

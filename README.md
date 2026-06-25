@@ -103,7 +103,7 @@ Confirme o prompt do sistema. O browser passará a confiar nos certificados gera
 Edite `C:\Windows\System32\drivers\etc\hosts` (Windows, como administrador) ou `/etc/hosts` (macOS/Linux):
 
 ```text
-127.0.0.1 admin.playplus.localhost api.playplus.localhost
+127.0.0.1 admin.playplus.localhost api.playplus.localhost storage.playplus.localhost
 ```
 
 **3.4. Gerar certificados**
@@ -112,7 +112,7 @@ Na raiz do repositório:
 
 ```bash
 mkdir certs
-mkcert -cert-file certs/playplus.pem -key-file certs/playplus-key.pem admin.playplus.localhost api.playplus.localhost localhost 127.0.0.1
+mkcert -cert-file certs/playplus.pem -key-file certs/playplus-key.pem admin.playplus.localhost api.playplus.localhost storage.playplus.localhost localhost 127.0.0.1
 ```
 
 A pasta `certs/` não é versionada (`.gitignore`).
@@ -128,14 +128,18 @@ COOKIE_SECURE=true
 COOKIE_SAME_SITE=none
 COOKIE_DOMAIN=api.playplus.localhost
 CORS_ADMIN_ORIGIN=https://admin.playplus.localhost:3001
+STORAGE_ENDPOINT=https://storage.playplus.localhost:9000
 NUXT_PUBLIC_API_URL=https://api.playplus.localhost:3000/v1
 NUXT_PUBLIC_WS_URL=wss://api.playplus.localhost:3000/ws
 NUXT_PUBLIC_WEB_URL=https://admin.playplus.localhost:3001
 ```
 
+O MinIO serve HTTPS diretamente na porta **9000** com os certificados mkcert (`certs/playplus.pem` montados no container). Requer `mkcert -install` no host para que API e worker confiem no certificado (`--use-system-ca`).
+
 **3.6. Subir com HTTPS**
 
 ```bash
+docker compose up -d
 pnpm dev
 ```
 
@@ -143,6 +147,7 @@ URLs esperadas:
 
 - Admin: `https://admin.playplus.localhost:3001`
 - API: `https://api.playplus.localhost:3000/v1`
+- Storage: `https://storage.playplus.localhost:9000`
 
 **3.7. Verificar**
 

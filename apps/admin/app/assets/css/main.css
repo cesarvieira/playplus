@@ -1,10 +1,7 @@
 @import 'tailwindcss';
 @config "../../../tailwind.config.ts";
 
-@import './theme/tokens.css';
-@import './theme/components.css';
-@import './theme/motion.css';
-@import './theme/error.css';
+@import './theme/index.css';
 
 @layer base {
   body {

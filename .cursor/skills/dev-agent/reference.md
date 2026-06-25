@@ -8,12 +8,12 @@ Material de apoio para implementação, refatoração e revisão de código. Fon
 
 ## Quando invocar
 
-| Situação | Exemplos |
-|----------|----------|
-| **Após planning** | Task T02–T05 com DoR satisfeito; ordem shared → api → worker → frontend |
-| **Durante iteração** | Implementar US, corrigir bug, escrever teste, refatorar módulo DDD |
-| **Spike concluído** | Codificar decisão documentada (presigned, WS auth, FFmpeg args) |
-| **Revisão de PR local** | Verificar aderência a DDD, pipeline e regras de dependência |
+| Situação                | Exemplos                                                                |
+| ----------------------- | ----------------------------------------------------------------------- |
+| **Após planning**       | Task T02–T05 com DoR satisfeito; ordem shared → api → worker → frontend |
+| **Durante iteração**    | Implementar US, corrigir bug, escrever teste, refatorar módulo DDD      |
+| **Spike concluído**     | Codificar decisão documentada (presigned, WS auth, FFmpeg args)         |
+| **Revisão de PR local** | Verificar aderência a DDD, pipeline e regras de dependência             |
 
 **Entrada típica:** task do `planning-agent`, US com critérios de aceite, bug report, pedido de refatoração ou snippet a completar.
 
@@ -23,14 +23,14 @@ Material de apoio para implementação, refatoração e revisão de código. Fon
 
 ## Superfícies e responsabilidades
 
-| Superfície | O que implementar | Onde colocar |
-|------------|-------------------|--------------|
-| `packages/shared` | Tipos, DTOs, enums, erros tipados | `src/types/`, `src/dtos/`, `src/enums/`, `src/errors/` |
-| `apps/api` | Módulos DDD por agregado | `src/modules/[dominio]/{domain,application,infra,http}/` |
-| `apps/api` (global) | DB, Redis, storage, Sentry | `src/infra/`, `src/config/` |
-| `packages/worker` | Jobs FFmpeg, upload HLS | `src/jobs/`, `src/processors/`, `src/config/` |
-| `apps/web` | Viewer — player, catálogo, progresso | `pages/`, `components/`, `composables/`, `stores/` |
-| `apps/admin` | Upload, fila, gestão | `pages/`, `components/`, `composables/` |
+| Superfície          | O que implementar                    | Onde colocar                                             |
+| ------------------- | ------------------------------------ | -------------------------------------------------------- |
+| `packages/shared`   | Tipos, DTOs, enums, erros tipados    | `src/types/`, `src/dtos/`, `src/enums/`, `src/errors/`   |
+| `apps/api`          | Módulos DDD por agregado             | `src/modules/[dominio]/{domain,application,infra,http}/` |
+| `apps/api` (global) | DB, Redis, storage, Sentry           | `src/infra/`, `src/config/`                              |
+| `packages/worker`   | Jobs FFmpeg, upload HLS              | `src/jobs/`, `src/processors/`, `src/config/`            |
+| `apps/web`          | Viewer — player, catálogo, progresso | `pages/`, `components/`, `composables/`, `stores/`       |
+| `apps/admin`        | Upload, fila, gestão                 | `pages/`, `components/`, `composables/`                  |
 
 **Comunicação permitida:**
 
@@ -66,27 +66,31 @@ export class VideoNotFoundError extends Error {
 
 ### `apps/api` — camadas DDD
 
-| Camada | Pode | Não pode |
-|--------|------|----------|
-| `domain/` | Entities, VOs, regras puras, erros de domínio | Fastify, DB, BullMQ, HTTP |
-| `application/` | Use cases, orquestração domain + ports | Schemas HTTP, SQL direto |
-| `infra/` | Repositories, producers BullMQ, storage S3 | Regras de negócio |
-| `http/` | Rotas, schemas JSON, mapeamento request/response | Lógica de negócio, queries complexas |
+| Camada         | Pode                                             | Não pode                             |
+| -------------- | ------------------------------------------------ | ------------------------------------ |
+| `domain/`      | Entities, VOs, regras puras, erros de domínio    | Fastify, DB, BullMQ, HTTP            |
+| `application/` | Use cases, orquestração domain + ports           | Schemas HTTP, SQL direto             |
+| `infra/`       | Repositories, producers BullMQ, storage S3       | Regras de negócio                    |
+| `http/`        | Rotas, schemas JSON, mapeamento request/response | Lógica de negócio, queries complexas |
 
 **Rota Fastify (padrão):**
 
 ```typescript
 // http/routes.ts — fina; delega ao use case
-fastify.post('/v1/videos/:id/transcode', {
-  schema: transcodeSchema,
-  preHandler: [authenticate, requireAdmin],
-}, async (request, reply) => {
-  const result = await enqueueTranscode.execute({
-    videoId: request.params.id,
-    userId: request.user.id,
-  });
-  return reply.status(202).send(result);
-});
+fastify.post(
+  '/v1/videos/:id/transcode',
+  {
+    schema: transcodeSchema,
+    preHandler: [authenticate, requireAdmin],
+  },
+  async (request, reply) => {
+    const result = await enqueueTranscode.execute({
+      videoId: request.params.id,
+      userId: request.user.id,
+    });
+    return reply.status(202).send(result);
+  },
+);
 ```
 
 **Use case (padrão):**
@@ -183,25 +187,51 @@ export function useProgress(videoId: Ref<string>) {
 - Admin: upload direto ao storage via presigned URL — nunca credencial R2 no bundle
 - Tratar `409 VIDEO_NOT_READY` antes de montar player HLS
 
+#### `apps/admin` — tema visual (obrigatório)
+
+Fonte canônica: [`apps/admin/docs/theme.md`](../../../apps/admin/docs/theme.md).
+
+| Regra           | Detalhe                                                        |
+| --------------- | -------------------------------------------------------------- |
+| Cores           | `peach-*`, `status-*` — nunca hex nem paleta Tailwind genérica |
+| Tipografia      | `text-pl-*` — não `text-sm` / `text-xs` / `text-2xl`           |
+| Ícones / mídia  | `size-pl-icon*`, `size-pl-media-*` — não `size-4` / `size-12`  |
+| Padrão repetido | Classe `pl-*` em `app/assets/css/theme/components.css`         |
+| Token novo      | `app/assets/css/theme/tokens.css` (`@theme`)                   |
+| Overlays        | `pl-toast-host`, `z-pl-toast` — não `z-[60]` / `top-20`        |
+| Componentes     | Preferir `PlButton`, `PlInput`, `PlModal`, `PlToast`           |
+
+Anti-patterns de tema (nunca gerar em `.vue` do admin):
+
+```vue
+<!-- ❌ -->
+<h1 class="text-2xl text-gray-900">...</h1>
+<div class="fixed top-20 z-[60] bg-white">...</div>
+
+<!-- ✅ -->
+<h1 class="pl-page-title">...</h1>
+<div class="pl-toast-host">...</div>
+```
+
 ---
 
 ## Anti-patterns (nunca gerar)
 
 Lista arquitetural completa: [architect-agent/reference.md](../architect-agent/reference.md). Resumo para implementação:
 
-| Anti-pattern | Correção Play+ |
-|--------------|----------------|
-| Upload binário na API | Presigned URL → MinIO/R2 |
-| Transcode síncrono na rota | `POST .../transcode` → BullMQ job |
-| Polling de status/progresso | WebSocket `video.status`, `player.progress` |
-| Import app → app | Tipos em `shared`; fila api↔worker |
-| Lógica de negócio em `http/` ou `infra/` | Use case em `application/` |
-| `access_token` em localStorage | Memória + refresh httpOnly |
-| Credenciais R2 no frontend | Presigned com TTL curto |
-| `any` explícito no TypeScript | Tipos de `packages/shared` |
-| SQL string concatenado | Parameterized queries / ORM |
-| Catch genérico sem re-throw ou Sentry | Log + Sentry nos pontos críticos |
-| Multi-tenancy / `TenantId` | Fora de escopo — plataforma pessoal |
+| Anti-pattern                             | Correção Play+                              |
+| ---------------------------------------- | ------------------------------------------- |
+| Upload binário na API                    | Presigned URL → MinIO/R2                    |
+| Transcode síncrono na rota               | `POST .../transcode` → BullMQ job           |
+| Polling de status/progresso              | WebSocket `video.status`, `player.progress` |
+| Import app → app                         | Tipos em `shared`; fila api↔worker          |
+| Lógica de negócio em `http/` ou `infra/` | Use case em `application/`                  |
+| `access_token` em localStorage           | Memória + refresh httpOnly                  |
+| Credenciais R2 no frontend               | Presigned com TTL curto                     |
+| `any` explícito no TypeScript            | Tipos de `packages/shared`                  |
+| SQL string concatenado                   | Parameterized queries / ORM                 |
+| Catch genérico sem re-throw ou Sentry    | Log + Sentry nos pontos críticos            |
+| Multi-tenancy / `TenantId`               | Fora de escopo — plataforma pessoal         |
 
 ---
 
@@ -254,13 +284,13 @@ Use antes de considerar a task concluída:
 
 ## Testes — onde e o quê
 
-| Camada | Tipo | Exemplos |
-|--------|------|----------|
-| `domain/` | Unitário | Regras de status, VOs, validações puras |
-| `application/` | Unitário (mocks) | Use cases com repos/queues mockados |
-| `http/` | Integração | Rotas + schema validation + auth |
-| `packages/worker` | Integração | Job processor com FFmpeg/storage mock |
-| Frontend | Component/composable | Estados loading/erro, composable auth |
+| Camada            | Tipo                 | Exemplos                                |
+| ----------------- | -------------------- | --------------------------------------- |
+| `domain/`         | Unitário             | Regras de status, VOs, validações puras |
+| `application/`    | Unitário (mocks)     | Use cases com repos/queues mockados     |
+| `http/`           | Integração           | Rotas + schema validation + auth        |
+| `packages/worker` | Integração           | Job processor com FFmpeg/storage mock   |
+| Frontend          | Component/composable | Estados loading/erro, composable auth   |
 
 Prioridade Play+: regras de `VideoStatus`, idempotência de enqueue, upsert `watch_progress`, tratamento `VIDEO_NOT_READY`.
 
@@ -272,14 +302,14 @@ Não adicione testes triviais que só assertam mock — cubra comportamento real
 
 Ao alterar um artefato, verifique:
 
-| Artefato alterado | Verificar |
-|-------------------|-----------|
-| Tipo/DTO/enum/erro em `shared` | api, worker, web, admin — breaking? |
-| Rota REST em `docs/api.md` | Composables dos dois frontends |
-| Evento WebSocket | web (player/progresso), admin (status transcode) |
-| Migration PostgreSQL | Rollback; dados existentes em dev |
-| Job BullMQ payload | api producer + worker consumer — mesma shape |
-| Env var nova | `.env.example`, compose dev/prod, README |
+| Artefato alterado              | Verificar                                        |
+| ------------------------------ | ------------------------------------------------ |
+| Tipo/DTO/enum/erro em `shared` | api, worker, web, admin — breaking?              |
+| Rota REST em `docs/api.md`     | Composables dos dois frontends                   |
+| Evento WebSocket               | web (player/progresso), admin (status transcode) |
+| Migration PostgreSQL           | Rollback; dados existentes em dev                |
+| Job BullMQ payload             | api producer + worker consumer — mesma shape     |
+| Env var nova                   | `.env.example`, compose dev/prod, README         |
 
 ---
 
@@ -291,9 +321,11 @@ Ao alterar um artefato, verifique:
 
 ```markdown
 ## Resumo
+
 Enfileira transcodificação HLS para vídeo com status `uploaded`. Agregado Video, superfície apps/api.
 
 ## Arquivos
+
 - packages/shared/src/enums/video-status.ts (se ainda não existir)
 - apps/api/src/modules/video/application/enqueue-transcode.ts
 - apps/api/src/modules/video/infra/bullmq-transcode-queue.ts
@@ -301,18 +333,22 @@ Enfileira transcodificação HLS para vídeo com status `uploaded`. Agregado Vid
 - apps/api/src/modules/video/http/routes.ts
 
 ## Impactos
+
 - packages/worker: consumer deve aceitar mesmo payload (T04)
 - docs/api.md: rota já documentada — sem alteração
 
 ## Testes sugeridos
+
 - Unit: EnqueueTranscode rejeita vídeo não encontrado → VideoNotFoundError
 - Unit: EnqueueTranscode rejeita job duplicado → JOB_ALREADY_QUEUED
 - Integração: POST sem auth → 401; POST com viewer → 403
 
 ## Riscos
+
 - Nenhum — não toca binário nem FFmpeg síncrono
 
 ## Checklist
+
 - [x] Use case em application/
 - [x] Rota fina com schema JSON
 - [x] Idempotência de enqueue
@@ -351,6 +387,7 @@ Escalar quando a task exigir desvio de baseline (novo serviço, mudança de cont
 Formato: `<tipo>: <descrição minúscula>` em português (BR).
 
 Exemplos:
+
 - `feat: adiciona rota de enqueue de transcode`
 - `fix: corrige upsert de progresso no websocket`
 - `refactor: extrai use case enqueue-transcode`

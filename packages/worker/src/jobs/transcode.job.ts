@@ -4,6 +4,7 @@ import { z } from 'zod';
 import {
   VIDEO_STATUS,
   assertValidStatusTransition,
+  buildTranscodeJobId,
   type TranscodeJobPayload,
 } from '@playplus/shared';
 
@@ -56,7 +57,7 @@ function isLastAttempt(job: Job<TranscodeJobPayload>): boolean {
 }
 
 function resolveJobId(job: Job<TranscodeJobPayload>): string {
-  return job.id ?? `transcode:${job.data.videoId}`;
+  return job.id ?? buildTranscodeJobId(job.data.videoId);
 }
 
 function resolveVideoErrorReason(error: unknown): string {

@@ -9,6 +9,22 @@
       "restart": true,
       "skipFiles": ["<node_internals>/**"],
       "resolveSourceMapLocations": ["${workspaceFolder}/apps/api/**", "!**/node_modules/**"]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Worker: Attach (9230)",
+      "port": 9230,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": ["${workspaceFolder}/packages/worker/**", "!**/node_modules/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "API + Worker",
+      "configurations": ["API: Attach (9229)", "Worker: Attach (9230)"],
+      "stopAll": true
     }
   ]
 }

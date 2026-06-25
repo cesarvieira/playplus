@@ -34,6 +34,8 @@ export class StorageClient {
         secretAccessKey: config.secretAccessKey,
       },
       forcePathStyle: true,
+      // Browser uploads via presigned PUT cannot send SDK checksum headers.
+      requestChecksumCalculation: 'WHEN_REQUIRED',
     });
     this.bucket = config.bucket;
     this.defaultTtlSeconds = config.defaultTtlSeconds;

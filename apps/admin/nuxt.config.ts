@@ -2,7 +2,6 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadDevTlsHttps } from './dev-tls';
 import { createSecurityHeaders } from './security-headers';
-import checker from 'vite-plugin-checker';
 
 const adminRoot = dirname(fileURLToPath(import.meta.url));
 const sharedEntry = resolve(adminRoot, '../../packages/shared/src/index.ts');
@@ -31,7 +30,6 @@ export default defineNuxtConfig({
     },
   },
   devtools: { enabled: true },
-  css: ['~/assets/css/main.css'],
   runtimeConfig: {
     m2mServiceToken: process.env.M2M_SERVICE_TOKEN ?? '',
     delegationJwtSecret: process.env.DELEGATION_JWT_SECRET ?? '',
@@ -103,16 +101,6 @@ export default defineNuxtConfig({
     },
   },
   vite: {
-    plugins: [
-      checker({
-        vueTsc: {
-          tsconfigPath: '.nuxt/tsconfig.app.json',
-        },
-        eslint: {
-          lintCommand: 'eslint .',
-        },
-      }),
-    ],
     optimizeDeps: {
       include: ['@tabler/icons-vue', '@vue/devtools-core', '@vue/devtools-kit', 'gravatar-url'],
     },

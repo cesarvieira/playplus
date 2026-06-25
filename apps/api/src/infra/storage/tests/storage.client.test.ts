@@ -2,14 +2,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StorageClient } from '../storage.client.ts';
 
-const { sendMock, getSignedUrlMock } = vi.hoisted(() => ({
+const { sendMock, getSignedUrlMock, s3ClientConstructors } = vi.hoisted(() => ({
   sendMock: vi.fn(),
   getSignedUrlMock: vi.fn(),
+  s3ClientConstructors: [] as unknown[][],
 }));
 
 vi.mock('@aws-sdk/client-s3', () => ({
   S3Client: class MockS3Client {
     send = sendMock;
+
+    constructor(...args: unknown[]) {
+      s3ClientConstructors.push(args);
+    }
   },
   PutObjectCommand: class MockPutObjectCommand {
     input: unknown;
@@ -46,6 +51,7 @@ describe('StorageClient', () => {
   beforeEach(() => {
     sendMock.mockReset();
     getSignedUrlMock.mockReset();
+    s3ClientConstructors.length = 0;
   });
 
   it('getPresignedUploadUrl gera URL com TTL default', async () => {
@@ -53,6 +59,10 @@ describe('StorageClient', () => {
 
     const client = new StorageClient(config);
     const url = await client.getPresignedUploadUrl('videos/id/original/file.mp4');
+
+    const presignedClientConfig = s3ClientConstructors[0]?.[0] as Record<string, unknown>;
+
+    expect(presignedClientConfig.requestChecksumCalculation).toBe('WHEN_REQUIRED');
 
     const command = getSignedUrlMock.mock.calls[0]?.[1] as { input: unknown; type: string };
 

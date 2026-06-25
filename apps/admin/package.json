@@ -34,7 +34,6 @@
     "nuxt-security": "^2.6.0",
     "tailwindcss": "^4.1.11",
     "typescript": "^6.0.3",
-    "vite-plugin-checker": "^0.14.4",
     "vite-plugin-eslint2": "^5.2.0",
     "vue-tsc": "^3.3.5"
   }

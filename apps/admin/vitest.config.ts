@@ -12,6 +12,7 @@ export default mergeConfig(
     resolve: {
       alias: {
         '#server': resolve(adminRoot, 'server'),
+        '~': resolve(adminRoot, 'app'),
       },
     },
     test: {

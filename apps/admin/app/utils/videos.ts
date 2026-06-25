@@ -16,3 +16,26 @@ export interface ApiListVideosResponse {
     limit: number;
   };
 }
+
+export interface ApiCreateVideoBody {
+  title: string;
+  file_name: string;
+  file_size: number;
+}
+
+export interface ApiCreateVideoResponse {
+  id: string;
+  upload_url: string;
+  status: 'pending';
+}
+
+export interface ApiRenewUploadUrlResponse {
+  id: string;
+  upload_url: string;
+  status: 'pending';
+}
+
+export interface ApiEnqueueTranscodeResponse {
+  job_id: string;
+  status: 'queued';
+}

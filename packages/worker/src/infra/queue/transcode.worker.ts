@@ -24,6 +24,8 @@ export function createTranscodeWorker(connection: ConnectionOptions): Worker<Tra
     {
       connection,
       concurrency: 1,
+      // FFmpeg + upload HLS can exceed BullMQ default lock (30s).
+      lockDuration: 30 * 60 * 1000,
     },
   );
 

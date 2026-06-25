@@ -35,6 +35,7 @@ Antes de responder, leia (somente leitura):
 - [`.cursorrules`](../../../.cursorrules) — agregados, pipeline, auth, regras de streaming
 - [`docs/folder-structure.md`](../../../docs/folder-structure.md) — componentes e superfícies
 - [`docs/api.md`](../../../docs/api.md) — contratos, WebSocket, erros tipados
+- [`apps/admin/docs/theme.md`](../../../apps/admin/docs/theme.md) — tema visual admin (consistência UI)
 - [`reference.md`](reference.md) — padrões UX, checklist a11y, exemplos de revisão
 - [`../FLUXO.md`](../FLUXO.md) — posição no pipeline e handoffs
 - User Stories ou Business Case de entrada (quando fornecidos)

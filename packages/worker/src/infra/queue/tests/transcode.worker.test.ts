@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { VIDEO_QUEUE_NAME, VIDEO_TRANSCODE_JOB_NAME } from '@playplus/shared';
+import { VIDEO_QUEUE_NAME, VIDEO_TRANSCODE_JOB_NAME, buildTranscodeJobId } from '@playplus/shared';
 
 const processTranscodeJob = vi.fn();
 
@@ -56,7 +56,7 @@ describe('createTranscodeWorker', () => {
     createTranscodeWorker({} as never);
 
     const job = {
-      id: `transcode:${videoId}`,
+      id: buildTranscodeJobId(videoId),
       name: VIDEO_TRANSCODE_JOB_NAME,
       data: { videoId },
     };
@@ -97,7 +97,7 @@ describe('createTranscodeWorker', () => {
     createTranscodeWorker({} as never);
 
     eventHandlers.get('completed')?.({
-      id: `transcode:${videoId}`,
+      id: buildTranscodeJobId(videoId),
       data: { videoId },
       attemptsMade: 1,
     });
@@ -110,7 +110,7 @@ describe('createTranscodeWorker', () => {
 
     eventHandlers.get('failed')?.(
       {
-        id: `transcode:${videoId}`,
+        id: buildTranscodeJobId(videoId),
         data: { videoId },
         attemptsMade: 3,
       },

@@ -122,4 +122,158 @@
   .error-visual-frame--lg {
     @apply rounded-pl-visual;
   }
+
+  /* ── Admin shell ── */
+  .pl-focus-ring {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-peach-accent;
+  }
+
+  .pl-page-section {
+    @apply mx-auto max-w-xl;
+  }
+
+  .pl-page-title {
+    @apply text-pl-2xl font-extrabold tracking-tight text-peach-ink;
+  }
+
+  .pl-page-lead {
+    @apply mt-2 text-pl-sm font-medium text-peach-muted;
+  }
+
+  .pl-back-link {
+    @apply mb-4 inline-flex items-center gap-1.5 text-pl-sm font-semibold text-peach-muted transition-colors hover:text-peach-ink;
+  }
+
+  .pl-text-error {
+    @apply text-pl-sm font-medium text-status-error-fg;
+  }
+
+  .pl-text-muted {
+    @apply text-pl-xs font-medium text-peach-muted;
+  }
+
+  .pl-text-meta {
+    @apply text-pl-xs font-semibold text-peach-muted;
+  }
+
+  /* ── Upload dropzone ── */
+  .pl-dropzone {
+    @apply flex cursor-pointer flex-col items-center justify-center gap-3 rounded-pl-lg border-2 border-dashed border-peach-border bg-peach-input px-6 py-10 transition-colors hover:border-peach-muted;
+  }
+
+  .pl-dropzone--active {
+    @apply border-status-processing-fg bg-status-processing/30;
+  }
+
+  .pl-dropzone__icon {
+    @apply flex size-pl-media-lg items-center justify-center rounded-pl-md bg-status-processing/40 text-status-processing-fg;
+  }
+
+  .pl-dropzone__title {
+    @apply text-pl-sm font-bold text-peach-ink;
+  }
+
+  .pl-dropzone__hint {
+    @apply mt-1 text-pl-xs font-medium text-peach-muted;
+  }
+
+  .pl-file-chip {
+    @apply flex items-center gap-3 rounded-pl-md bg-peach-page px-4 py-3;
+  }
+
+  .pl-file-chip__icon {
+    @apply flex size-pl-media-md shrink-0 items-center justify-center rounded-pl-sm bg-status-processing/40 text-status-processing-fg;
+  }
+
+  .pl-file-chip__name {
+    @apply truncate text-pl-sm font-bold text-peach-ink;
+  }
+
+  /* ── Upload modal ── */
+  .pl-media-thumb {
+    @apply flex size-pl-media-lg shrink-0 items-center justify-center rounded-pl-md bg-status-processing/40;
+  }
+
+  .pl-play-glyph {
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    border-style: solid;
+    border-width: var(--size-pl-play-border-y) 0 var(--size-pl-play-border-y) var(--size-pl-play-border-l);
+    border-color: transparent transparent transparent var(--color-peach-surface);
+  }
+
+  .pl-modal-error {
+    @apply mb-5 flex items-start gap-3.5;
+  }
+
+  .pl-modal-error__icon {
+    @apply flex size-pl-media-lg shrink-0 items-center justify-center rounded-pl-md bg-status-error/30 text-status-error-fg;
+  }
+
+  .pl-modal-error__message {
+    @apply text-pl-sm font-medium leading-relaxed text-peach-subtle;
+  }
+
+  .pl-modal-file {
+    @apply mb-5 flex items-center gap-3.5;
+  }
+
+  .pl-modal-file__name {
+    @apply truncate text-pl-sm font-bold text-peach-ink;
+  }
+
+  .pl-modal-file__meta {
+    @apply mt-0.5 text-pl-xs font-medium text-peach-muted;
+  }
+
+  .pl-upload-notice {
+    @apply mt-4 flex items-center gap-2 rounded-pl-md bg-peach-page px-3.5 py-2.5 text-peach-muted;
+  }
+
+  .pl-upload-notice__icon {
+    @apply size-pl-icon-sm shrink-0;
+  }
+
+  .pl-upload-notice__text {
+    @apply text-pl-xs font-medium text-peach-subtle;
+  }
+
+  .pl-modal-bytes {
+    @apply mt-2 text-right text-pl-xs font-semibold text-peach-muted;
+  }
+
+  .pl-modal-footnote {
+    @apply text-pl-xs font-medium text-peach-muted;
+  }
+
+  /* ── Toast ── */
+  .pl-toast-host {
+    @apply pointer-events-none fixed right-4 z-pl-toast flex flex-col items-end gap-2;
+    top: calc(var(--height-header) + 0.75rem);
+  }
+
+  .pl-toast {
+    @apply pointer-events-auto flex w-full max-w-sm items-center gap-3 rounded-pl-md border px-4 py-3 text-pl-sm font-semibold shadow-pl-elevated;
+  }
+
+  .pl-toast--info {
+    @apply border-status-queued-fg/30 bg-status-queued text-status-queued-fg;
+  }
+
+  .pl-toast--success {
+    @apply border-status-ready-fg/30 bg-status-ready text-status-ready-fg;
+  }
+
+  .pl-toast--error {
+    @apply border-status-error-fg/40 bg-status-error text-status-error-fg;
+  }
+
+  .pl-toast__close {
+    @apply cursor-pointer rounded-pl-sm p-1 opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-peach-accent;
+  }
+
+  .pl-toast__close-icon {
+    @apply size-pl-icon-sm;
+  }
 }

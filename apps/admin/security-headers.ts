@@ -18,6 +18,7 @@ export function buildConnectSrc(isDev: boolean): string[] {
 
   const apiOrigin = tryOrigin(process.env.NUXT_PUBLIC_API_URL);
   const wsOrigin = tryOrigin(process.env.NUXT_PUBLIC_WS_URL);
+  const storageOrigin = tryOrigin(process.env.STORAGE_ENDPOINT);
 
   if (apiOrigin) {
     sources.add(apiOrigin);
@@ -27,13 +28,21 @@ export function buildConnectSrc(isDev: boolean): string[] {
     sources.add(wsOrigin);
   }
 
+  if (storageOrigin) {
+    sources.add(storageOrigin);
+  }
+
   if (isDev) {
     sources.add('ws://localhost:3001');
     sources.add('ws://localhost:24678');
+    sources.add('wss://admin.playplus.localhost:3001');
+    sources.add('https://admin.playplus.localhost:3001');
     sources.add('http://localhost:3000');
     sources.add('https://localhost:3000');
+    sources.add('http://localhost:9000');
     sources.add('https://api.playplus.localhost:3000');
     sources.add('wss://api.playplus.localhost:3000');
+    sources.add('https://storage.playplus.localhost:9000');
   }
 
   return [...sources];

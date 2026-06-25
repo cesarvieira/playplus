@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { IconPlus } from '@tabler/icons-vue';
 import type { ApiListVideosResponse } from '~/utils/videos';
 
 definePageMeta({
@@ -17,24 +18,30 @@ const totalVideos = computed(() => videosResponse.value?.meta.total ?? 0);
 
 <template>
   <section>
-    <h1 class="text-2xl font-extrabold tracking-tight text-peach-ink">
-      Meus vídeos
-    </h1>
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <h1 class="pl-page-title">
+        Meus vídeos
+      </h1>
+      <PlButton to="/videos/new" size="sm">
+        <IconPlus class="size-pl-icon-sm" stroke="2.4" aria-hidden="true" />
+        Adicionar vídeo
+      </PlButton>
+    </div>
     <p
       v-if="pending"
-      class="mt-2 text-sm font-medium text-peach-muted"
+      class="pl-page-lead"
     >
       Carregando catálogo…
     </p>
     <p
       v-else-if="error"
-      class="mt-2 text-sm font-medium text-status-error-fg"
+      class="pl-page-lead pl-text-error"
     >
       Não foi possível carregar os vídeos.
     </p>
     <p
       v-else
-      class="mt-2 text-sm font-medium text-peach-muted"
+      class="pl-page-lead"
     >
       {{ totalVideos }} vídeo(s) no catálogo.
     </p>

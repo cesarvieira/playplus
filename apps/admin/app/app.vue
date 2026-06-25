@@ -13,10 +13,5 @@ const error = useError();
     </NuxtLayout>
   </div>
   <NuxtPage v-else />
-  <DevOnly>
-    <ClientOnly>
-      <VitePluginChecker />
-    </ClientOnly>
-  </DevOnly>
   <PlToast />
 </template>

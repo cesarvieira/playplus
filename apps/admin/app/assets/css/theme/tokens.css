@@ -5,6 +5,7 @@
  * - Novas cores → @theme, nunca hex nos .vue
  * - Tamanhos repetidos → token pl-*
  * - Padrão visual em 2+ lugares → components.css
+ * - Guia completo para IA → apps/admin/docs/theme.md
  */
 
 @theme {
@@ -117,13 +118,26 @@
   /* ── Heights ── */
   --height-header: 68px;
   --height-pl-btn-lg: 54px;
+  --height-pl-btn-sm: 42px;
   --height-pl-input: 50px;
 
   /* ── Sizes ── */
   --size-pl-icon: 19px;
+  --size-pl-icon-sm: 16px;
+  --size-pl-icon-md: 24px;
+  --size-pl-media-lg: 3rem;
+  --size-pl-media-md: 2.5rem;
   --size-dev-dot: 11px;
   --height-pl-logo-sm: 26px;
   --height-pl-logo-md: 32px;
+
+  /* ── Z-index ── */
+  --z-index-pl-modal: 50;
+  --z-index-pl-toast: 60;
+
+  /* ── Upload play glyph ── */
+  --size-pl-play-border-y: 6px;
+  --size-pl-play-border-l: 10px;
 
   /* ── Shadows ── */
   --shadow-pl-card: 0 10px 34px rgba(80, 40, 20, 0.06);

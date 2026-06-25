@@ -8,5 +8,6 @@ export const VIDEO_TRANSCODE_JOB_OPTIONS = {
 } as const;
 
 export function buildTranscodeJobId(videoId: string): string {
-  return `transcode:${videoId}`;
+  // BullMQ custom job IDs cannot contain ':' (see Job.validateOptions).
+  return `transcode-${videoId}`;
 }

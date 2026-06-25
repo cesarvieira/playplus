@@ -19,6 +19,9 @@ function getStorageClient(): S3Client {
         secretAccessKey: env.STORAGE_SECRET_KEY,
       },
       forcePathStyle: true,
+      // MinIO does not handle SDK default flexible checksums (WHEN_SUPPORTED).
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
     });
   }
 

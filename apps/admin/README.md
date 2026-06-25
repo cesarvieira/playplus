@@ -24,9 +24,11 @@ Copie a seção Admin do `.env.example` na raiz do monorepo para um `.env` local
 
 Tokens visuais do tema **Pêssego** espelham o mockup em [`mockups/dc.html`](./mockups/dc.html). O `tailwind.config.ts` é carregado via `@config` em `app/assets/css/main.css` (Tailwind CSS 4).
 
+**Guia obrigatório para UI (humanos e IA):** [`docs/theme.md`](./docs/theme.md)
+
 O módulo `@nuxtjs/tailwindcss` está na versão `7.0.0-beta.1` para compatibilidade com Tailwind 4.
 
-Classes Tailwind customizadas incluem `bg-peach-page`, `bg-status-ready`, `rounded-pl-md` e `outline-peach-accent`.
+Classes Tailwind customizadas incluem `bg-peach-page`, `bg-status-ready`, `rounded-pl-md`, `text-pl-sm` e classes compostas `pl-page-title`, `pl-dropzone`, `pl-toast-host`.
 
 ## Dependências
 
