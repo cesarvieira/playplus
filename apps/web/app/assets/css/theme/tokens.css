@@ -22,6 +22,7 @@
   --color-night-label: #8a7b6f;
   --color-night-subtle: #b59c8c;
   --color-night-border: #322620;
+  --color-night-border-subtle: #322620;
   --color-night-border-strong: #382c24;
   --color-night-border-panel: #2c231d;
   --color-night-accent: #e8956b;
@@ -105,11 +106,14 @@
   --size-pl-icon-md: 24px;
   --size-pl-media-lg: 3rem;
   --size-pl-media-md: 2.5rem;
+  --size-pl-empty-icon: 72px;
+  --size-pl-pagination-btn: 36px;
   --height-pl-logo-sm: 26px;
   --height-pl-logo-md: 32px;
 
   /* ── Layout widths ── */
   --width-pl-hero-aside: 480px;
+  --spacing-pl-catalog-gap: 22px;
 
   /* ── Z-index ── */
   --z-index-pl-modal: 50;
