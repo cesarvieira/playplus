@@ -35,7 +35,7 @@
         "app/components/PlayLogo.vue",
         "app/components/PlayerNotFound.vue",
         "app/components/PlayerUnavailable.vue",
-        "app/components/VideoPlayer.vue"
+        "app/components/PlayerScrubber.vue"
       ]
     },
     "packages/*": {

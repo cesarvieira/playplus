@@ -6,17 +6,40 @@ import type { VideoDetail } from '~/composables/useVideoDetail';
 
 const isBuffering = ref(false);
 const isError = ref(false);
+const isPlaying = ref(false);
+const currentTime = ref(0);
+const duration = ref(600);
+const volume = ref(1);
+const isMuted = ref(false);
+const isFullscreen = ref(false);
+const currentResolution = ref('Auto');
+
 const playMock = vi.fn();
 const pauseMock = vi.fn();
 const retryMock = vi.fn();
+const seekMock = vi.fn();
+const setVolumeMock = vi.fn();
+const toggleMuteMock = vi.fn();
+const toggleFullscreenMock = vi.fn();
 
 vi.mock('~/composables/usePlayer', () => ({
   usePlayer: vi.fn().mockImplementation(() => ({
     isBuffering,
     isError,
+    isPlaying,
+    currentTime,
+    duration,
+    volume,
+    isMuted,
+    isFullscreen,
+    currentResolution,
     play: playMock,
     pause: pauseMock,
     retry: retryMock,
+    seek: seekMock,
+    setVolume: setVolumeMock,
+    toggleMute: toggleMuteMock,
+    toggleFullscreen: toggleFullscreenMock,
   })),
 }));
 
@@ -40,17 +63,19 @@ describe('VideoPlayer', () => {
   beforeEach(() => {
     isBuffering.value = false;
     isError.value = false;
+    isPlaying.value = false;
+    currentResolution.value = 'Auto';
     vi.clearAllMocks();
   });
 
-  it('renders video element with controls, playsinline, preload and poster', async () => {
+  it('renders video element without native controls, but with playsinline, preload and poster', async () => {
     const wrapper = await mountVideoPlayer();
     const videoEl = wrapper.find('video');
 
     expect(videoEl.exists()).toBe(true);
     expect(videoEl.attributes('playsinline')).toBe('');
     expect(videoEl.attributes('preload')).toBe('metadata');
-    expect(videoEl.attributes('controls')).toBe('');
+    expect(videoEl.attributes('controls')).toBeUndefined();
     expect(videoEl.attributes('poster')).toBe(baseVideo.thumbnail_url);
     // Should not have the gradient class when thumbnail is present
     expect(videoEl.classes()).not.toContain('bg-linear-to-br');
@@ -115,5 +140,28 @@ describe('VideoPlayer', () => {
 
     await retryBtn.trigger('click');
     expect(retryMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders custom player controls, scrubber and quality badge', async () => {
+    currentResolution.value = '1080p · HD';
+    const wrapper = await mountVideoPlayer();
+
+    expect(wrapper.find('[data-testid="player-controls"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="player-scrubber"]').exists()).toBe(true);
+
+    const badge = wrapper.find('[data-testid="quality-badge"]');
+    expect(badge.exists()).toBe(true);
+    expect(badge.text()).toBe('1080p · HD');
+  });
+
+  it('triggers play when clicking the central play button', async () => {
+    isPlaying.value = false;
+    const wrapper = await mountVideoPlayer();
+
+    const centralPlayBtn = wrapper.find('[data-testid="central-play-btn"]');
+    expect(centralPlayBtn.exists()).toBe(true);
+
+    await centralPlayBtn.trigger('click');
+    expect(playMock).toHaveBeenCalledTimes(1);
   });
 });

@@ -262,4 +262,127 @@ describe('usePlayer', () => {
     expect(videoElement.load).toHaveBeenCalled();
     expect(videoElement.removeEventListener).toHaveBeenCalledWith('waiting', expect.any(Function));
   });
+
+  describe('custom player controls and properties', () => {
+    it('manages play, pause, ended and isPlaying states', async () => {
+      const video = createMockVideo();
+      const videoElement = video as unknown as HTMLVideoElement;
+      const videoRef = ref<HTMLVideoElement | null>(videoElement);
+      const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+      const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+      await nextTick();
+
+      expect(player.isPlaying.value).toBe(false);
+
+      video.trigger('play');
+      expect(player.isPlaying.value).toBe(true);
+
+      video.trigger('pause');
+      expect(player.isPlaying.value).toBe(false);
+
+      video.trigger('play');
+      expect(player.isPlaying.value).toBe(true);
+
+      video.trigger('ended');
+      expect(player.isPlaying.value).toBe(false);
+    });
+
+    it('manages currentTime, duration and loadedmetadata states', async () => {
+      const video = createMockVideo();
+      const videoElement = video as unknown as HTMLVideoElement;
+      const videoRef = ref<HTMLVideoElement | null>(videoElement);
+      const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+      const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+      await nextTick();
+
+      // Trigger durationchange
+      (videoElement as unknown as { duration: number }).duration = 300;
+      video.trigger('durationchange');
+      expect(player.duration.value).toBe(300);
+
+      // Trigger timeupdate
+      videoElement.currentTime = 45;
+      video.trigger('timeupdate');
+      expect(player.currentTime.value).toBe(45);
+
+      // Trigger loadedmetadata
+      const mutableVideo = videoElement as unknown as { duration: number; videoHeight: number };
+      mutableVideo.duration = 600;
+      mutableVideo.videoHeight = 1080;
+      video.trigger('loadedmetadata');
+      expect(player.duration.value).toBe(600);
+      expect(player.currentResolution.value).toBe('1080p · HD');
+    });
+
+    it('manages volume and isMuted states', async () => {
+      const video = createMockVideo();
+      const videoElement = video as unknown as HTMLVideoElement;
+      const videoRef = ref<HTMLVideoElement | null>(videoElement);
+      const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+      const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+      await nextTick();
+
+      videoElement.volume = 0.5;
+      videoElement.muted = false;
+      video.trigger('volumechange');
+      expect(player.volume.value).toBe(0.5);
+      expect(player.isMuted.value).toBe(false);
+
+      videoElement.muted = true;
+      video.trigger('volumechange');
+      expect(player.isMuted.value).toBe(true);
+    });
+
+    it('exposes seek, setVolume, toggleMute and toggleFullscreen', async () => {
+      const video = createMockVideo();
+      const videoElement = video as unknown as HTMLVideoElement;
+      const videoRef = ref<HTMLVideoElement | null>(videoElement);
+      const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+      const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+      await nextTick();
+
+      (videoElement as unknown as { duration: number }).duration = 200;
+      player.seek(50);
+      expect(videoElement.currentTime).toBe(50);
+
+      player.setVolume(0.8);
+      expect(videoElement.volume).toBe(0.8);
+
+      player.toggleMute();
+      expect(videoElement.muted).toBe(true);
+    });
+
+    it('handles HLS level switching and updates resolution label', async () => {
+      const video = createMockVideo();
+      const videoElement = video as unknown as HTMLVideoElement;
+      const videoRef = ref<HTMLVideoElement | null>(videoElement);
+      const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+      const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+      await nextTick();
+
+      const levelSwitchedCallback = (mockHlsInstance.on as Mock).mock.calls.find(
+        (call: unknown[]) => call[0] === 'hlsLevelSwitched',
+      )?.[1];
+
+      expect(levelSwitchedCallback).toBeDefined();
+
+      // Mock hlsInstance.levels
+      (mockHlsInstance as unknown as { levels: { height: number }[] }).levels = [
+        { height: 480 },
+        { height: 720 },
+        { height: 1080 },
+      ];
+
+      levelSwitchedCallback('hlsLevelSwitched', { level: 2 });
+      expect(player.currentResolution.value).toBe('1080p · HD');
+
+      levelSwitchedCallback('hlsLevelSwitched', { level: 0 });
+      expect(player.currentResolution.value).toBe('480p · SD');
+    });
+  });
 });
