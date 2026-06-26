@@ -70,6 +70,7 @@ services:
       /bin/sh -c "
       mc --insecure alias set local https://storage.playplus.localhost:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
       mc --insecure mb --ignore-existing local/$$STORAGE_BUCKET &&
+      mc --insecure anonymous set download local/$$STORAGE_BUCKET &&
       exit 0
       "
 

@@ -1,0 +1,265 @@
+import { ref, createApp, defineComponent, nextTick } from 'vue';
+import { describe, expect, it, vi, beforeEach, type Mock } from 'vitest';
+import Hls from 'hls.js';
+import { usePlayer } from '~/composables/usePlayer';
+
+// Properly hoist the mocks so Vitest defines them before running the mock factory
+const { mockHlsInstance, HlsMock } = vi.hoisted(() => {
+  const instance = {
+    loadSource: vi.fn(),
+    attachMedia: vi.fn(),
+    on: vi.fn(),
+    destroy: vi.fn(),
+    startLoad: vi.fn(),
+    recoverMediaError: vi.fn(),
+  };
+
+  // Use a constructible function instead of class to avoid @typescript-eslint/no-extraneous-class
+  function MockHls(this: unknown) {
+    return instance;
+  }
+
+  MockHls.isSupported = vi.fn().mockReturnValue(true);
+  MockHls.Events = {
+    ERROR: 'hlsError',
+  };
+  MockHls.ErrorTypes = {
+    NETWORK_ERROR: 'networkError',
+    MEDIA_ERROR: 'mediaError',
+  };
+
+  return { mockHlsInstance: instance, HlsMock: MockHls as unknown as typeof Hls };
+});
+
+vi.mock('hls.js', () => {
+  return { default: HlsMock };
+});
+
+function createMockVideo() {
+  const listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
+  return {
+    src: '',
+    canPlayType: vi.fn().mockReturnValue(''),
+    addEventListener: vi.fn((event: string, callback: (...args: unknown[]) => void) => {
+      if (!listeners[event]) listeners[event] = [];
+      listeners[event].push(callback);
+    }),
+    removeEventListener: vi.fn((event: string, callback: (...args: unknown[]) => void) => {
+      if (listeners[event]) {
+        listeners[event] = listeners[event].filter(cb => cb !== callback);
+      }
+    }),
+    play: vi.fn().mockResolvedValue(undefined),
+    pause: vi.fn(),
+    removeAttribute: vi.fn(),
+    load: vi.fn(),
+    // Helper for tests to trigger event callbacks
+    trigger: (event: string, ...args: unknown[]) => {
+      if (listeners[event]) {
+        listeners[event].forEach(cb => cb(...args));
+      }
+    },
+  };
+}
+
+function withSetup<T>(composable: () => T) {
+  let result: T | undefined;
+  const app = createApp(
+    defineComponent({
+      setup() {
+        result = composable();
+        return () => null;
+      },
+    }),
+  );
+  const container = document.createElement('div');
+  app.mount(container);
+  return [result!, app] as const;
+}
+
+describe('usePlayer', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('does not initialize if videoRef is null', async () => {
+    const videoRef = ref<HTMLVideoElement | null>(null);
+    const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+    const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    expect(player.isBuffering.value).toBe(false);
+    expect(player.isError.value).toBe(false);
+  });
+
+  it('initializes hls.js when native HLS is not supported', async () => {
+    const video = createMockVideo() as unknown as HTMLVideoElement;
+    const videoRef = ref<HTMLVideoElement | null>(video);
+    const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+    const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    expect(mockHlsInstance.loadSource).toHaveBeenCalledWith('http://example.com/stream.m3u8');
+    expect(mockHlsInstance.attachMedia).toHaveBeenCalledWith(video);
+    expect(player.isBuffering.value).toBe(true);
+    expect(player.isError.value).toBe(false);
+  });
+
+  it('uses native playback when browser supports HLS natively (Safari)', async () => {
+    const video = createMockVideo();
+    // Simulate Safari native HLS support
+    video.canPlayType.mockImplementation((type: string) => {
+      return type === 'application/vnd.apple.mpegurl' ? 'maybe' : '';
+    });
+    const videoElement = video as unknown as HTMLVideoElement;
+    const videoRef = ref<HTMLVideoElement | null>(videoElement);
+    const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+    const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    expect(videoElement.src).toBe('http://example.com/stream.m3u8');
+    expect(player.isBuffering.value).toBe(true);
+  });
+
+  it('manages buffering states via native event listeners', async () => {
+    const video = createMockVideo();
+    const videoElement = video as unknown as HTMLVideoElement;
+    const videoRef = ref<HTMLVideoElement | null>(videoElement);
+    const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+    const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    // Start loading: buffering should be true
+    expect(player.isBuffering.value).toBe(true);
+
+    // Simulate playing: buffering becomes false
+    video.trigger('playing');
+    expect(player.isBuffering.value).toBe(false);
+
+    // Simulate waiting: buffering becomes true
+    video.trigger('waiting');
+    expect(player.isBuffering.value).toBe(true);
+
+    // Simulate canplay: buffering becomes false
+    video.trigger('canplay');
+    expect(player.isBuffering.value).toBe(false);
+  });
+
+  it('marks isError as true when video element throws error', async () => {
+    const video = createMockVideo();
+    const videoElement = video as unknown as HTMLVideoElement;
+    const videoRef = ref<HTMLVideoElement | null>(videoElement);
+    const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+    const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    video.trigger('error', new Event('error'));
+    expect(player.isError.value).toBe(true);
+    expect(player.isBuffering.value).toBe(false);
+  });
+
+  it('retries HLS network error up to 3 times before setting fatal error', async () => {
+    const video = createMockVideo();
+    const videoElement = video as unknown as HTMLVideoElement;
+    const videoRef = ref<HTMLVideoElement | null>(videoElement);
+    const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+    const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    // Get the error callback registered on Hls instance
+    const errorCallback = (mockHlsInstance.on as Mock).mock.calls.find(
+      (call: unknown[]) => call[0] === Hls.Events.ERROR,
+    )?.[1] as (event: string, data: { fatal: boolean; type: string }) => void;
+
+    // Trigger non-fatal error: shouldn't set isError
+    errorCallback('hlsError', { fatal: false, type: Hls.ErrorTypes.NETWORK_ERROR });
+    expect(player.isError.value).toBe(false);
+
+    // Trigger fatal network error 1
+    errorCallback('hlsError', { fatal: true, type: Hls.ErrorTypes.NETWORK_ERROR });
+    expect(player.isError.value).toBe(false);
+    expect(mockHlsInstance.startLoad).toHaveBeenCalledTimes(1);
+
+    // Trigger fatal network error 2
+    errorCallback('hlsError', { fatal: true, type: Hls.ErrorTypes.NETWORK_ERROR });
+    expect(player.isError.value).toBe(false);
+    expect(mockHlsInstance.startLoad).toHaveBeenCalledTimes(2);
+
+    // Trigger fatal network error 3
+    errorCallback('hlsError', { fatal: true, type: Hls.ErrorTypes.NETWORK_ERROR });
+    expect(player.isError.value).toBe(false);
+    expect(mockHlsInstance.startLoad).toHaveBeenCalledTimes(3);
+
+    // Trigger fatal network error 4 (exceeds MAX_RETRIES)
+    errorCallback('hlsError', { fatal: true, type: Hls.ErrorTypes.NETWORK_ERROR });
+    expect(player.isError.value).toBe(true);
+    expect(player.isBuffering.value).toBe(false);
+  });
+
+  it('retries HLS media error up to 3 times before setting fatal error', async () => {
+    const video = createMockVideo();
+    const videoElement = video as unknown as HTMLVideoElement;
+    const videoRef = ref<HTMLVideoElement | null>(videoElement);
+    const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+    const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    const errorCallback = (mockHlsInstance.on as Mock).mock.calls.find(
+      (call: unknown[]) => call[0] === Hls.Events.ERROR,
+    )?.[1] as (event: string, data: { fatal: boolean; type: string }) => void;
+
+    // Trigger fatal media errors
+    for (let i = 0; i < 3; i++) {
+      errorCallback('hlsError', { fatal: true, type: Hls.ErrorTypes.MEDIA_ERROR });
+      expect(player.isError.value).toBe(false);
+    }
+    expect(mockHlsInstance.recoverMediaError).toHaveBeenCalledTimes(3);
+
+    // Exceed retry limit
+    errorCallback('hlsError', { fatal: true, type: Hls.ErrorTypes.MEDIA_ERROR });
+    expect(player.isError.value).toBe(true);
+  });
+
+  it('triggers fatal error immediately on other HLS fatal error types', async () => {
+    const video = createMockVideo();
+    const videoElement = video as unknown as HTMLVideoElement;
+    const videoRef = ref<HTMLVideoElement | null>(videoElement);
+    const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+    const [player] = withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    const errorCallback = (mockHlsInstance.on as Mock).mock.calls.find(
+      (call: unknown[]) => call[0] === Hls.Events.ERROR,
+    )?.[1] as (event: string, data: { fatal: boolean; type: string }) => void;
+
+    errorCallback('hlsError', { fatal: true, type: 'OTHER_FATAL_ERROR' });
+    expect(player.isError.value).toBe(true);
+    expect(player.isBuffering.value).toBe(false);
+  });
+
+  it('destroys Hls instance and removes listeners on cleanup/unmount', async () => {
+    const video = createMockVideo();
+    const videoElement = video as unknown as HTMLVideoElement;
+    const videoRef = ref<HTMLVideoElement | null>(videoElement);
+    const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+
+    const [_, app] = withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    app.unmount();
+    await nextTick();
+
+    expect(mockHlsInstance.destroy).toHaveBeenCalled();
+    expect(videoElement.removeAttribute).toHaveBeenCalledWith('src');
+    expect(videoElement.load).toHaveBeenCalled();
+    expect(videoElement.removeEventListener).toHaveBeenCalledWith('waiting', expect.any(Function));
+  });
+});

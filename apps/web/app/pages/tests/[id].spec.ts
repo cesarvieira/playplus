@@ -3,6 +3,14 @@ import { useAuthStore } from '~/stores/auth';
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('~/components/VideoPlayer.vue', () => ({
+  default: {
+    name: 'VideoPlayer',
+    props: ['video'],
+    template: '<div>[VideoPlayer Stub - {{ video.title }}]</div>',
+  },
+}));
+
 function flushPromises(): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, 0);

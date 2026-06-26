@@ -91,6 +91,7 @@ export default defineNuxtConfig({
         '@vue/devtools-kit',
         '@tabler/icons-vue',
         'gravatar-url',
+        'hls.js',
       ],
     },
   },
