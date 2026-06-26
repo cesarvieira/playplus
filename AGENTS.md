@@ -24,24 +24,25 @@ Construído como **monorepo** com pnpm workspaces e Turborepo:
 
 Organização por **domínios (DDD)** em `apps/api/src/modules/`. Cada módulo segue quatro camadas:
 
-| Camada | Responsabilidade |
-|--------|------------------|
-| `domain/` | Regras de negócio puras — sem framework, sem I/O |
-| `application/` | Orquestração — use cases, commands, queries |
-| `infra/` | Implementações concretas — banco, storage, FFmpeg |
-| `http/` | Interface HTTP — rotas, schemas, controllers |
+| Camada         | Responsabilidade                                  |
+| -------------- | ------------------------------------------------- |
+| `domain/`      | Regras de negócio puras — sem framework, sem I/O  |
+| `application/` | Orquestração — use cases, commands, queries       |
+| `infra/`       | Implementações concretas — banco, storage, FFmpeg |
+| `http/`        | Interface HTTP — rotas, schemas, controllers      |
 
 ### Agregados principais
 
-| Agregado | Responsabilidade | Status |
-|----------|------------------|--------|
-| **Video** | Upload, transcodificação HLS, catálogo, metadados | 📋 Planejado |
-| **User** | Autenticação, roles (`viewer` / admin), gestão de usuários | 📋 Planejado |
-| **WatchSession** | Progresso de reprodução (`watch_progress`), retomada | 📋 Planejado |
+| Agregado         | Responsabilidade                                           | Status       |
+| ---------------- | ---------------------------------------------------------- | ------------ |
+| **Video**        | Upload, transcodificação HLS, catálogo, metadados          | 📋 Planejado |
+| **User**         | Autenticação, roles (`viewer` / admin), gestão de usuários | 📋 Planejado |
+| **WatchSession** | Progresso de reprodução (`watch_progress`), retomada       | 📋 Planejado |
 
 Nenhum módulo acessa o domínio de outro diretamente. Tipos cruzados vêm exclusivamente de `packages/shared`.
 
 ## Regras de dependência (críticas)
+
 apps/api → packages/shared apps/web → packages/shared
 apps/admin → packages/shared packages/worker → packages/shared
 
@@ -59,6 +60,7 @@ apps/admin → packages/shared packages/worker → packages/shared
 - WebSocket autentica via query param `?token=<access_token>` (limitação do browser)
 
 ## Pipeline de vídeo (fluxo crítico)
+
 1. POST /videos (admin) → retorna presigned upload_url
 2. Cliente faz upload direto para MinIO/R2
 3. POST /videos/:id/transcode → enfileira job BullMQ
@@ -85,6 +87,7 @@ apps/admin → packages/shared packages/worker → packages/shared
 ## Convenções de código
 
 ### Backend (`apps/api`)
+
 - Módulos em `src/modules/[dominio]/` com as quatro camadas DDD
 - Rotas e schemas em `http/` — validação com JSON Schema do Fastify
 - Use cases em `application/` — orquestram domínio + infra
@@ -92,6 +95,7 @@ apps/admin → packages/shared packages/worker → packages/shared
 - Config e plugins em `src/config/`
 
 ### Frontend (`apps/web`, `apps/admin`)
+
 - Composables para lógica reutilizável (`usePlayer`, `useProgress`, `useAuth`, etc.)
 - Stores Pinia para estado global (`auth`, `catalog`)
 - Player HLS via `hls.js` ou `@nuxtjs/video-player`
@@ -108,12 +112,14 @@ Em `apps/admin`, **sempre** use o tema em `app/assets/css/theme/` — guia compl
 - Novos tokens → `theme/tokens.css` (`@theme`); carregamento via `main.css` apenas
 
 ### Worker (`packages/worker`)
+
 - Jobs em `jobs/` (transcode, thumbnail, cleanup)
 - Processors em `processors/` (ffmpeg, storage upload)
 - Processo independente — pode ser reiniciado/escalado sem afetar a API
 - Falhas de FFmpeg e retry esgotado → Sentry
 
 ### Shared (`packages/shared`)
+
 - Tipos: `Video`, `User`, `WatchSession`
 - DTOs: `CreateVideoDto`, `UpdateProgressDto`
 - Enums: `VideoStatus`, `UserRole`
@@ -121,10 +127,10 @@ Em `apps/admin`, **sempre** use o tema em `app/assets/css/theme/` — guia compl
 
 ## Ambientes e infra
 
-| Ambiente | Compose | Storage |
-|----------|---------|---------|
-| Desenvolvimento | `docker-compose.yml` | MinIO (local) |
-| Produção | `docker-compose.prod.yml` | Cloudflare R2 (env vars) |
+| Ambiente        | Compose                   | Storage                  |
+| --------------- | ------------------------- | ------------------------ |
+| Desenvolvimento | `docker-compose.yml`      | MinIO (local)            |
+| Produção        | `docker-compose.prod.yml` | Cloudflare R2 (env vars) |
 
 Troca MinIO ↔ R2 **somente por variáveis de ambiente** — nenhuma linha de código muda:
 `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`
@@ -157,6 +163,7 @@ Serviços Docker: `api`, `postgres`, `valkey`, `minio` (dev), `worker`
 Todas as mensagens de commit sugeridas devem seguir estritamente o padrão Conventional Commits em português (BR).
 
 Regras obrigatórias:
+
 1. Use a estrutura: `<tipo>: <descrição minúscula>`
 2. O prefixo `<tipo>` deve usar os termos padrão da comunidade (ex: docs, feat, fix, chore, refactor).
 3. A `<descrição>` deve começar com um verbo no presente do indicativo (ex: adiciona, atualiza, corrige, documenta, remove).
