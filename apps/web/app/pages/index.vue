@@ -1,167 +1,72 @@
 <script setup lang="ts">
-import { IconX } from '@tabler/icons-vue';
+const catalog = useCatalogStore();
+const page = ref(1);
 
-const email = ref('test@test.net');
-const password = ref('');
-const passwordError = ref('');
-const loading = ref(false);
+const subtitle = computed(() =>
+  catalog.meta.total === 1 ? '1 vídeo' : `${catalog.meta.total} vídeos`,
+);
 
-function simulateLogin() {
-  loading.value = true;
-  passwordError.value = '';
+const totalPages = computed(() =>
+  Math.ceil(catalog.meta.total / catalog.meta.limit),
+);
 
-  setTimeout(() => {
-    loading.value = false;
-    if (password.value.length < 6) {
-      passwordError.value = 'E-mail ou senha incorretos.';
-    }
-  }, 1200);
+const showPagination = computed(() => catalog.meta.total > catalog.meta.limit);
+
+function retry() {
+  void catalog.fetchReady(page.value, catalog.meta.limit);
 }
 
-function resetForm() {
-  email.value = 'test@test.net';
-  password.value = '';
-  passwordError.value = '';
-  loading.value = false;
-}
+onMounted(() => {
+  void catalog.fetchReady(page.value);
+});
+
+watch(page, (nextPage) => {
+  void catalog.fetchReady(nextPage, catalog.meta.limit);
+});
 </script>
 
 <template>
-  <div class="mx-auto flex max-w-3xl flex-col gap-10">
-    <header>
+  <div class="flex flex-col">
+    <header class="mb-6">
       <h1 class="text-pl-2xl font-extrabold tracking-pl-tight text-night-text">
-        Primitivos UI — Play+ Web
+        Meus vídeos
       </h1>
-      <p class="mt-2 text-pl-sm text-night-muted">
-        Demonstração dos componentes Pl* (issue #52)
+      <p
+        v-if="catalog.status !== 'loading'"
+        class="mt-1 text-pl-sm font-medium text-night-muted"
+      >
+        {{ subtitle }}
       </p>
     </header>
 
-    <!-- Buttons -->
-    <section class="flex flex-col gap-4">
-      <h2 class="text-pl-lg font-bold text-night-text">
-        PlButton
-      </h2>
-      <div class="flex flex-wrap items-center gap-3">
-        <PlButton variant="cta">
-          CTA
-        </PlButton>
-        <PlButton variant="secondary">
-          Secondary
-        </PlButton>
-        <PlButton variant="ghost">
-          Ghost
-        </PlButton>
-        <PlButton
-          variant="icon"
-          aria-label="Fechar"
-        >
-          <IconX class="size-pl-icon-sm text-night-muted" />
-        </PlButton>
-        <PlButton
-          variant="cta"
-          :loading="loading"
-          @click="simulateLogin"
-        >
-          Loading
-        </PlButton>
-        <PlButton
-          variant="cta"
-          disabled
-        >
-          Disabled
-        </PlButton>
-      </div>
-    </section>
-
-    <!-- Alerts -->
-    <section class="flex flex-col gap-4">
-      <h2 class="text-pl-lg font-bold text-night-text">
-        PlAlert
-      </h2>
-      <PlAlert variant="error">
-        E-mail ou senha incorretos.
+    <LoadingSkeleton v-if="catalog.status === 'loading'" />
+    <EmptyState v-else-if="catalog.status === 'empty'" />
+    <div
+      v-else-if="catalog.status === 'error'"
+      class="flex flex-col items-center gap-6 py-16"
+    >
+      <PlAlert
+        variant="error"
+        :dismissible="false"
+      >
+        {{ catalog.errorMessage ?? 'Não foi possível carregar os vídeos.' }}
       </PlAlert>
-      <PlAlert variant="info">
-        Sua sessão expirou. Faça login novamente.
-      </PlAlert>
-    </section>
-
-    <!-- Form -->
-    <section class="flex flex-col gap-4">
-      <h2 class="text-pl-lg font-bold text-night-text">
-        PlInput + PlLabel
-      </h2>
-      <div class="rounded-pl-xl border border-night-border-panel bg-night-panel p-6 shadow-night-panel">
-        <form
-          class="flex flex-col gap-4"
-          @submit.prevent="simulateLogin"
-        >
-          <PlInput
-            v-model="email"
-            label="E-mail"
-            type="email"
-            placeholder="voce@email.com"
-          />
-          <PlInput
-            v-model="password"
-            label="Senha"
-            type="password"
-            placeholder="••••••••"
-            :error="passwordError"
-          />
-          <div class="flex flex-wrap gap-3 pt-2">
-            <PlButton
-              type="submit"
-              variant="cta"
-              :loading="loading"
-            >
-              Entrar
-            </PlButton>
-            <PlButton
-              type="button"
-              variant="ghost"
-              @click="resetForm"
-            >
-              Limpar
-            </PlButton>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- Skeleton -->
-    <section class="flex flex-col gap-4">
-      <h2 class="text-pl-lg font-bold text-night-text">
-        PlSkeleton
-      </h2>
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div class="flex flex-col gap-3 rounded-pl-lg border border-night-border-panel bg-night-card p-4">
-          <p class="pl-text-muted">
-            variant="text"
-          </p>
-          <PlSkeleton variant="text" />
-          <PlSkeleton
-            variant="text"
-            width="70%"
-          />
-          <PlSkeleton
-            variant="text"
-            width="45%"
-          />
-        </div>
-        <div class="flex flex-col gap-3 rounded-pl-lg border border-night-border-panel bg-night-card p-4">
-          <p class="pl-text-muted">
-            variant="card"
-          </p>
-          <PlSkeleton variant="card" />
-          <PlSkeleton variant="text" />
-          <PlSkeleton
-            variant="text"
-            width="60%"
-          />
-        </div>
-      </div>
-    </section>
+      <PlButton
+        variant="secondary"
+        @click="retry"
+      >
+        Tentar novamente
+      </PlButton>
+    </div>
+    <template v-else>
+      <CatalogGrid :videos="catalog.data" />
+      <Pagination
+        v-if="showPagination"
+        :page="page"
+        :total-pages="totalPages"
+        class="mt-7"
+        @update:page="page = $event"
+      />
+    </template>
   </div>
 </template>
