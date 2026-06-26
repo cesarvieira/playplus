@@ -32,7 +32,10 @@
         "app/components/PlLabel.vue",
         "app/components/PlSkeleton.vue",
         "app/components/AppHeader.vue",
-        "app/components/PlayLogo.vue"
+        "app/components/PlayLogo.vue",
+        "app/components/PlayerNotFound.vue",
+        "app/components/PlayerUnavailable.vue",
+        "app/components/VideoPlayer.vue"
       ]
     },
     "packages/*": {
