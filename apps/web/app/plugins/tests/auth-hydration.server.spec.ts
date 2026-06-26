@@ -7,7 +7,8 @@ import authHydrationPlugin from '~/plugins/auth-hydration.server';
 
 const hasSessionCookieMock = vi.hoisted(() => vi.fn());
 const ensureServerSessionMock = vi.hoisted(() => vi.fn());
-const serverApiFetchMock = vi.hoisted(() => vi.fn());
+const getServerAccessTokenMock = vi.hoisted(() => vi.fn());
+const fetchMeWithServerSessionMock = vi.hoisted(() => vi.fn());
 const requestEventRef = vi.hoisted(() => ({
   current: undefined as { context: Record<string, unknown> } | undefined,
 }));
@@ -20,10 +21,11 @@ vi.mock('~/utils/session-cookie', () => ({
 
 vi.mock('~/utils/server-session.server', () => ({
   ensureServerSession: ensureServerSessionMock,
+  getServerAccessToken: getServerAccessTokenMock,
 }));
 
-vi.mock('~/utils/api-client.server', () => ({
-  serverApiFetch: serverApiFetchMock,
+vi.mock('~~/server/utils/fetch-me.server', () => ({
+  fetchMeWithServerSession: fetchMeWithServerSessionMock,
 }));
 
 type NuxtPluginModule =
@@ -53,9 +55,11 @@ describe('auth-hydration.server plugin', () => {
   beforeEach(() => {
     hasSessionCookieMock.mockReset();
     ensureServerSessionMock.mockReset();
-    serverApiFetchMock.mockReset();
+    getServerAccessTokenMock.mockReset();
+    fetchMeWithServerSessionMock.mockReset();
     hasSessionCookieMock.mockReturnValue(false);
     ensureServerSessionMock.mockResolvedValue(null);
+    getServerAccessTokenMock.mockResolvedValue(undefined);
     requestEventRef.current = undefined;
   });
 
@@ -72,7 +76,7 @@ describe('auth-hydration.server plugin', () => {
           createdAt: '2025-01-01T00:00:00Z',
         };
         await runAuthHydrationPlugin();
-        expect(serverApiFetchMock).not.toHaveBeenCalled();
+        expect(fetchMeWithServerSessionMock).not.toHaveBeenCalled();
       },
       template: '<div />',
     });
@@ -88,7 +92,8 @@ describe('auth-hydration.server plugin', () => {
       role: USER_ROLE.VIEWER,
       exp: 9999999999,
     });
-    serverApiFetchMock.mockResolvedValue({
+    getServerAccessTokenMock.mockResolvedValue('mock-access-token');
+    fetchMeWithServerSessionMock.mockResolvedValue({
       id: 'user-1',
       email: 'viewer@playplus.localhost',
       role: USER_ROLE.VIEWER,
@@ -104,6 +109,7 @@ describe('auth-hydration.server plugin', () => {
         expect(useAuthUser().value?.email).toBe('viewer@playplus.localhost');
         expect(useAuthStore().user?.email).toBe('viewer@playplus.localhost');
         expect(useAuthStore().status).toBe('authenticated');
+        expect(useAuthStore().accessToken).toBe('mock-access-token');
       },
       template: '<div />',
     });
@@ -122,7 +128,7 @@ describe('auth-hydration.server plugin', () => {
         requestEventRef.current = event;
         await runAuthHydrationPlugin();
 
-        expect(serverApiFetchMock).not.toHaveBeenCalled();
+        expect(fetchMeWithServerSessionMock).not.toHaveBeenCalled();
         expect(useAuthUser().value).toBeNull();
       },
       template: '<div />',
@@ -139,7 +145,7 @@ describe('auth-hydration.server plugin', () => {
       role: USER_ROLE.VIEWER,
       exp: 9999999999,
     });
-    serverApiFetchMock.mockRejectedValue(new Error('api down'));
+    fetchMeWithServerSessionMock.mockResolvedValue(null);
 
     await mountSuspended({
       async setup() {

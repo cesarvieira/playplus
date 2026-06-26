@@ -1,4 +1,3 @@
-import type { ApiMeResponse } from '~/utils/auth';
 import { mapMeResponse } from '~/utils/auth';
 import { hasSessionCookie } from '~/utils/session-cookie';
 
@@ -15,23 +14,29 @@ export default defineNuxtPlugin(async () => {
     return;
   }
 
-  const { ensureServerSession } = await import('~/utils/server-session.server');
+  const { ensureServerSession, getServerAccessToken } = await import('~/utils/server-session.server');
   const session = await ensureServerSession(event);
 
   if (!session) {
     return;
   }
 
-  try {
-    const { serverApiFetch } = await import('~/utils/api-client.server');
-    const me = await serverApiFetch<ApiMeResponse>(event, '/me');
-    const user = mapMeResponse(me);
-    authUser.value = user;
+  const { fetchMeWithServerSession } = await import('~~/server/utils/fetch-me.server');
+  const me = await fetchMeWithServerSession(event);
 
-    const authStore = useAuthStore();
-    authStore.user = user;
-    authStore.status = 'authenticated';
-  } catch {
-    // middleware já validou a sessão; header usa fallback
+  if (!me) {
+    return;
+  }
+
+  const user = mapMeResponse(me);
+  authUser.value = user;
+
+  const token = await getServerAccessToken(event);
+
+  const authStore = useAuthStore();
+  authStore.user = user;
+  authStore.status = 'authenticated';
+  if (token) {
+    authStore.accessToken = token;
   }
 });

@@ -1,4 +1,4 @@
-export default defineNuxtPlugin(async () => {
+export default defineNuxtPlugin(async (nuxtApp) => {
   const authStore = useAuthStore();
   const authUser = useAuthUser();
 
@@ -17,12 +17,22 @@ export default defineNuxtPlugin(async () => {
     return;
   }
 
-  const { ensureSession } = useAuth();
-  const hasSession = await ensureSession();
+  const hydrateSession = async () => {
+    const { ensureSession } = useAuth();
+    const hasSession = await ensureSession();
 
-  if (hasSession) {
-    if (authStore.user) {
+    if (hasSession && authStore.user) {
       authUser.value = authStore.user;
     }
+  };
+
+  // SSR sem authUser: evita mismatch de hidratação no header antes do mount
+  if (nuxtApp.isHydrating && !authUser.value) {
+    nuxtApp.hook('app:mounted', () => {
+      void hydrateSession();
+    });
+    return;
   }
+
+  await hydrateSession();
 });

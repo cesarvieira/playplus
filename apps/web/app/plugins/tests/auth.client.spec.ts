@@ -106,6 +106,21 @@ describe('auth.client plugin', () => {
     expect(ensureSessionMock).not.toHaveBeenCalled();
   });
 
+  it('adianta ensureSession até app:mounted durante hidratação sem authUser SSR', async () => {
+    const { mountSuspended } = await import('@nuxt/test-utils/runtime');
+
+    await mountSuspended({
+      async setup() {
+        useAuthStore().clearSession();
+        useAuthUser().value = null;
+        useNuxtApp().isHydrating = true;
+        await runAuthClientPlugin();
+        expect(ensureSessionMock).not.toHaveBeenCalled();
+      },
+      template: '<div />',
+    });
+  });
+
   it('pula ensureSession em /login sem indício de sessão', async () => {
     useRouteMock.mockReturnValue({
       path: '/login',

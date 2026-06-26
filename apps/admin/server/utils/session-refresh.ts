@@ -3,12 +3,23 @@ import { appendResponseHeader, getRequestHeader } from 'h3';
 
 import type { ApiAuthResponse } from '~/utils/auth';
 
-import { setAccessTokenCookie } from './access-cookie';
+import { getAccessTokenFromCookie, setAccessTokenCookie } from './access-cookie';
 import { getServerRuntimeConfig } from './runtime-config';
 import { readSessionFromEvent, verifyAccessToken, type SessionPayload } from './session';
 
 const SERVER_SESSION_CONTEXT_KEY = 'playplusServerSession';
 const SERVER_SESSION_IN_FLIGHT_CONTEXT_KEY = 'playplusServerSessionInFlight';
+const SERVER_ACCESS_TOKEN_CONTEXT_KEY = 'playplusServerAccessToken';
+
+export function getServerAccessToken(event: H3Event): string | undefined {
+  const cached = event.context[SERVER_ACCESS_TOKEN_CONTEXT_KEY];
+
+  if (typeof cached === 'string' && cached.length > 0) {
+    return cached;
+  }
+
+  return getAccessTokenFromCookie(event);
+}
 
 function getCachedServerSession(event: H3Event): SessionPayload | null | undefined {
   return event.context[SERVER_SESSION_CONTEXT_KEY] as SessionPayload | null | undefined;
@@ -63,6 +74,7 @@ export async function refreshServerSession(event: H3Event): Promise<SessionPaylo
   }
 
   setAccessTokenCookie(event, accessToken, expiresIn);
+  event.context[SERVER_ACCESS_TOKEN_CONTEXT_KEY] = accessToken;
   appendSetCookieHeaders(event, collectSetCookieHeaders(response.headers));
 
   return verifyAccessToken(accessToken, config.jwtSecret);
@@ -96,6 +108,12 @@ async function resolveServerSession(event: H3Event): Promise<SessionPayload | nu
   const session = readSessionFromEvent(event, config.jwtSecret);
 
   if (session) {
+    const accessToken = getAccessTokenFromCookie(event);
+
+    if (accessToken) {
+      event.context[SERVER_ACCESS_TOKEN_CONTEXT_KEY] = accessToken;
+    }
+
     setCachedServerSession(event, session);
     return session;
   }

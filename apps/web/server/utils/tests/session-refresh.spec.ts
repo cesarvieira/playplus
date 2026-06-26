@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { USER_ROLE } from '@playplus/shared';
 
 import { ACCESS_TOKEN_COOKIE, setAccessTokenCookie } from '../access-cookie';
-import { ensureServerSession, refreshServerSession } from '../session-refresh';
+import { ensureServerSession, getServerAccessToken, refreshServerSession } from '../session-refresh';
 
 const JWT_SECRET = 'session-refresh-test-secret';
 
@@ -94,6 +94,7 @@ describe('ensureServerSession', () => {
     const session = await ensureServerSession(event);
 
     expect(session?.userId).toBe('user-id');
+    expect(getServerAccessToken(event)).toBe(validToken);
     expect(apiOfetchRaw).not.toHaveBeenCalled();
   });
 
@@ -114,6 +115,7 @@ describe('ensureServerSession', () => {
     ]);
 
     expect(first).toEqual(second);
+    expect(getServerAccessToken(event)).toBe(freshToken);
     expect(apiOfetchRaw).toHaveBeenCalledTimes(1);
   });
 });

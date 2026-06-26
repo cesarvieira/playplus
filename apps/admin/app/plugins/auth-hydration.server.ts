@@ -15,7 +15,7 @@ export default defineNuxtPlugin(async () => {
     return;
   }
 
-  const { ensureServerSession } = await import('~/utils/server-session.server');
+  const { ensureServerSession, getServerAccessToken } = await import('~/utils/server-session.server');
   const session = await ensureServerSession(event);
 
   if (!session) {
@@ -28,9 +28,14 @@ export default defineNuxtPlugin(async () => {
     const user = mapMeResponse(me);
     authUser.value = user;
 
+    const token = await getServerAccessToken(event);
+
     const authStore = useAuthStore();
     authStore.user = user;
     authStore.status = 'authenticated';
+    if (token) {
+      authStore.accessToken = token;
+    }
   } catch {
     // middleware já validou a sessão; header usa fallback
   }
