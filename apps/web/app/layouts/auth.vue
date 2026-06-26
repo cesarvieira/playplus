@@ -26,9 +26,6 @@ import PlayLogo from '~/components/PlayLogo.vue';
           <h2 class="text-pl-hero font-extrabold leading-tight tracking-pl-tight text-night-ink">
             Seu cinema<br>particular.
           </h2>
-          <p class="mt-2.5 text-pl-sm font-medium text-night-ink/72">
-            Guarde, assista e retome de onde parou.
-          </p>
         </div>
       </aside>
 

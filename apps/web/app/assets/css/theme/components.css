@@ -63,6 +63,19 @@
     @apply text-pl-sm font-semibold text-night-body;
   }
 
+  .pl-input-wrap--revealable {
+    @apply relative;
+  }
+
+  .pl-input-wrap--revealable .pl-input {
+    @apply pr-11;
+  }
+
+  .pl-input-reveal-btn {
+    @apply absolute top-0 right-3 bottom-0 flex cursor-pointer items-center justify-center border-0 bg-transparent px-1 text-night-subtle disabled:cursor-not-allowed disabled:opacity-60;
+    margin-bottom: calc(var(--spacing) * 7);
+  }
+
   .pl-input {
     @apply h-pl-input w-full rounded-pl-md border-pl border-night-border-strong bg-night-input px-4 text-pl-base text-night-text placeholder:text-night-muted disabled:cursor-not-allowed disabled:opacity-60;
   }
