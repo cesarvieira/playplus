@@ -8,6 +8,10 @@ const props = defineProps<{
   video: VideoListItem;
 }>();
 
+const emit = defineEmits<{
+  select: [video: VideoListItem];
+}>();
+
 const durationLabel = computed(() => formatDuration(props.video.duration));
 
 const metaLine = computed(() => {
@@ -23,9 +27,10 @@ const hasThumbnail = computed(() => Boolean(props.video.thumbnail_url));
 </script>
 
 <template>
-  <NuxtLink
-    :to="`/${video.id}`"
-    class="pl-media-card pl-focus-ring"
+  <a
+    :href="`/${video.id}`"
+    class="pl-media-card pl-focus-ring cursor-pointer text-left block"
+    @click.prevent="emit('select', video)"
   >
     <div
       class="pl-media-card__thumb"
@@ -73,5 +78,5 @@ const hasThumbnail = computed(() => Boolean(props.video.thumbnail_url));
         {{ metaLine }}
       </p>
     </div>
-  </NuxtLink>
+  </a>
 </template>

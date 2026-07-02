@@ -215,4 +215,38 @@ describe('index page', () => {
     expect(wrapper.find('.pl-catalog-grid--skeleton').exists()).toBe(false);
     expect(wrapper.find('.pl-catalog-grid').exists()).toBe(true);
   });
+
+  it('opens modal on video card click and navigates to play route when play is clicked', async () => {
+    apiFetchMock.mockResolvedValueOnce({
+      data: [sampleVideo],
+      meta: { total: 1, page: 1, limit: 20 },
+    });
+
+    const wrapper = await mountIndexWithAuth();
+    await flushPromises();
+
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+
+    await wrapper.find('a.pl-media-card').trigger('click');
+    await flushPromises();
+
+    const modal = document.querySelector('[role="dialog"]');
+    expect(modal).not.toBeNull();
+    expect(modal!.textContent).toContain('Detalhes do Vídeo');
+    expect(modal!.textContent).toContain(sampleVideo.title);
+    expect(modal!.textContent).toContain('Duração: 2:00:40');
+
+    const playBtn = modal!.querySelector('[aria-label="Reproduzir vídeo"]');
+    expect(playBtn).not.toBeNull();
+    playBtn!.dispatchEvent(new Event('click'));
+    await flushPromises();
+
+    expect(navigateToMock).not.toHaveBeenCalled();
+
+    // Espera os 350ms de transição da animação real
+    await new Promise(resolve => setTimeout(resolve, 360));
+    await flushPromises();
+
+    expect(navigateToMock).toHaveBeenCalledWith('/video-1?play=true');
+  });
 });

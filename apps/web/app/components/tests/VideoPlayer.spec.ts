@@ -77,11 +77,11 @@ describe('VideoPlayer', () => {
     expect(videoEl.attributes('preload')).toBe('metadata');
     expect(videoEl.attributes('controls')).toBeUndefined();
     expect(videoEl.attributes('poster')).toBe(baseVideo.thumbnail_url);
-    // Should not have the gradient class when thumbnail is present
-    expect(videoEl.classes()).not.toContain('bg-linear-to-br');
+    // Should have the black background
+    expect(videoEl.classes()).toContain('bg-black');
   });
 
-  it('shows gradient background on video element when thumbnail is not present', async () => {
+  it('shows black background on video element when thumbnail is not present', async () => {
     const wrapper = await mountVideoPlayer({
       ...baseVideo,
       thumbnail_url: null,
@@ -89,10 +89,7 @@ describe('VideoPlayer', () => {
     const videoEl = wrapper.find('video');
 
     expect(videoEl.attributes('poster')).toBeUndefined();
-    expect(videoEl.classes()).toContain('bg-linear-to-br');
-    expect(videoEl.classes()).toContain('from-[#3A2E5C]');
-    expect(videoEl.classes()).toContain('via-[#5A4A86]');
-    expect(videoEl.classes()).toContain('to-[#8A6FA8]');
+    expect(videoEl.classes()).toContain('bg-black');
   });
 
   it('does not display buffering or error overlays initially', async () => {

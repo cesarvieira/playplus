@@ -5,9 +5,15 @@ import type { VideoDetail } from '~/composables/useVideoDetail';
 import { usePlayer } from '~/composables/usePlayer';
 import PlayerControls from '~/components/PlayerControls.vue';
 
-const props = defineProps<{
-  video: VideoDetail;
-}>();
+const props = withDefaults(
+  defineProps<{
+    video: VideoDetail;
+    autoplay?: boolean;
+  }>(),
+  {
+    autoplay: false,
+  },
+);
 
 const videoRef = ref<HTMLVideoElement | null>(null);
 const containerRef = ref<HTMLDivElement | null>(null);
@@ -104,6 +110,16 @@ onMounted(() => {
   resetHideTimeout();
 });
 
+watch(
+  [isBuffering, isError],
+  ([buffering, error]) => {
+    if (!buffering && !error && props.autoplay && !isPlaying.value) {
+      void play();
+    }
+  },
+  { immediate: true },
+);
+
 onBeforeUnmount(() => {
   if (hideTimeout) {
     clearTimeout(hideTimeout);
@@ -126,8 +142,7 @@ onBeforeUnmount(() => {
       :poster="video.thumbnail_url || undefined"
       playsinline
       preload="metadata"
-      class="absolute inset-0 w-full h-full object-contain z-0 cursor-pointer"
-      :class="{ 'bg-linear-to-br from-[#3A2E5C] via-[#5A4A86] to-[#8A6FA8]': !video.thumbnail_url }"
+      class="absolute inset-0 w-full h-full object-contain z-0 cursor-pointer bg-black"
       @click="isPlaying ? pause() : play()"
     ></video>
 

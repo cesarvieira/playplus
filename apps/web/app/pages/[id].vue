@@ -13,6 +13,8 @@ const videoId = computed(() => {
 
 const { video, status, errorMessage, fetchVideo } = useVideoDetail(videoId);
 
+const isFullscreenMode = computed(() => route.query.play === 'true');
+
 const durationLabel = computed(() => (video.value ? formatDuration(video.value.duration) : null));
 
 const metaLine = computed(() => {
@@ -27,7 +29,11 @@ const metaLine = computed(() => {
   <div class="flex flex-col max-w-4xl mx-auto w-full">
     <!-- Player Stage (Aspect Ratio Video) to avoid layout shifts -->
     <div
-      class="w-full aspect-video rounded-pl-lg overflow-hidden bg-night-card border border-night-border-panel relative"
+      :class="[
+        isFullscreenMode
+          ? 'fixed inset-0 z-50 w-screen h-screen bg-black'
+          : 'w-full aspect-video rounded-pl-lg overflow-hidden bg-night-card border border-night-border-panel relative'
+      ]"
     >
       <!-- Loading State -->
       <div
@@ -46,6 +52,7 @@ const metaLine = computed(() => {
       <VideoPlayer
         v-else-if="status === 'ready' && video"
         :video="video"
+        :autoplay="isFullscreenMode"
         class="absolute inset-0 w-full h-full"
       />
 

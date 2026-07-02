@@ -3,11 +3,30 @@ import { useAuthStore } from '~/stores/auth';
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+const { apiFetchMock, navigateToMock, routeQueryMock } = vi.hoisted(() => ({
+  apiFetchMock: vi.fn(),
+  navigateToMock: vi.fn().mockResolvedValue(undefined),
+  routeQueryMock: {} as Record<string, string>,
+}));
+
+vi.mock('vue-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue-router')>();
+  return {
+    ...actual,
+    useRoute: () => ({
+      params: { id: 'video-123' },
+      fullPath: '/video-123',
+      path: '/video-123',
+      query: routeQueryMock,
+    }),
+  };
+});
+
 vi.mock('~/components/VideoPlayer.vue', () => ({
   default: {
     name: 'VideoPlayer',
-    props: ['video'],
-    template: '<div>[VideoPlayer Stub - {{ video.title }}]</div>',
+    props: ['video', 'autoplay'],
+    template: '<div class="video-player-stub" :data-autoplay="autoplay">[VideoPlayer Stub - {{ video.title }}]</div>',
   },
 }));
 
@@ -17,22 +36,11 @@ function flushPromises(): Promise<void> {
   });
 }
 
-const { apiFetchMock, navigateToMock } = vi.hoisted(() => ({
-  apiFetchMock: vi.fn(),
-  navigateToMock: vi.fn().mockResolvedValue(undefined),
-}));
-
 vi.mock('~/utils/api-client', () => ({
   apiFetch: apiFetchMock,
 }));
 
 mockNuxtImport('navigateTo', () => navigateToMock);
-mockNuxtImport('useRoute', () => () => ({
-  params: { id: 'video-123' },
-  fullPath: '/video-123',
-  path: '/video-123',
-  query: {},
-}));
 
 async function mountPageWithAuth() {
   return mountSuspended({
@@ -133,5 +141,32 @@ describe('[id] video detail page', () => {
 
     expect(wrapper.text()).toContain('API failed');
     expect(wrapper.text()).toContain('Tentar novamente');
+  });
+
+  it('renders fullscreen player and passes autoplay when query play is true', async () => {
+    Object.assign(routeQueryMock, { play: 'true' });
+    apiFetchMock.mockResolvedValueOnce({
+      id: 'video-123',
+      title: 'Filme pronto',
+      duration: 3600,
+      thumbnail_url: null,
+      status: 'ready',
+      created_at: '2025-01-01T12:00:00.000Z',
+    });
+
+    const wrapper = await mountPageWithAuth();
+    await flushPromises();
+
+    const playerContainer = wrapper.find('.fixed.inset-0.z-50');
+    expect(playerContainer.exists()).toBe(true);
+    expect(playerContainer.classes()).toContain('w-screen');
+    expect(playerContainer.classes()).toContain('h-screen');
+    expect(playerContainer.classes()).toContain('bg-black');
+
+    const stub = wrapper.find('.video-player-stub');
+    expect(stub.exists()).toBe(true);
+    expect(stub.attributes('data-autoplay')).toBe('true');
+
+    delete routeQueryMock.play;
   });
 });

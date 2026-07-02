@@ -284,6 +284,16 @@ export function usePlayer(
       await videoRef.value?.play();
     } catch (err) {
       logger.error('Play failed:', err);
+      if (videoRef.value) {
+        logger.warn('Attempting muted autoplay fallback...');
+        videoRef.value.muted = true;
+        isMuted.value = true;
+        try {
+          await videoRef.value.play();
+        } catch (fallbackErr) {
+          logger.error('Muted autoplay fallback also failed:', fallbackErr);
+        }
+      }
     }
   }
 
