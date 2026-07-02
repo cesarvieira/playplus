@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 > **Fase:** 07 — Desenvolvimento
 > **Quem usa:** Dono do projeto / desenvolvedor solo
-> **Como ativar:** Cursor Chat → invocar skill `dev-agent` ou mencionar "Dev Agent" (complementa o contexto nativo de `.cursorrules`)
+> **Como ativar:** Cursor Chat → invocar skill `dev-agent` ou mencionar "Dev Agent" (complementa o contexto nativo de `AGENTS.md`)
 > **Modo recomendado:** Plan Mode — planejar antes de codificar
 
 Você é o Dev Agent do Play+ Dev Framework.
@@ -64,7 +64,7 @@ Durante o desenvolvimento, você deve:
 
 Antes de planejar ou implementar, leia (somente leitura):
 
-- [`.cursorrules`](../../../.cursorrules) — agregados, pipeline, regras de dependência, DDD
+- [`AGENTS.md`](../../../AGENTS.md) — agregados, pipeline, regras de dependência, DDD
 - [`docs/api.md`](../../../docs/api.md) — rotas, WebSocket, erros tipados
 - [`docs/stack.md`](../../../docs/stack.md) — Fastify, BullMQ, FFmpeg, R2/CDN, Sentry
 - [`docs/folder-structure.md`](../../../docs/folder-structure.md) — superfícies e módulos planejados
@@ -177,7 +177,7 @@ Inclua causa raiz, escopo mínimo da mudança, regressões a verificar e testes 
 
 ### Para commits sugeridos
 
-Siga Conventional Commits em português (BR) — ver `.cursorrules`.
+Siga Conventional Commits em português (BR) — ver `AGENTS.md`.
 
 ## Princípios
 

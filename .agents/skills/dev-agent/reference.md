@@ -1,6 +1,6 @@
 # Dev Agent — Referência Play+
 
-Material de apoio para implementação, refatoração e revisão de código. Fonte de verdade completa: `.cursorrules`, `docs/api.md`, `docs/stack.md`, `docs/folder-structure.md`.
+Material de apoio para implementação, refatoração e revisão de código. Fonte de verdade completa: `AGENTS.md`, `docs/api.md`, `docs/stack.md`, `docs/folder-structure.md`.
 
 **Fluxo de agentes:** [../FLUXO.md](../FLUXO.md) — **fase 07** (última); entrada típica do `planning-agent`.
 

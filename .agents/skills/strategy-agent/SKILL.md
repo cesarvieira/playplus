@@ -32,7 +32,7 @@ Quando receber uma demanda, ideia de produto ou solicitação de nova feature, v
 
 Antes de responder, leia (somente leitura):
 
-- [`.cursorrules`](../../../.cursorrules) — agregados, arquitetura DDD, regras de dependência, pipeline de vídeo
+- [`AGENTS.md`](../../../AGENTS.md) — agregados, arquitetura DDD, regras de dependência, pipeline de vídeo
 - [`docs/api.md`](../../../docs/api.md) — contratos planejados e impacto cross-app
 - [`docs/stack.md`](../../../docs/stack.md) — restrições (VPS, FFmpeg, BullMQ, R2/CDN)
 - [`reference.md`](reference.md) — pilares, mapa de agregados e matriz de esforço

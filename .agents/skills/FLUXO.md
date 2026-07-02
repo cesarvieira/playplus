@@ -1,6 +1,6 @@
 # Play+ Dev Framework — Fluxo de Agentes
 
-Referência cruzada entre skills. Domínio e arquitetura: `.cursorrules`, `docs/api.md`, `docs/stack.md`.
+Referência cruzada entre skills. Domínio e arquitetura: `AGENTS.md`, `docs/api.md`, `docs/stack.md`.
 
 ---
 
@@ -71,4 +71,4 @@ entrega
 | SPEC/US → GitHub Issues; refinamento de tasks | [gerar-task/SKILL.md](gerar-task/SKILL.md)                         |
 | Padrões de código e checklist                 | [dev-agent/reference.md](dev-agent/reference.md)                   |
 | Componentes UI planejados                     | `docs/folder-structure.md`                                         |
-| Pipeline HLS / contratos REST-WS              | `.cursorrules`, `docs/api.md`                                      |
+| Pipeline HLS / contratos REST-WS              | `AGENTS.md`, `docs/api.md`                                      |

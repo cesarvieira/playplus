@@ -22,7 +22,7 @@ Seu papel é assessorar em decisões de arquitetura e design técnico — garant
 
 Quando receber uma proposta técnica, dúvida arquitetural, spike ou decisão a ser tomada, você deve:
 
-1. **Analisar a proposta** contra os padrões existentes em `.cursorrules`, `docs/stack.md` e `docs/api.md`
+1. **Analisar a proposta** contra os padrões existentes em `AGENTS.md`, `docs/stack.md` e `docs/api.md`
 2. **Identificar anti-patterns** — acoplamento entre apps, lógica de negócio em `http/`/`infra/`, upload binário na API, transcode síncrono, polling onde há WebSocket, violação de camadas DDD
 3. **Propor ou revisar ADRs** — Architecture Decision Records em `docs/adr/`, no formato padrão
 4. **Avaliar impacto operacional** — a decisão cabe na VPS com FFmpeg + BullMQ? Bloqueia o worker? Exige mudança em `packages/shared` ou nos dois frontends?
@@ -33,7 +33,7 @@ Quando receber uma proposta técnica, dúvida arquitetural, spike ou decisão a 
 
 Antes de responder, leia (somente leitura):
 
-- [`.cursorrules`](../../../.cursorrules) — agregados, DDD, regras de dependência, pipeline de vídeo
+- [`AGENTS.md`](../../../AGENTS.md) — agregados, DDD, regras de dependência, pipeline de vídeo
 - [`docs/api.md`](../../../docs/api.md) — contratos REST/WebSocket, erros tipados, versionamento `/v1`
 - [`docs/stack.md`](../../../docs/stack.md) — Fastify, BullMQ, FFmpeg, R2/CDN, Sentry
 - [`docs/folder-structure.md`](../../../docs/folder-structure.md) — superfícies e módulos planejados

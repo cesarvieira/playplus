@@ -115,5 +115,5 @@ Prefixo `ple-` (error **e**): `ple-headline`, `ple-btn`, `ple-dev-panel`, etc. U
 ## Referências cruzadas
 
 - [README do admin](../README.md) — setup e variáveis
-- [`.cursorrules`](../../../.cursorrules) — regra resumida para todos os agentes
+- [`AGENTS.md`](../../../AGENTS.md) — regra resumida para todos os agentes
 - [`dev-agent/reference.md`](../../../.cursor/skills/dev-agent/reference.md) — padrões de implementação frontend

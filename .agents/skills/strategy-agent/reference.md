@@ -1,6 +1,6 @@
 # Strategy Agent — Referência Play+
 
-Material de apoio para análises estratégicas. Fonte de verdade completa: `.cursorrules`, `docs/api.md`, `docs/stack.md`.
+Material de apoio para análises estratégicas. Fonte de verdade completa: `AGENTS.md`, `docs/api.md`, `docs/stack.md`.
 
 **Fluxo de agentes:** [../FLUXO.md](../FLUXO.md) — entrada da `discovery-agent` (fase 01); saída **go** → `requirements-agent` (fase 03).
 
@@ -79,7 +79,7 @@ Resumo estratégico:
 
 ## Pipeline de vídeo (referência rápida)
 
-Detalhes completos em `.cursorrules` e `docs/api.md`. Resumo:
+Detalhes completos em `AGENTS.md` e `docs/api.md`. Resumo:
 
 1. `POST /videos` (admin) → presigned upload_url
 2. Cliente upload direto → MinIO/R2

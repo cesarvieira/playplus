@@ -32,7 +32,7 @@ Quando receber especificações de tela, descrições de fluxo, wireframes, mock
 
 Antes de responder, leia (somente leitura):
 
-- [`.cursorrules`](../../../.cursorrules) — agregados, pipeline, auth, regras de streaming
+- [`AGENTS.md`](../../../AGENTS.md) — agregados, pipeline, auth, regras de streaming
 - [`docs/folder-structure.md`](../../../docs/folder-structure.md) — componentes e superfícies
 - [`docs/api.md`](../../../docs/api.md) — contratos, WebSocket, erros tipados
 - [`apps/admin/docs/theme.md`](../../../apps/admin/docs/theme.md) — tema visual admin (consistência UI)

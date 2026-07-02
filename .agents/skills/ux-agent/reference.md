@@ -1,6 +1,6 @@
 # UX Agent — Referência Play+
 
-Material de apoio para revisões de design e UX. Fonte de verdade completa: `.cursorrules`, `docs/folder-structure.md`, `docs/api.md`.
+Material de apoio para revisões de design e UX. Fonte de verdade completa: `AGENTS.md`, `docs/folder-structure.md`, `docs/api.md`.
 
 **Fluxo de agentes:** [../FLUXO.md](../FLUXO.md) — entrada da `requirements-agent` (fase 03); saída → `architect-agent` ou `planning-agent`.
 

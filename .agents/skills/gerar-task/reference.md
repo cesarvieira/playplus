@@ -1,7 +1,7 @@
 # Gerar e Refinar Task — Referência Play+ (GitHub Issues)
 
 Material de apoio para criação e refinamento de issues alinhadas ao monorepo Play+.
-Fonte de verdade: `.cursorrules`, `docs/api.md`, `docs/stack.md`, `docs/folder-structure.md`.
+Fonte de verdade: `AGENTS.md`, `docs/api.md`, `docs/stack.md`, `docs/folder-structure.md`.
 
 **Fluxo:** [../FLUXO.md](../FLUXO.md) — fase **06b**; entrada do `planning-agent` ou issue/texto a refinar; saída → `dev-agent`.
 

@@ -1,6 +1,6 @@
 # Discovery Agent — Referência Play+
 
-Material de apoio para análises de discovery. Fonte de verdade completa: `.cursorrules`, `docs/api.md`, `docs/stack.md`.
+Material de apoio para análises de discovery. Fonte de verdade completa: `AGENTS.md`, `docs/api.md`, `docs/stack.md`.
 
 **Fluxo de agentes:** [../FLUXO.md](../FLUXO.md) — esta skill é a **fase 01**; handoff de saída → `strategy-agent`.
 

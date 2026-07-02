@@ -34,7 +34,7 @@ Quando receber um épico, User Story refinada, bloco de US aprovadas pela `ux-ag
 
 Antes de responder, leia (somente leitura):
 
-- [`.cursorrules`](../../../.cursorrules) — agregados, pipeline, regras de dependência, DDD
+- [`AGENTS.md`](../../../AGENTS.md) — agregados, pipeline, regras de dependência, DDD
 - [`docs/api.md`](../../../docs/api.md) — rotas, WebSocket, erros tipados
 - [`docs/stack.md`](../../../docs/stack.md) — VPS, BullMQ, FFmpeg, R2/CDN
 - [`docs/folder-structure.md`](../../../docs/folder-structure.md) — componentes e módulos planejados

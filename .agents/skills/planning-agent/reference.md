@@ -1,6 +1,6 @@
 # Planning Agent — Referência Play+
 
-Material de apoio para breakdown técnico e planejamento de iterações. Fonte de verdade completa: `.cursorrules`, `docs/api.md`, `docs/stack.md`, `docs/folder-structure.md`.
+Material de apoio para breakdown técnico e planejamento de iterações. Fonte de verdade completa: `AGENTS.md`, `docs/api.md`, `docs/stack.md`, `docs/folder-structure.md`.
 
 **Fluxo de agentes:** [../FLUXO.md](../FLUXO.md) — **fase 06**; saída → `dev-agent` (fase 07).
 
@@ -218,4 +218,4 @@ Planning quebra em tasks alinhadas ao inventário de `docs/folder-structure.md` 
 
 Entrega tasks ordenadas com dependências, pontos e superfície. O `dev-agent` implementa na ordem **T01 → T02 → …** — ver [dev-agent/reference.md](../dev-agent/reference.md).
 
-Não substitui o desenvolvedor — entrega sequência executável. Commits seguem Conventional Commits em português (`.cursorrules`).
+Não substitui o desenvolvedor — entrega sequência executável. Commits seguem Conventional Commits em português (`AGENTS.md`).

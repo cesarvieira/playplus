@@ -34,7 +34,7 @@ Dois modos complementares:
 2. Saída do `planning-agent`
 3. Markdown ou issue existente colada no chat
 
-**Contexto obrigatório:** [`.cursorrules`](../../../.cursorrules), [`../FLUXO.md`](../FLUXO.md), [`reference.md`](reference.md).
+**Contexto obrigatório:** [`AGENTS.md`](../../../AGENTS.md), [`../FLUXO.md`](../FLUXO.md), [`reference.md`](reference.md).
 
 **Handoff posterior:** issues criadas/refinadas → `dev-agent`, ordem `shared → api → worker → frontend`.
 

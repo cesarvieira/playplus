@@ -34,7 +34,7 @@ Quando receber transcrições de entrevistas, notas de reunião ou relatos de us
 
 Antes de responder, leia (somente leitura):
 
-- [`.cursorrules`](../../../.cursorrules) — visão do produto, agregados, pipeline de vídeo
+- [`AGENTS.md`](../../../AGENTS.md) — visão do produto, agregados, pipeline de vídeo
 - [`docs/api.md`](../../../docs/api.md) — superfícies viewer vs admin, contratos planejados
 - [`reference.md`](reference.md) — personas, domínios de dor, mapa insight → agregado, exemplos JTBD
 - [`../FLUXO.md`](../FLUXO.md) — posição no pipeline e handoffs

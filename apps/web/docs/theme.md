@@ -143,5 +143,5 @@ Utilitários de **layout estrutural** sem valor visual de marca:
 ## Referências cruzadas
 
 - [Tema admin](../../admin/docs/theme.md) — padrão arquitetural espelhado (paleta Pêssego vs Night)
-- [`.cursorrules`](../../../.cursorrules) — regra resumida para todos os agentes
+- [`AGENTS.md`](../../../AGENTS.md) — regra resumida para todos os agentes
 - [`dev-agent/reference.md`](../../../.cursor/skills/dev-agent/reference.md) — padrões de implementação frontend

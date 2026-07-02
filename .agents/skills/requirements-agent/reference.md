@@ -1,6 +1,6 @@
 # Requirements Agent — Referência Play+
 
-Material de apoio para especificação de requisitos. Fonte de verdade completa: `.cursorrules`, `docs/api.md`, `docs/stack.md`.
+Material de apoio para especificação de requisitos. Fonte de verdade completa: `AGENTS.md`, `docs/api.md`, `docs/stack.md`.
 
 **Fluxo de agentes:** [../FLUXO.md](../FLUXO.md) — entrada da `strategy-agent` (fase 02); saída → `ux-agent`, `architect-agent` ou `planning-agent`.
 

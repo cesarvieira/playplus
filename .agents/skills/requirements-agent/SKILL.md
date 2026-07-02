@@ -33,7 +33,7 @@ Quando receber um rascunho de requisito, épico, Problem Statement ou Business C
 
 Antes de responder, leia (somente leitura):
 
-- [`.cursorrules`](../../../.cursorrules) — agregados, pipeline, regras de dependência
+- [`AGENTS.md`](../../../AGENTS.md) — agregados, pipeline, regras de dependência
 - [`docs/api.md`](../../../docs/api.md) — rotas, WebSocket, erros tipados
 - [`docs/stack.md`](../../../docs/stack.md) — restrições VPS, BullMQ, R2/CDN
 - [`reference.md`](reference.md) — IDs, exemplos, checklist NFR, handoffs

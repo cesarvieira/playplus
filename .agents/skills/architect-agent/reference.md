@@ -1,6 +1,6 @@
 # Architect Agent — Referência Play+
 
-Material de apoio para revisões arquiteturais e ADRs. Fonte de verdade completa: `.cursorrules`, `docs/api.md`, `docs/stack.md`, `docs/folder-structure.md`.
+Material de apoio para revisões arquiteturais e ADRs. Fonte de verdade completa: `AGENTS.md`, `docs/api.md`, `docs/stack.md`, `docs/folder-structure.md`.
 
 **Fluxo de agentes:** [../FLUXO.md](../FLUXO.md) — **fase 05**; entrada de `requirements-agent` ou `ux-agent`; saída → `planning-agent`.
 
@@ -160,7 +160,7 @@ Proposta de upload binário via Fastify com proxy para MinIO.
 
 ## Anti-patterns detectados
 
-- **Crítico:** upload binário na API — viola `.cursorrules` e esgota VPS
+- **Crítico:** upload binário na API — viola `AGENTS.md` e esgota VPS
 - **Crítico:** duplica responsabilidade já coberta por presigned URL
 
 ## Impacto cross-package
