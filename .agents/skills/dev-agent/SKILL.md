@@ -91,7 +91,7 @@ Não implemente frontend antes de contratos em `shared` e rotas/eventos definido
 
 - Rotas finas em `http/` — orquestração nos use cases em `application/`
 - Regras de negócio puras em `domain/` — sem framework, sem I/O
-- Validação com JSON Schema nativo do Fastify — nunca lógica de validação na rota
+- Validação com Zod (schemas em `application/` ou compartilhados via `packages/shared`) — nunca lógica de validação na rota
 - Injeção via construtor ou factory — nunca acoplamento global oculto
 - Erros tipados de `packages/shared` — resposta `{ "error": { "code", "message" } }`
 - Log estruturado: `logger.info({ videoId, userId }, 'descrição do evento')`
