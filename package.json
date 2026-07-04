@@ -31,7 +31,7 @@
   "devDependencies": {
     "@awmottaz/prettier-plugin-void-html": "^2.1.0",
     "@eslint/config-helpers": "^0.6.0",
-    "@eslint/js": "^9.28.0",
+    "@eslint/js": "^10.0.1",
     "@eslint/json": "^2.0.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@vitest/coverage-v8": "^4.1.9",

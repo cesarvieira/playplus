@@ -17,8 +17,8 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
       '@eslint/js':
-        specifier: ^9.28.0
-        version: 9.39.4
+        specifier: ^10.0.1
+        version: 10.0.1(eslint@10.5.0(jiti@2.7.0))
       '@eslint/json':
         specifier: ^2.0.0
         version: 2.0.0
@@ -1333,10 +1333,6 @@ packages:
     peerDependenciesMeta:
       eslint:
         optional: true
-
-  '@eslint/js@9.39.4':
-    resolution: {integrity: sha512-nE7DEIchvtiFTwBw4Lfbu59PG+kCofhjsKaCWzxTpt4lfRjRMqG6uMBzKXuEcyXhOHoUp9riAm7/aWYGhXZ9cw==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/json@2.0.0':
     resolution: {integrity: sha512-P32ZJMIopNWQd1SFhd0tgjfA/hgzUuVSqHmMi2273QaLWHWimXq6V+qL4DNKnjGzO/aNECtYW+rEJ/pWB6uP+w==}
@@ -7793,8 +7789,6 @@ snapshots:
   '@eslint/js@10.0.1(eslint@10.5.0(jiti@2.7.0))':
     optionalDependencies:
       eslint: 10.5.0(jiti@2.7.0)
-
-  '@eslint/js@9.39.4': {}
 
   '@eslint/json@2.0.0':
     dependencies:
