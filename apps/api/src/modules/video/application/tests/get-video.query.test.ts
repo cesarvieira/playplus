@@ -22,7 +22,9 @@ function createVideo(
     uploadComplete: status !== VIDEO_STATUS.PENDING,
     storageOriginalKey: `videos/${videoId}/original/movie.mp4`,
     storageHlsPrefix: `videos/${videoId}/hls/`,
+    thumbnailKey: null,
     errorReason: null,
+    publishedAt: null,
     createdAt,
     updatedAt: createdAt,
   });
@@ -73,10 +75,12 @@ describe('GetVideoQuery', () => {
       id: videoId,
       title: 'Meu filme',
       duration: 7240,
+      thumbnailKey: null,
       thumbnailUrl: null,
       streamUrl: `http://localhost:8080/media/videos/${videoId}/hls/master.m3u8`,
       status: VIDEO_STATUS.READY,
       progress: null,
+      publishedAt: null,
       createdAt: createdAt.toISOString(),
     });
   });
@@ -91,9 +95,11 @@ describe('GetVideoQuery', () => {
       id: videoId,
       title: 'Meu filme',
       duration: null,
+      thumbnailKey: null,
       thumbnailUrl: null,
       status: VIDEO_STATUS.PROCESSING,
       progress: null,
+      publishedAt: null,
       createdAt: createdAt.toISOString(),
     });
     expect(result).not.toHaveProperty('streamUrl');

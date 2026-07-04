@@ -12,13 +12,20 @@ export function buildStreamUrl(cdnBaseUrl: string, videoId: string): string {
   return `${base}/videos/${videoId}/hls/master.m3u8`;
 }
 
+export function buildThumbnailUrl(cdnBaseUrl: string, thumbnailKey: string): string {
+  const base = cdnBaseUrl.replace(/\/$/, '');
+  return `${base}/${thumbnailKey}`;
+}
+
 interface VideoDetail {
   id: string;
   title: string;
   duration: number | null;
-  thumbnailUrl: null;
+  thumbnailKey: string | null;
+  thumbnailUrl: string | null;
   status: VideoStatus;
   progress: null;
+  publishedAt: string | null;
   createdAt: string;
   streamUrl?: string;
   uploadComplete?: boolean;
@@ -52,13 +59,18 @@ async function mapToDetail(
   videoRepository: VideoRepository,
   cdnBaseUrl: string,
 ): Promise<VideoDetail> {
+  const thumbnailUrl =
+    video.thumbnailKey ? buildThumbnailUrl(cdnBaseUrl, video.thumbnailKey) : null;
+
   const detail: VideoDetail = {
     id: video.id,
     title: video.title,
     duration: video.status === VIDEO_STATUS.READY ? video.duration : null,
-    thumbnailUrl: null,
+    thumbnailKey: video.thumbnailKey,
+    thumbnailUrl,
     status: video.status,
     progress: null,
+    publishedAt: video.publishedAt ? video.publishedAt.toISOString() : null,
     createdAt: video.createdAt.toISOString(),
   };
 
@@ -72,3 +84,4 @@ async function mapToDetail(
 
   return detail;
 }
+

@@ -30,6 +30,7 @@
         "app/components/PlButton.vue",
         "app/components/PlInput.vue",
         "app/components/PlLabel.vue",
+        "app/components/PlModal.vue",
         "app/components/PlSkeleton.vue",
         "app/components/AppHeader.vue",
         "app/components/PlayLogo.vue",

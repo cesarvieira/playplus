@@ -39,7 +39,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
     storageClient,
     transcodeQueue,
   );
-  const listVideosQuery = new ListVideosQuery(videoRepository, storageClient);
+  const listVideosQuery = new ListVideosQuery(videoRepository, storageClient, env.CDN_BASE_URL);
   const getVideoQuery = new GetVideoQuery(videoRepository, storageClient, env.CDN_BASE_URL);
 
   fastify.get(
@@ -67,9 +67,11 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
           id: item.id,
           title: item.title,
           duration: item.duration,
+          thumbnail_key: item.thumbnailKey,
           thumbnail_url: item.thumbnailUrl,
           status: item.status,
           ...(item.uploadComplete !== undefined ? { upload_complete: item.uploadComplete } : {}),
+          published_at: item.publishedAt,
           created_at: item.createdAt,
         })),
         meta: result.meta,
@@ -98,11 +100,13 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
         id: result.id,
         title: result.title,
         duration: result.duration,
+        thumbnail_key: result.thumbnailKey,
         thumbnail_url: result.thumbnailUrl,
         ...(result.streamUrl !== undefined ? { stream_url: result.streamUrl } : {}),
         status: result.status,
         ...(result.uploadComplete !== undefined ? { upload_complete: result.uploadComplete } : {}),
         progress: result.progress,
+        published_at: result.publishedAt,
         created_at: result.createdAt,
       });
     },

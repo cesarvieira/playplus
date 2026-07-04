@@ -18,7 +18,9 @@ function createPendingVideo(uploadComplete: boolean) {
     uploadComplete,
     storageOriginalKey: `videos/${videoId}/original/movie.mp4`,
     storageHlsPrefix: `videos/${videoId}/hls/`,
+    thumbnailKey: null,
     errorReason: null,
+    publishedAt: null,
     createdAt: new Date('2025-01-01T00:00:00Z'),
     updatedAt: new Date('2025-01-01T00:00:00Z'),
   });
@@ -35,7 +37,9 @@ function createReadyVideo() {
     uploadComplete: true,
     storageOriginalKey: `videos/${videoId}/original/movie.mp4`,
     storageHlsPrefix: `videos/${videoId}/hls/`,
+    thumbnailKey: null,
     errorReason: null,
+    publishedAt: null,
     createdAt: new Date('2025-01-01T00:00:00Z'),
     updatedAt: new Date('2025-01-01T00:00:00Z'),
   });

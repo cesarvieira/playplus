@@ -17,7 +17,9 @@ interface VideoRowFixture {
   uploadComplete: boolean;
   storageOriginalKey: string;
   storageHlsPrefix: string | null;
+  thumbnailKey: string | null;
   errorReason: string | null;
+  publishedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,7 +34,9 @@ const videoRow: VideoRowFixture = {
   uploadComplete: false,
   storageOriginalKey: 'videos/00000000-0000-4000-8000-000000000002/original/movie.mp4',
   storageHlsPrefix: null,
+  thumbnailKey: null,
   errorReason: null,
+  publishedAt: null,
   createdAt: new Date('2026-06-20T12:00:00.000Z'),
   updatedAt: new Date('2026-06-20T12:00:00.000Z'),
 };
@@ -151,6 +155,8 @@ describe('VideoRepository', () => {
     expect(findByIdChain.limit).toHaveBeenCalledWith(1);
     expect(result).toBeInstanceOf(VideoEntity);
     expect(result?.id).toBe(videoRow.id);
+    expect(result?.thumbnailKey).toBeNull();
+    expect(result?.publishedAt).toBeNull();
   });
 
   it('findById retorna null quando não existe', async () => {

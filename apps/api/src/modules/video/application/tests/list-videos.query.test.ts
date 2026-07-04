@@ -19,7 +19,9 @@ function createVideo(status: typeof VIDEO_STATUS.PENDING | typeof VIDEO_STATUS.R
     uploadComplete: status === VIDEO_STATUS.READY,
     storageOriginalKey: `videos/${videoId}/original/movie.mp4`,
     storageHlsPrefix: `videos/${videoId}/hls/`,
+    thumbnailKey: null,
     errorReason: null,
+    publishedAt: null,
     createdAt,
     updatedAt: createdAt,
   });
@@ -34,7 +36,7 @@ function createQuery() {
   const storageClient = {
     objectExists: vi.fn(),
   };
-  const query = new ListVideosQuery(videoRepository as never, storageClient as never);
+  const query = new ListVideosQuery(videoRepository as never, storageClient as never, 'http://localhost:8080/media');
 
   return { query, videoRepository, storageClient };
 }
@@ -60,8 +62,10 @@ describe('ListVideosQuery', () => {
           id: videoId,
           title: 'Meu filme',
           duration: 7240,
+          thumbnailKey: null,
           thumbnailUrl: null,
           status: VIDEO_STATUS.READY,
+          publishedAt: null,
           createdAt: createdAt.toISOString(),
         },
       ],

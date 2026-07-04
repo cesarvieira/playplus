@@ -5,6 +5,7 @@ import type { StorageClient } from '#infra/storage/storage.client';
 
 import type { VideoEntity } from '../domain/video.entity.ts';
 import type { VideoRepository } from '../infra/video.repository.ts';
+import { buildThumbnailUrl } from './get-video.query.ts';
 import { resolveUploadComplete } from './resolve-upload-complete.ts';
 
 const DEFAULT_PAGE = 1;
@@ -23,9 +24,11 @@ interface VideoListItem {
   id: string;
   title: string;
   duration: number | null;
-  thumbnailUrl: null;
+  thumbnailKey: string | null;
+  thumbnailUrl: string | null;
   status: VideoStatus;
   uploadComplete?: boolean;
+  publishedAt: string | null;
   createdAt: string;
 }
 
@@ -52,13 +55,19 @@ async function mapToListItem(
   video: VideoEntity,
   storageClient: StorageClient,
   videoRepository: VideoRepository,
+  cdnBaseUrl: string,
 ): Promise<VideoListItem> {
+  const thumbnailUrl =
+    video.thumbnailKey ? buildThumbnailUrl(cdnBaseUrl, video.thumbnailKey) : null;
+
   const item: VideoListItem = {
     id: video.id,
     title: video.title,
     duration: video.duration,
-    thumbnailUrl: null,
+    thumbnailKey: video.thumbnailKey,
+    thumbnailUrl,
     status: video.status,
+    publishedAt: video.publishedAt ? video.publishedAt.toISOString() : null,
     createdAt: video.createdAt.toISOString(),
   };
 
@@ -72,10 +81,12 @@ async function mapToListItem(
 export class ListVideosQuery {
   private readonly videoRepository: VideoRepository;
   private readonly storageClient: StorageClient;
+  private readonly cdnBaseUrl: string;
 
-  constructor(videoRepository: VideoRepository, storageClient: StorageClient) {
+  constructor(videoRepository: VideoRepository, storageClient: StorageClient, cdnBaseUrl: string) {
     this.videoRepository = videoRepository;
     this.storageClient = storageClient;
+    this.cdnBaseUrl = cdnBaseUrl;
   }
 
   async execute(input: ListVideosInput = {}): Promise<ListVideosResult> {
@@ -87,7 +98,7 @@ export class ListVideosQuery {
     ]);
 
     const data = await Promise.all(
-      videos.map((video) => mapToListItem(video, this.storageClient, this.videoRepository)),
+      videos.map(video => mapToListItem(video, this.storageClient, this.videoRepository, this.cdnBaseUrl)),
     );
 
     return {
@@ -96,3 +107,4 @@ export class ListVideosQuery {
     };
   }
 }
+

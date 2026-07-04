@@ -10,7 +10,10 @@ export interface Video {
   uploadComplete: boolean;
   storageOriginalKey: string;
   storageHlsPrefix: string | null;
+  thumbnailKey: string | null;
+  thumbnailUrl: string | null;
   errorReason: string | null;
+  publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

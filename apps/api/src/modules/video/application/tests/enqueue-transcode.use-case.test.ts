@@ -28,7 +28,9 @@ function createVideo(
     uploadComplete: false,
     storageOriginalKey: `videos/${videoId}/original/movie.mp4`,
     storageHlsPrefix: `videos/${videoId}/hls/`,
+    thumbnailKey: null,
     errorReason: status === VIDEO_STATUS.ERROR ? 'FFmpeg falhou' : null,
+    publishedAt: null,
     createdAt: new Date('2025-01-01T00:00:00Z'),
     updatedAt: new Date('2025-01-01T00:00:00Z'),
   });

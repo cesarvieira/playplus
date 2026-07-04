@@ -15,7 +15,9 @@ describe('VideoEntity', () => {
     uploadComplete: true,
     storageOriginalKey: 'videos/video-id/original/movie.mp4',
     storageHlsPrefix: 'videos/video-id/hls/',
+    thumbnailKey: null,
     errorReason: null,
+    publishedAt: null,
     createdAt: new Date('2026-06-20T12:00:00.000Z'),
     updatedAt: new Date('2026-06-20T13:00:00.000Z'),
   };
@@ -46,6 +48,8 @@ describe('VideoEntity', () => {
     expect(entity.duration).toBeNull();
     expect(entity.storageHlsPrefix).toBe('videos/00000000-0000-4000-8000-000000000001/hls/');
     expect(entity.errorReason).toBeNull();
+    expect(entity.thumbnailKey).toBeNull();
+    expect(entity.publishedAt).toBeNull();
   });
 
   it('preserva campos via fromPersistence', () => {
@@ -76,7 +80,10 @@ describe('VideoEntity', () => {
       uploadComplete: persistenceProps.uploadComplete,
       storageOriginalKey: persistenceProps.storageOriginalKey,
       storageHlsPrefix: persistenceProps.storageHlsPrefix,
+      thumbnailKey: null,
+      thumbnailUrl: null,
       errorReason: persistenceProps.errorReason,
+      publishedAt: null,
       createdAt: persistenceProps.createdAt.toISOString(),
       updatedAt: persistenceProps.updatedAt.toISOString(),
     });

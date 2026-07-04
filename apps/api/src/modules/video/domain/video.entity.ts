@@ -17,7 +17,9 @@ interface VideoPersistenceProps {
   uploadComplete: boolean;
   storageOriginalKey: string;
   storageHlsPrefix: string | null;
+  thumbnailKey: string | null;
   errorReason: string | null;
+  publishedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,7 +34,9 @@ export class VideoEntity {
   readonly uploadComplete: boolean;
   readonly storageOriginalKey: string;
   readonly storageHlsPrefix: string | null;
+  readonly thumbnailKey: string | null;
   readonly errorReason: string | null;
+  readonly publishedAt: Date | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
@@ -46,7 +50,9 @@ export class VideoEntity {
     this.uploadComplete = props.uploadComplete;
     this.storageOriginalKey = props.storageOriginalKey;
     this.storageHlsPrefix = props.storageHlsPrefix;
+    this.thumbnailKey = props.thumbnailKey;
     this.errorReason = props.errorReason;
+    this.publishedAt = props.publishedAt;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
@@ -69,7 +75,9 @@ export class VideoEntity {
       uploadComplete: false,
       storageOriginalKey: buildStorageOriginalKey(id, input.fileName),
       storageHlsPrefix: buildStorageHlsPrefix(id),
+      thumbnailKey: null,
       errorReason: null,
+      publishedAt: null,
       createdAt: now,
       updatedAt: now,
     });
@@ -86,9 +94,13 @@ export class VideoEntity {
       uploadComplete: this.uploadComplete,
       storageOriginalKey: this.storageOriginalKey,
       storageHlsPrefix: this.storageHlsPrefix,
+      thumbnailKey: this.thumbnailKey,
+      thumbnailUrl: null,
       errorReason: this.errorReason,
+      publishedAt: this.publishedAt ? this.publishedAt.toISOString() : null,
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
     };
   }
 }
+

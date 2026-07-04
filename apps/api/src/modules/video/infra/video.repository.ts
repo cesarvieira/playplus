@@ -36,7 +36,9 @@ function mapRowToEntity(row: VideoRow): VideoEntity {
     uploadComplete: row.uploadComplete,
     storageOriginalKey: row.storageOriginalKey,
     storageHlsPrefix: row.storageHlsPrefix,
+    thumbnailKey: row.thumbnailKey,
     errorReason: row.errorReason,
+    publishedAt: row.publishedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });

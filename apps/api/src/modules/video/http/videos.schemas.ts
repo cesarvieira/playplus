@@ -83,18 +83,20 @@ export interface ListVideosQuerystring {
 
 const videoListItemSchema = {
   type: 'object',
-  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'created_at'],
+  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'published_at', 'created_at'],
   additionalProperties: false,
   properties: {
     id: { type: 'string', format: 'uuid' },
     title: { type: 'string' },
     duration: { type: ['integer', 'null'] },
-    thumbnail_url: { type: 'null' },
+    thumbnail_key: { type: ['string', 'null'] },
+    thumbnail_url: { type: ['string', 'null'] },
     status: {
       type: 'string',
       enum: ['pending', 'queued', 'processing', 'ready', 'error'],
     },
     upload_complete: { type: 'boolean' },
+    published_at: { type: ['string', 'null'], format: 'date-time' },
     created_at: { type: 'string', format: 'date-time' },
   },
 } as const;
@@ -123,13 +125,14 @@ export const listVideosResponseSchema = {
 
 export const getVideoResponseSchema = {
   type: 'object',
-  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'progress', 'created_at'],
+  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'progress', 'published_at', 'created_at'],
   additionalProperties: false,
   properties: {
     id: { type: 'string', format: 'uuid' },
     title: { type: 'string' },
     duration: { type: ['integer', 'null'] },
-    thumbnail_url: { type: 'null' },
+    thumbnail_key: { type: ['string', 'null'] },
+    thumbnail_url: { type: ['string', 'null'] },
     stream_url: { type: 'string' },
     status: {
       type: 'string',
@@ -137,6 +140,7 @@ export const getVideoResponseSchema = {
     },
     upload_complete: { type: 'boolean' },
     progress: { type: 'null' },
+    published_at: { type: ['string', 'null'], format: 'date-time' },
     created_at: { type: 'string', format: 'date-time' },
   },
 } as const;
