@@ -185,8 +185,9 @@ Lista vídeos disponíveis.
       "id": "uuid",
       "title": "...",
       "duration": 7240,
-      "thumbnail_url": "https://cdn.../thumb.jpg",
+      "thumbnail_url": "https://cdn.example.com/videos/uuid/hls/thumbnail.jpg",
       "status": "ready",
+      "published_at": "2025-01-01T00:00:00Z",
       "upload_complete": true,
       "created_at": "2025-01-01T00:00:00Z"
     }
@@ -194,6 +195,8 @@ Lista vídeos disponíveis.
   "meta": { "total": 12, "page": 1, "limit": 20 }
 }
 ```
+
+`thumbnail_url`: URL pública derivada de `{CDN_BASE_URL}/{thumbnail_key}` (key interna no storage, não exposta na API). `null` quando o worker ainda não gerou o frame.
 
 `upload_complete`: `boolean` — presente em itens com `status: pending`. `false` = aguardando upload ao storage; `true` = arquivo no storage, pronto para `POST /videos/:id/transcode`. Omitido ou `true` nos demais status.
 
@@ -212,13 +215,14 @@ Retorna metadados completos de um vídeo, incluindo progresso salvo do usuário 
   "id": "uuid",
   "title": "...",
   "duration": 7240,
-  "thumbnail_url": "https://cdn.../thumb.jpg",
-  "stream_url": "https://cdn.../master.m3u8",
+  "thumbnail_url": "https://cdn.example.com/videos/uuid/hls/thumbnail.jpg",
+  "stream_url": "https://cdn.example.com/videos/uuid/hls/master.m3u8",
   "status": "ready",
   "progress": {
     "position": 3420,
     "updated_at": "2025-01-01T00:00:00Z"
   },
+  "published_at": "2025-01-01T00:00:00Z",
   "created_at": "2025-01-01T00:00:00Z"
 }
 ```
@@ -232,9 +236,13 @@ Retorna metadados completos de um vídeo, incluindo progresso salvo do usuário 
   "duration": null,
   "thumbnail_url": null,
   "status": "processing",
+  "progress": null,
+  "published_at": null,
   "created_at": "2025-01-01T00:00:00Z"
 }
 ```
+
+`thumbnail_url`: `null` enquanto o worker não extraiu o frame. Mesma derivação CDN descrita em `GET /videos`.
 
 `stream_url` omitido quando o vídeo não está pronto. A UI do player (`apps/web`) deve tratar `status !== ready` sem montar HLS.
 

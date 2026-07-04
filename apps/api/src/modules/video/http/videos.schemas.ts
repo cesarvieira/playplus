@@ -89,7 +89,6 @@ const videoListItemSchema = {
     id: { type: 'string', format: 'uuid' },
     title: { type: 'string' },
     duration: { type: ['integer', 'null'] },
-    thumbnail_key: { type: ['string', 'null'] },
     thumbnail_url: { type: ['string', 'null'] },
     status: {
       type: 'string',
@@ -131,7 +130,6 @@ export const getVideoResponseSchema = {
     id: { type: 'string', format: 'uuid' },
     title: { type: 'string' },
     duration: { type: ['integer', 'null'] },
-    thumbnail_key: { type: ['string', 'null'] },
     thumbnail_url: { type: ['string', 'null'] },
     stream_url: { type: 'string' },
     status: {

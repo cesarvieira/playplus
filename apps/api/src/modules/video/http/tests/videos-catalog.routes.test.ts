@@ -150,7 +150,6 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
             id: videoId,
             title: 'Meu filme',
             duration: 7240,
-            thumbnail_key: null,
             thumbnail_url: null,
             status: VIDEO_STATUS.READY,
             published_at: null,
@@ -174,6 +173,44 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
       });
 
       expect(response.statusCode).toBe(200);
+    });
+
+    it('retorna thumbnail_url quando thumbnailKey existe', async () => {
+      const thumbnailUrl = `http://localhost:8080/media/videos/${videoId}/hls/thumbnail.jpg`;
+
+      listExecute.mockResolvedValue({
+        data: [
+          {
+            id: videoId,
+            title: 'Meu filme',
+            duration: 7240,
+            thumbnailKey: `videos/${videoId}/hls/thumbnail.jpg`,
+            thumbnailUrl,
+            status: VIDEO_STATUS.READY,
+            publishedAt: null,
+            createdAt: '2025-01-01T00:00:00Z',
+          },
+        ],
+        meta: { total: 1, page: 1, limit: 20 },
+      });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/v1/videos',
+        headers: { authorization: `Bearer ${viewerToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().data[0]).toEqual({
+        id: videoId,
+        title: 'Meu filme',
+        duration: 7240,
+        thumbnail_url: thumbnailUrl,
+        status: VIDEO_STATUS.READY,
+        published_at: null,
+        created_at: '2025-01-01T00:00:00Z',
+      });
+      expect(response.json().data[0]).not.toHaveProperty('thumbnail_key');
     });
   });
 
@@ -212,7 +249,6 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
         id: videoId,
         title: 'Meu filme',
         duration: 7240,
-        thumbnail_key: null,
         thumbnail_url: null,
         stream_url: `http://localhost:8080/media/videos/${videoId}/hls/master.m3u8`,
         status: VIDEO_STATUS.READY,
@@ -220,6 +256,43 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
         published_at: null,
         created_at: '2025-01-01T00:00:00Z',
       });
+    });
+
+    it('retorna 200 com thumbnail_url para vídeo com thumbnail', async () => {
+      const thumbnailUrl = `http://localhost:8080/media/videos/${videoId}/hls/thumbnail.jpg`;
+
+      getExecute.mockResolvedValue({
+        id: videoId,
+        title: 'Meu filme',
+        duration: 7240,
+        thumbnailKey: `videos/${videoId}/hls/thumbnail.jpg`,
+        thumbnailUrl,
+        streamUrl: `http://localhost:8080/media/videos/${videoId}/hls/master.m3u8`,
+        status: VIDEO_STATUS.READY,
+        progress: null,
+        publishedAt: null,
+        createdAt: '2025-01-01T00:00:00Z',
+      });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: `/v1/videos/${videoId}`,
+        headers: { authorization: `Bearer ${viewerToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json()).toEqual({
+        id: videoId,
+        title: 'Meu filme',
+        duration: 7240,
+        thumbnail_url: thumbnailUrl,
+        stream_url: `http://localhost:8080/media/videos/${videoId}/hls/master.m3u8`,
+        status: VIDEO_STATUS.READY,
+        progress: null,
+        published_at: null,
+        created_at: '2025-01-01T00:00:00Z',
+      });
+      expect(response.json()).not.toHaveProperty('thumbnail_key');
     });
 
     it('retorna 200 sem stream_url para vídeo processing', async () => {
