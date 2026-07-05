@@ -4,6 +4,7 @@ import type { VideoStatus } from '@playplus/shared';
 import type { StorageClient } from '#infra/storage/storage.client';
 
 import type { VideoEntity } from '../domain/video.entity.ts';
+import { isCatalogVisible } from '../domain/video-publication.ts';
 import type { VideoRepository } from '../infra/video.repository.ts';
 import { resolveUploadComplete } from './resolve-upload-complete.ts';
 
@@ -42,10 +43,20 @@ export class GetVideoQuery {
     this.cdnBaseUrl = cdnBaseUrl;
   }
 
-  async execute(videoId: string): Promise<VideoDetail> {
+  async execute(
+    videoId: string,
+    options: { includeUnpublished?: boolean } = {},
+  ): Promise<VideoDetail> {
     const video = await this.videoRepository.findById(videoId);
 
     if (!video) {
+      throw new VideoNotFoundError();
+    }
+
+    if (
+      options.includeUnpublished === false &&
+      !isCatalogVisible(video.publishedAt, new Date())
+    ) {
       throw new VideoNotFoundError();
     }
 

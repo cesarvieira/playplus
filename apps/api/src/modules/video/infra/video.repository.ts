@@ -1,4 +1,5 @@
-import { count, desc, eq } from 'drizzle-orm';
+import { and, count, desc, eq, isNotNull, lte, sql } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
 import type * as schema from '#infra/database/schema';
@@ -14,10 +15,35 @@ interface ListVideosParams {
   page: number;
   limit: number;
   status?: VideoStatus;
+  publishedOnly?: boolean;
 }
 
 interface CountVideosParams {
   status?: VideoStatus;
+  publishedOnly?: boolean;
+}
+
+function buildListFilters(params: { status?: VideoStatus; publishedOnly?: boolean }): SQL | undefined {
+  const conditions: SQL[] = [];
+
+  if (params.status) {
+    conditions.push(eq(videos.status, params.status));
+  }
+
+  if (params.publishedOnly) {
+    conditions.push(isNotNull(videos.publishedAt));
+    conditions.push(lte(videos.publishedAt, sql`now()`));
+  }
+
+  if (conditions.length === 0) {
+    return undefined;
+  }
+
+  if (conditions.length === 1) {
+    return conditions[0];
+  }
+
+  return and(...conditions);
 }
 
 interface UpdateStatusOptions {
@@ -136,14 +162,31 @@ export class VideoRepository {
     return mapRowToEntity(row);
   }
 
+  async updatePublishedAt(id: string, publishedAt: Date | null): Promise<VideoEntity | null> {
+    const rows = await this.db
+      .update(videos)
+      .set({
+        publishedAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(videos.id, id))
+      .returning();
+
+    const row = rows[0];
+    if (!row) {
+      return null;
+    }
+
+    return mapRowToEntity(row);
+  }
+
   async list(params: ListVideosParams): Promise<VideoEntity[]> {
     const offset = (params.page - 1) * params.limit;
 
     const baseQuery = this.db.select().from(videos);
+    const filters = buildListFilters(params);
 
-    const filteredQuery = params.status
-      ? baseQuery.where(eq(videos.status, params.status))
-      : baseQuery;
+    const filteredQuery = filters ? baseQuery.where(filters) : baseQuery;
 
     const rows = await filteredQuery
       .orderBy(desc(videos.createdAt))
@@ -155,10 +198,9 @@ export class VideoRepository {
 
   async count(params: CountVideosParams = {}): Promise<number> {
     const baseQuery = this.db.select({ total: count() }).from(videos);
+    const filters = buildListFilters(params);
 
-    const rows = params.status
-      ? await baseQuery.where(eq(videos.status, params.status))
-      : await baseQuery;
+    const rows = filters ? await baseQuery.where(filters) : await baseQuery;
 
     return rows[0]?.total ?? 0;
   }

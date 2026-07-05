@@ -8,8 +8,8 @@ import {
 
 import { getValkeyClient } from '../valkey.ts';
 
-export type VideoStatusEventPayload = VideoStatusEvent['payload'];
-export type VideoErrorEventPayload = VideoErrorEvent['payload'];
+type VideoStatusEventPayload = VideoStatusEvent['payload'];
+type VideoErrorEventPayload = VideoErrorEvent['payload'];
 
 export interface VideoEventPublisher {
   publishVideoStatus(payload: VideoStatusEventPayload): Promise<void>;

@@ -202,6 +202,8 @@ Lista vídeos disponíveis.
 
 **Filtros admin (v0):** pill **Em andamento** agrupa `queued` + `processing` no client — a API não expõe filtro único para ambos; `queued` aparece na listagem sem query param dedicado.
 
+**Filtro de publicação:** viewers (`role: viewer`) recebem apenas vídeos com `published_at` no passado ou presente (`published_at IS NOT NULL AND published_at <= NOW()`). Rascunhos (`published_at: null`) e agendados (data futura) ficam ocultos. Admins veem todos os vídeos, independentemente de `published_at`.
+
 ---
 
 ### `GET /videos/:id`
@@ -258,6 +260,8 @@ Retorna metadados completos de um vídeo, incluindo progresso salvo do usuário 
 ```
 
 Aplicável quando `status` é `pending`, `queued` ou `processing`. A implementação pode retornar `200` com metadados parciais (acima) **ou** `409` — a UI deve tratar ambos.
+
+**Filtro de publicação:** viewers recebem `404 VIDEO_NOT_FOUND` para vídeos não publicados (`published_at: null`) ou com publicação futura. Admins acessam qualquer vídeo por ID.
 
 **Erros:** `404 VIDEO_NOT_FOUND` · `401 UNAUTHORIZED`
 
@@ -323,6 +327,67 @@ Dispara o job de transcodificação após o upload concluído.
 ```
 
 A partir daqui, o progresso é acompanhado via WebSocket.
+
+---
+
+### `PATCH /videos/:id/publish` 🔒 admin
+
+Publica o vídeo imediatamente — define `published_at = NOW()`.
+
+**Response `200`:**
+
+```json
+{
+  "id": "uuid",
+  "published_at": "2026-07-04T12:00:00.000Z"
+}
+```
+
+**Erros:** `401 UNAUTHORIZED` · `403 FORBIDDEN` · `404 VIDEO_NOT_FOUND`
+
+---
+
+### `PATCH /videos/:id/schedule` 🔒 admin
+
+Agenda publicação futura — define `published_at` para a data informada.
+
+**Body:**
+
+```json
+{
+  "published_at": "2030-01-01T00:00:00.000Z"
+}
+```
+
+A data deve ser estritamente futura (`published_at > NOW()`).
+
+**Response `200`:**
+
+```json
+{
+  "id": "uuid",
+  "published_at": "2030-01-01T00:00:00.000Z"
+}
+```
+
+**Erros:** `401 UNAUTHORIZED` · `403 FORBIDDEN` · `404 VIDEO_NOT_FOUND` · `422 VALIDATION_ERROR` (data no passado ou igual a now)
+
+---
+
+### `PATCH /videos/:id/unpublish` 🔒 admin
+
+Despublica o vídeo — define `published_at = NULL` (rascunho, invisível no catálogo web).
+
+**Response `200`:**
+
+```json
+{
+  "id": "uuid",
+  "published_at": null
+}
+```
+
+**Erros:** `401 UNAUTHORIZED` · `403 FORBIDDEN` · `404 VIDEO_NOT_FOUND`
 
 ---
 

@@ -1,5 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 
+import { USER_ROLE } from '@playplus/shared';
+
 import { env } from '#config/env';
 import { db } from '#infra/database/client';
 import { createStorageClient } from '#infra/storage/storage.factory';
@@ -10,7 +12,10 @@ import { CreateVideoUseCase } from '../application/create-video.use-case.ts';
 import { EnqueueTranscodeUseCase } from '../application/enqueue-transcode.use-case.ts';
 import { GetVideoQuery } from '../application/get-video.query.ts';
 import { ListVideosQuery } from '../application/list-videos.query.ts';
+import { PublishVideoUseCase } from '../application/publish-video.use-case.ts';
 import { RenewUploadUrlUseCase } from '../application/renew-upload-url.use-case.ts';
+import { ScheduleVideoUseCase } from '../application/schedule-video.use-case.ts';
+import { UnpublishVideoUseCase } from '../application/unpublish-video.use-case.ts';
 import { createTranscodeQueue } from '../infra/transcode.queue.ts';
 import { VideoRepository } from '../infra/video.repository.ts';
 import {
@@ -22,8 +27,11 @@ import {
   listVideosQuerySchema,
   listVideosResponseSchema,
   type ListVideosQuerystring,
+  publishVideoResponseSchema,
   renewUploadUrlResponseSchema,
+  scheduleVideoBodySchema,
   type CreateVideoRequestBody,
+  type ScheduleVideoRequestBody,
   videoIdParamsSchema,
 } from './videos.schemas.ts';
 
@@ -41,6 +49,9 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   );
   const listVideosQuery = new ListVideosQuery(videoRepository, storageClient, env.CDN_BASE_URL);
   const getVideoQuery = new GetVideoQuery(videoRepository, storageClient, env.CDN_BASE_URL);
+  const publishVideoUseCase = new PublishVideoUseCase(videoRepository);
+  const scheduleVideoUseCase = new ScheduleVideoUseCase(videoRepository);
+  const unpublishVideoUseCase = new UnpublishVideoUseCase(videoRepository);
 
   fastify.get(
     '/videos',
@@ -56,10 +67,12 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
     },
     async (request, reply) => {
       const query = request.query as ListVideosQuerystring;
+      const includeUnpublished = request.user.role === USER_ROLE.ADMIN;
       const result = await listVideosQuery.execute({
         page: query.page,
         limit: query.limit,
         status: query.status,
+        includeUnpublished,
       });
 
       return reply.status(200).send({
@@ -93,7 +106,8 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
     },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      const result = await getVideoQuery.execute(id);
+      const includeUnpublished = request.user.role === USER_ROLE.ADMIN;
+      const result = await getVideoQuery.execute(id, { includeUnpublished });
 
       return reply.status(200).send({
         id: result.id,
@@ -190,6 +204,84 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
       return reply.status(202).send({
         job_id: result.jobId,
         status: result.status,
+      });
+    },
+  );
+
+  fastify.patch(
+    '/videos/:id/publish',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        response: {
+          200: publishVideoResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('admin')],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const result = await publishVideoUseCase.execute(id);
+
+      return reply.status(200).send({
+        id: result.id,
+        published_at: result.publishedAt,
+      });
+    },
+  );
+
+  fastify.patch(
+    '/videos/:id/schedule',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        body: scheduleVideoBodySchema,
+        response: {
+          200: publishVideoResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+          422: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('admin')],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const body = request.body as ScheduleVideoRequestBody;
+      const result = await scheduleVideoUseCase.execute(id, new Date(body.published_at));
+
+      return reply.status(200).send({
+        id: result.id,
+        published_at: result.publishedAt,
+      });
+    },
+  );
+
+  fastify.patch(
+    '/videos/:id/unpublish',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        response: {
+          200: publishVideoResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('admin')],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const result = await unpublishVideoUseCase.execute(id);
+
+      return reply.status(200).send({
+        id: result.id,
+        published_at: result.publishedAt,
       });
     },
   );

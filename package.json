@@ -6,6 +6,9 @@
     "node": ">=24"
   },
   "pnpm": {
+    "overrides": {
+      "@smithy/types": "4.15.1"
+    },
     "packageExtensions": {
       "drizzle-kit": {
         "dependencies": {

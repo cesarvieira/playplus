@@ -14,7 +14,7 @@ export interface TranscodeResult {
   storageHlsPrefix: string;
 }
 
-export interface TranscodeContext {
+interface TranscodeContext {
   jobId: string;
   onProgress?: (percent: number) => void;
 }

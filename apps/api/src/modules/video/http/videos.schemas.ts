@@ -159,3 +159,26 @@ export const errorResponseSchema = {
     },
   },
 } as const;
+
+export const scheduleVideoBodySchema = {
+  type: 'object',
+  required: ['published_at'],
+  additionalProperties: false,
+  properties: {
+    published_at: { type: 'string', format: 'date-time' },
+  },
+} as const;
+
+export interface ScheduleVideoRequestBody {
+  published_at: string;
+}
+
+export const publishVideoResponseSchema = {
+  type: 'object',
+  required: ['id', 'published_at'],
+  additionalProperties: false,
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    published_at: { type: ['string', 'null'], format: 'date-time' },
+  },
+} as const;

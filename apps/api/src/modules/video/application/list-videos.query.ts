@@ -18,6 +18,7 @@ interface ListVideosInput {
   page?: number;
   limit?: number;
   status?: CatalogListStatusFilter;
+  includeUnpublished?: boolean;
 }
 
 interface VideoListItem {
@@ -92,9 +93,20 @@ export class ListVideosQuery {
   async execute(input: ListVideosInput = {}): Promise<ListVideosResult> {
     const { page, limit } = normalizePagination(input);
 
+    const repositoryParams = {
+      page,
+      limit,
+      status: input.status,
+      ...(input.includeUnpublished === false ? { publishedOnly: true } : {}),
+    };
+
     const [videos, total] = await Promise.all([
-      this.videoRepository.list({ page, limit, status: input.status }),
-      this.videoRepository.count({ status: input.status }),
+      this.videoRepository.list(repositoryParams),
+      this.videoRepository.count(
+        input.includeUnpublished === false
+          ? { status: input.status, publishedOnly: true }
+          : { status: input.status },
+      ),
     ]);
 
     const data = await Promise.all(
