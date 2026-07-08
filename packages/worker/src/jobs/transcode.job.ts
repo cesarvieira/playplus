@@ -148,6 +148,7 @@ export async function processTranscodeJob(
     await deps.videoRepo.updateStatus(payload.videoId, VIDEO_STATUS.READY, {
       duration: result.durationSeconds,
       storageHlsPrefix: result.storageHlsPrefix,
+      ...(result.thumbnailKey !== undefined ? { thumbnailKey: result.thumbnailKey } : {}),
     });
 
     if (shouldPublishProgress) {

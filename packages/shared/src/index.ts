@@ -23,7 +23,11 @@ export { UserNotFoundError } from './errors/user-not-found.error.ts';
 export { VideoNotFoundError } from './errors/video-not-found.error.ts';
 export { InvalidVideoStatusTransitionError } from './errors/invalid-video-status-transition.error.ts';
 
-export { buildStorageHlsPrefix, buildStorageOriginalKey } from './paths/video-storage.ts';
+export {
+  buildStorageHlsPrefix,
+  buildStorageOriginalKey,
+  buildStorageThumbnailKey,
+} from './paths/video-storage.ts';
 export {
   VALID_TRANSITIONS,
   assertValidStatusTransition,

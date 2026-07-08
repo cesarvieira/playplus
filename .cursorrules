@@ -1,0 +1,9 @@
+## Git Commit Rules
+
+Todas as mensagens de commit sugeridas devem seguir estritamente o padrão Conventional Commits em português (BR).
+
+Regras obrigatórias:
+
+1. Use a estrutura: `<tipo>: <descrição minúscula>`
+2. O prefixo `<tipo>` deve usar os termos padrão da comunidade (ex: docs, feat, fix, chore, refactor).
+3. A `<descrição>` deve começar com um verbo no presente do indicativo (ex: adiciona, atualiza, corrige, documenta, remove).

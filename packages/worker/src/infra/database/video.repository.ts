@@ -9,6 +9,7 @@ import { getSql } from '../database.ts';
 interface UpdateStatusOptions {
   duration?: number;
   storageHlsPrefix?: string;
+  thumbnailKey?: string | null;
   errorReason?: string | null;
 }
 
@@ -41,6 +42,20 @@ export class VideoRepository {
     const sql = getSql();
 
     if (status === VIDEO_STATUS.READY && 'duration' in options && 'storageHlsPrefix' in options) {
+      if ('thumbnailKey' in options) {
+        await sql`
+          UPDATE videos
+          SET status = ${status},
+              duration = ${options.duration ?? null},
+              storage_hls_prefix = ${options.storageHlsPrefix ?? null},
+              thumbnail_key = ${options.thumbnailKey ?? null},
+              error_reason = NULL,
+              updated_at = NOW()
+          WHERE id = ${id}
+        `;
+        return;
+      }
+
       await sql`
         UPDATE videos
         SET status = ${status},

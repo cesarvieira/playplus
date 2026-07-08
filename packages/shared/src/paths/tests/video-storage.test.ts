@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildStorageHlsPrefix, buildStorageOriginalKey } from '../video-storage.ts';
+import {
+  buildStorageHlsPrefix,
+  buildStorageOriginalKey,
+  buildStorageThumbnailKey,
+} from '../video-storage.ts';
 
 describe('buildStorageOriginalKey', () => {
   it('monta caminho do original no storage', () => {
@@ -11,5 +15,11 @@ describe('buildStorageOriginalKey', () => {
 describe('buildStorageHlsPrefix', () => {
   it('monta prefixo HLS esperado', () => {
     expect(buildStorageHlsPrefix('abc-123')).toBe('videos/abc-123/hls/');
+  });
+});
+
+describe('buildStorageThumbnailKey', () => {
+  it('monta key de thumbnail no prefixo HLS', () => {
+    expect(buildStorageThumbnailKey('abc-123')).toBe('videos/abc-123/hls/thumbnail.jpg');
   });
 });

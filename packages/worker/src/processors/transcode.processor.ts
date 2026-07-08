@@ -1,17 +1,23 @@
-import { mkdtemp, rm } from 'node:fs/promises';
+import { access, mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { buildStorageHlsPrefix, type TranscodeJobPayload } from '@playplus/shared';
+import {
+  buildStorageHlsPrefix,
+  buildStorageThumbnailKey,
+  type TranscodeJobPayload,
+} from '@playplus/shared';
 
 import { env } from '../config/env.ts';
 import { logger } from '../config/logger.ts';
-import { downloadObject, uploadHlsDirectory } from '../infra/storage.ts';
+import { downloadObject, uploadFile, uploadHlsDirectory } from '../infra/storage.ts';
+import { extractThumbnailFrame } from './ffmpeg/extract-thumbnail.ts';
 import { transcodeToHls } from './ffmpeg/hls-transcoder.ts';
 
 export interface TranscodeResult {
   durationSeconds: number;
   storageHlsPrefix: string;
+  thumbnailKey?: string;
 }
 
 interface TranscodeContext {
@@ -37,29 +43,56 @@ export const noopTranscodeProcessor: TranscodeProcessor = {
   },
 };
 
+interface ExtractThumbnailParams {
+  inputPath: string;
+  outputPath: string;
+  durationSeconds: number;
+  ffmpegPath: string;
+}
+
 interface FfmpegTranscodeProcessorDeps {
   download: (key: string, destPath: string) => Promise<void>;
   transcode: typeof transcodeToHls;
   upload: (localDir: string, keyPrefix: string) => Promise<void>;
+  extractThumbnail: (params: ExtractThumbnailParams) => Promise<void>;
+  uploadThumbnail: (key: string, filePath: string) => Promise<void>;
+  fileExists: (filePath: string) => Promise<boolean>;
   ffmpegPath: string;
+}
+
+async function defaultFileExists(filePath: string): Promise<boolean> {
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 const defaultFfmpegDeps: FfmpegTranscodeProcessorDeps = {
   download: downloadObject,
   transcode: transcodeToHls,
   upload: uploadHlsDirectory,
+  extractThumbnail: ({ inputPath, outputPath, durationSeconds, ffmpegPath }) =>
+    extractThumbnailFrame({ inputPath, outputPath, durationSeconds, ffmpegPath }),
+  uploadThumbnail: (key, filePath) => uploadFile(key, filePath, 'image/jpeg'),
+  fileExists: defaultFileExists,
   ffmpegPath: env.FFMPEG_PATH,
 };
 
 export function createFfmpegTranscodeProcessor(
-  deps: FfmpegTranscodeProcessorDeps = defaultFfmpegDeps,
+  overrides: Partial<FfmpegTranscodeProcessorDeps> = {},
 ): TranscodeProcessor {
+  const deps: FfmpegTranscodeProcessorDeps = { ...defaultFfmpegDeps, ...overrides };
   return {
     async transcode(payload, context) {
       const workspaceDir = await mkdtemp(path.join(os.tmpdir(), `playplus-transcode-${payload.videoId}-`));
       const inputPath = path.join(workspaceDir, payload.fileName);
       const outputDir = path.join(workspaceDir, 'hls');
+      const thumbnailPath = path.join(workspaceDir, 'thumbnail.jpg');
       const storageHlsPrefix = buildStorageHlsPrefix(payload.videoId);
+      const storageThumbnailKey = buildStorageThumbnailKey(payload.videoId);
+      let thumbnailReady = false;
 
       try {
         logger.info(
@@ -80,7 +113,44 @@ export function createFfmpegTranscodeProcessor(
           onProgress: context?.onProgress,
         });
 
+        try {
+          await deps.extractThumbnail({
+            inputPath,
+            outputPath: thumbnailPath,
+            durationSeconds: result.durationSeconds,
+            ffmpegPath: deps.ffmpegPath,
+          });
+          thumbnailReady = await deps.fileExists(thumbnailPath);
+        } catch (error: unknown) {
+          logger.error(
+            {
+              videoId: payload.videoId,
+              jobId: context?.jobId,
+              err: error,
+            },
+            'Falha ao extrair thumbnail — best-effort',
+          );
+        }
+
         await deps.upload(outputDir, storageHlsPrefix);
+
+        let thumbnailKey: string | undefined;
+
+        if (thumbnailReady) {
+          try {
+            await deps.uploadThumbnail(storageThumbnailKey, thumbnailPath);
+            thumbnailKey = storageThumbnailKey;
+          } catch (error: unknown) {
+            logger.error(
+              {
+                videoId: payload.videoId,
+                jobId: context?.jobId,
+                err: error,
+              },
+              'Falha ao enviar thumbnail ao storage — best-effort',
+            );
+          }
+        }
 
         context?.onProgress?.(100);
 
@@ -91,6 +161,7 @@ export function createFfmpegTranscodeProcessor(
             durationSeconds: result.durationSeconds,
             renditions: result.renditions,
             storageHlsPrefix,
+            thumbnailKey: thumbnailKey ?? null,
           },
           'Transcodificação HLS concluída e artefatos enviados ao storage',
         );
@@ -98,6 +169,7 @@ export function createFfmpegTranscodeProcessor(
         return {
           durationSeconds: result.durationSeconds,
           storageHlsPrefix,
+          thumbnailKey,
         };
       } finally {
         await rm(workspaceDir, { recursive: true, force: true });
