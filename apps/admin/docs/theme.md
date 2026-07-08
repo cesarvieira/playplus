@@ -61,22 +61,24 @@ Utilitários de **layout estrutural** sem valor visual de marca:
 
 ### Admin geral (`pl-*`)
 
-| Classe                                       | Uso                              |
-| -------------------------------------------- | -------------------------------- |
-| `pl-focus-ring`                              | Outline de foco acessível        |
-| `pl-page-section`                            | Container de página (`max-w-xl`) |
-| `pl-page-title`                              | Título de página                 |
-| `pl-page-lead`                               | Subtítulo / lead                 |
-| `pl-back-link`                               | Link “voltar”                    |
-| `pl-text-error`                              | Mensagem de erro inline          |
-| `pl-text-muted`                              | Texto secundário                 |
-| `pl-text-meta`                               | Metadados (bytes, contadores)    |
-| `pl-dropzone` / `pl-dropzone--active`        | Área de upload                   |
-| `pl-file-chip`                               | Arquivo selecionado              |
-| `pl-media-thumb` / `pl-play-glyph`           | Preview de mídia no modal        |
-| `pl-modal-*`                                 | Blocos do modal de upload        |
-| `pl-upload-notice`                           | Aviso informativo no upload      |
-| `pl-toast-host` / `pl-toast` / `pl-toast--*` | Notificações toast               |
+| Classe                                             | Uso                                                   |
+| -------------------------------------------------- | ----------------------------------------------------- |
+| `pl-focus-ring`                                    | Outline de foco acessível                             |
+| `pl-page-section`                                  | Container de página (`max-w-xl`)                      |
+| `pl-page-title`                                    | Título de página                                      |
+| `pl-page-lead`                                     | Subtítulo / lead                                      |
+| `pl-back-link`                                     | Link “voltar”                                         |
+| `pl-text-error`                                    | Mensagem de erro inline                               |
+| `pl-text-muted`                                    | Texto secundário                                      |
+| `pl-text-meta`                                     | Metadados (bytes, contadores)                         |
+| `pl-dropzone` / `pl-dropzone--active`              | Área de upload                                        |
+| `pl-file-chip`                                     | Arquivo selecionado                                   |
+| `pl-media-thumb` / `pl-play-glyph`                 | Preview de mídia no modal                             |
+| `pl-modal-*`                                       | Blocos do modal de upload                             |
+| `pl-upload-notice`                                 | Aviso informativo no upload                           |
+| `pl-toast-host` / `pl-toast` / `pl-toast--*`       | Notificações toast                                    |
+| `pl-publication-badge` / `pl-publication-badge--*` | Badge de publicação (Rascunho / Agendado / Publicado) |
+| `pl-video-row-menu` / `pl-video-row-menu__item`    | Menu de ações de publicação na linha do vídeo         |
 
 ### Páginas de erro (`ple-*`)
 

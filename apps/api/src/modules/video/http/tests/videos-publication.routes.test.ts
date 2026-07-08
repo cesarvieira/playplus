@@ -146,7 +146,7 @@ describe('Publicação — rotas de vídeo', () => {
       );
     });
 
-    it('passa includeUnpublished true para admin', async () => {
+    it('passa includeUnpublished false para admin sem query param', async () => {
       listExecute.mockResolvedValue({ data: [], meta: { total: 0, page: 1, limit: 20 } });
 
       await app.inject({
@@ -156,7 +156,35 @@ describe('Publicação — rotas de vídeo', () => {
       });
 
       expect(listExecute).toHaveBeenCalledWith(
+        expect.objectContaining({ includeUnpublished: false }),
+      );
+    });
+
+    it('passa includeUnpublished true para admin com include_unpublished', async () => {
+      listExecute.mockResolvedValue({ data: [], meta: { total: 0, page: 1, limit: 20 } });
+
+      await app.inject({
+        method: 'GET',
+        url: '/v1/videos?include_unpublished=true',
+        headers: { authorization: `Bearer ${adminToken}` },
+      });
+
+      expect(listExecute).toHaveBeenCalledWith(
         expect.objectContaining({ includeUnpublished: true }),
+      );
+    });
+
+    it('ignora include_unpublished para viewer', async () => {
+      listExecute.mockResolvedValue({ data: [], meta: { total: 0, page: 1, limit: 20 } });
+
+      await app.inject({
+        method: 'GET',
+        url: '/v1/videos?include_unpublished=true',
+        headers: { authorization: `Bearer ${viewerToken}` },
+      });
+
+      expect(listExecute).toHaveBeenCalledWith(
+        expect.objectContaining({ includeUnpublished: false }),
       );
     });
   });
@@ -183,7 +211,7 @@ describe('Publicação — rotas de vídeo', () => {
       expect(getExecute).toHaveBeenCalledWith(videoId, { includeUnpublished: false });
     });
 
-    it('passa includeUnpublished true para admin', async () => {
+    it('passa includeUnpublished true para admin com include_unpublished', async () => {
       getExecute.mockResolvedValue({
         id: videoId,
         title: 'Meu filme',
@@ -197,11 +225,32 @@ describe('Publicação — rotas de vídeo', () => {
 
       await app.inject({
         method: 'GET',
-        url: `/v1/videos/${videoId}`,
+        url: `/v1/videos/${videoId}?include_unpublished=true`,
         headers: { authorization: `Bearer ${adminToken}` },
       });
 
       expect(getExecute).toHaveBeenCalledWith(videoId, { includeUnpublished: true });
+    });
+
+    it('passa includeUnpublished false para admin sem query param', async () => {
+      getExecute.mockResolvedValue({
+        id: videoId,
+        title: 'Meu filme',
+        duration: 7240,
+        thumbnailUrl: null,
+        status: 'ready',
+        progress: null,
+        publishedAt: '2025-01-01T00:00:00Z',
+        createdAt: '2025-01-01T00:00:00Z',
+      });
+
+      await app.inject({
+        method: 'GET',
+        url: `/v1/videos/${videoId}`,
+        headers: { authorization: `Bearer ${adminToken}` },
+      });
+
+      expect(getExecute).toHaveBeenCalledWith(videoId, { includeUnpublished: false });
     });
   });
 

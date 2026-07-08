@@ -6,6 +6,8 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import prettierPlugin from 'eslint-plugin-prettier';
 import json from '@eslint/json';
 
+import { stylisticRules, typescriptRules } from './eslint.shared.rules.mjs';
+
 export default defineConfig(
   eslintConfigPrettier,
   {
@@ -34,9 +36,7 @@ export default defineConfig(
       '@stylistic': stylistic,
     },
     rules: {
-      '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
-      '@stylistic/eol-last': ['error', 'always'],
-      '@stylistic/linebreak-style': ['error', 'unix'],
+      ...stylisticRules,
       '@stylistic/max-len': [
         'error',
         {
@@ -47,32 +47,6 @@ export default defineConfig(
           ignoreRegExpLiterals: true,
         },
       ],
-      '@stylistic/no-multiple-empty-lines': ['error', { max: 2, maxEOF: 1 }],
-      '@stylistic/member-delimiter-style': [
-        'error',
-        {
-          multiline: {
-            delimiter: 'semi',
-            requireLast: true,
-          },
-          singleline: {
-            delimiter: 'semi',
-            requireLast: false,
-          },
-          multilineDetection: 'brackets',
-        },
-      ],
-      '@stylistic/operator-linebreak': [
-        'error',
-        'after',
-        {
-          overrides: {
-            '?': 'before',
-            ':': 'before',
-          },
-        },
-      ],
-      '@stylistic/semi': ['error', 'always'],
     },
   },
   {
@@ -80,79 +54,7 @@ export default defineConfig(
     plugins: {
       '@typescript-eslint': tseslint.plugin,
     },
-    rules: {
-      '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/naming-convention': [
-        'warn',
-        {
-          selector: 'default',
-          format: ['camelCase'],
-          leadingUnderscore: 'allow',
-        },
-        {
-          selector: 'variable',
-          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
-          leadingUnderscore: 'allow',
-        },
-        {
-          selector: 'function',
-          format: ['camelCase', 'PascalCase'],
-        },
-        {
-          selector: 'enum',
-          format: ['UPPER_CASE'],
-        },
-        {
-          selector: 'typeAlias',
-          format: ['PascalCase', 'UPPER_CASE'],
-        },
-        {
-          selector: 'typeLike',
-          format: ['PascalCase'],
-        },
-        {
-          selector: 'parameter',
-          format: ['camelCase'],
-          leadingUnderscore: 'allow',
-        },
-        {
-          selector: ['property', 'objectLiteralProperty', 'objectLiteralMethod', 'enumMember'],
-          format: null,
-        },
-        {
-          selector: 'import',
-          format: null,
-        },
-      ],
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrors: 'none',
-        },
-      ],
-      'max-params': ['error', 4],
-      'no-console': 'warn',
-      'no-debugger': 1,
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: 'CallExpression[callee.property.name=\'then\']',
-          message: 'Use async/await instead of Promise.then()',
-        },
-        {
-          selector: 'CallExpression[callee.property.name=\'catch\']',
-          message: 'Use try/catch with await instead of Promise.catch()',
-        },
-        {
-          selector: 'CallExpression[callee.property.name=\'finally\']',
-          message: 'Use finally within try/catch/finally, not Promise.finally()',
-        },
-      ],
-      quotes: ['error', 'single'],
-      semi: ['error', 'always'],
-    },
+    rules: typescriptRules,
   },
   {
     files: ['**/*.json'],

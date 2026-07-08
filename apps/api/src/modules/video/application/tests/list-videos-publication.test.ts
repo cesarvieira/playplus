@@ -39,7 +39,23 @@ function createQuery() {
 }
 
 describe('ListVideosQuery — publicação', () => {
-  it('aplica filtro publishedOnly para viewer (includeUnpublished false)', async () => {
+  it('aplica filtro publishedOnly por padrão', async () => {
+    const { query, videoRepository } = createQuery();
+
+    videoRepository.list.mockResolvedValue([createVideo()]);
+    videoRepository.count.mockResolvedValue(1);
+
+    await query.execute();
+
+    expect(videoRepository.list).toHaveBeenCalledWith({
+      page: 1,
+      limit: 20,
+      status: undefined,
+      publishedOnly: true,
+    });
+  });
+
+  it('aplica filtro publishedOnly quando includeUnpublished é false', async () => {
     const { query, videoRepository } = createQuery();
 
     videoRepository.list.mockResolvedValue([createVideo()]);

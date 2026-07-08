@@ -54,7 +54,7 @@ export class GetVideoQuery {
     }
 
     if (
-      options.includeUnpublished === false &&
+      options.includeUnpublished !== true &&
       !isCatalogVisible(video.publishedAt, new Date())
     ) {
       throw new VideoNotFoundError();

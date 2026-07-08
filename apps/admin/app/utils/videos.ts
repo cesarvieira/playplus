@@ -6,6 +6,7 @@ export interface ApiVideoListItem {
   duration: number | null;
   thumbnail_url: string | null;
   status: VideoStatus;
+  published_at: string | null;
   upload_complete?: boolean;
   created_at: string;
 }
@@ -14,6 +15,10 @@ export interface VideoLivePatch {
   status: VideoStatus;
   progress?: number;
   errorReason?: string;
+}
+
+export interface VideoPublicationPatch {
+  published_at: string | null;
 }
 
 export interface DisplayVideoRow extends ApiVideoListItem {
@@ -31,6 +36,7 @@ export function buildVideosListPath(
   const params = new URLSearchParams();
   params.set('page', String(page));
   params.set('limit', String(limit));
+  params.set('include_unpublished', 'true');
 
   if (filter === 'ready') {
     params.set('status', 'ready');
@@ -44,9 +50,11 @@ export function buildVideosListPath(
 export function mergeVideoRow(
   item: ApiVideoListItem,
   patch?: VideoLivePatch,
+  publicationPatch?: VideoPublicationPatch,
 ): DisplayVideoRow {
   return {
     ...item,
+    published_at: publicationPatch?.published_at ?? item.published_at,
     status: patch?.status ?? item.status,
     progress: patch?.progress,
     errorReason: patch?.errorReason,
@@ -89,4 +97,9 @@ export interface ApiRenewUploadUrlResponse {
 export interface ApiEnqueueTranscodeResponse {
   job_id: string;
   status: 'queued';
+}
+
+export interface ApiPublicationResponse {
+  id: string;
+  published_at: string | null;
 }

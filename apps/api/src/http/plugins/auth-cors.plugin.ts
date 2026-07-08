@@ -1,28 +1,12 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
-import { env } from '#config/env';
+import { isAllowedAdminOrigin } from '#http/cors-origins';
 
 const AUTH_CORS_PATHS = ['/v1/auth/login', '/v1/auth/refresh', '/v1/auth/logout'] as const;
 
 function isAuthCorsRoute(url: string): boolean {
   const path = url.split('?')[0];
   return AUTH_CORS_PATHS.includes(path as (typeof AUTH_CORS_PATHS)[number]);
-}
-
-function isAllowedAdminOrigin(origin: string | undefined): boolean {
-  if (!origin) {
-    return false;
-  }
-
-  if (env.CORS_ADMIN_ORIGIN && origin === env.CORS_ADMIN_ORIGIN) {
-    return true;
-  }
-
-  if (env.NODE_ENV === 'development') {
-    return /^https?:\/\/(localhost|127\.0\.0\.1|[\w-]+\.playplus\.localhost)(:\d+)?$/.test(origin);
-  }
-
-  return false;
 }
 
 function setAuthCorsHeaders(request: FastifyRequest, reply: FastifyReply): void {

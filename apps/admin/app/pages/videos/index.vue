@@ -19,9 +19,44 @@ const {
   subtitle,
   transcodeLoadingId,
   enqueueTranscode,
+  publicationLoadingId,
+  publishVideo,
+  scheduleVideo,
+  unpublishVideo,
   setFilter,
   goToPage,
 } = useVideosList();
+
+const scheduleTargetId = ref<string | null>(null);
+
+const scheduleTargetVideo = computed(() =>
+  mergedRows.value.find(video => video.id === scheduleTargetId.value) ?? null,
+);
+
+function onPublish(videoId: string) {
+  void publishVideo(videoId);
+}
+
+function onUnpublish(videoId: string) {
+  void unpublishVideo(videoId);
+}
+
+function onScheduleOpen(videoId: string) {
+  scheduleTargetId.value = videoId;
+}
+
+function onScheduleClose() {
+  scheduleTargetId.value = null;
+}
+
+async function onScheduleConfirm(publishedAt: string) {
+  if (!scheduleTargetId.value) {
+    return;
+  }
+
+  await scheduleVideo(scheduleTargetId.value, publishedAt);
+  scheduleTargetId.value = null;
+}
 
 const showPagination = computed(() => meta.value.total > meta.value.limit);
 
@@ -94,8 +129,20 @@ const emptyMessage = computed(() =>
       <VideoTable
         :videos="mergedRows"
         :transcode-loading-id="transcodeLoadingId"
+        :publication-loading-id="publicationLoadingId"
         :web-url="config.public.webUrl"
         @transcode="enqueueTranscode"
+        @publish="onPublish"
+        @schedule="onScheduleOpen"
+        @unpublish="onUnpublish"
+      />
+
+      <SchedulePublicationModal
+        :open="scheduleTargetId !== null"
+        :loading="publicationLoadingId === scheduleTargetId"
+        :video-title="scheduleTargetVideo?.title"
+        @close="onScheduleClose"
+        @confirm="onScheduleConfirm"
       />
 
       <nav

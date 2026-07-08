@@ -13,11 +13,15 @@ import type { DisplayVideoRow } from '~/utils/videos';
 const props = defineProps<{
   video: DisplayVideoRow;
   transcodeLoading?: boolean;
+  publicationLoading?: boolean;
   webUrl: string;
 }>();
 
 const emit = defineEmits<{
   transcode: [videoId: string];
+  publish: [videoId: string];
+  schedule: [videoId: string];
+  unpublish: [videoId: string];
 }>();
 
 const primaryAction = computed(() =>
@@ -112,7 +116,32 @@ const errorCopy = computed(() => resolveVideoErrorReason(props.video.errorReason
       </p>
     </div>
 
-    <StatusBadge :status="video.status" />
+    <div class="pl-video-row__badges">
+      <StatusBadge :status="video.status" />
+      <VideoRowMenu
+        :published-at="video.published_at"
+        :loading="publicationLoading"
+        @publish="emit('publish', video.id)"
+        @schedule="emit('schedule', video.id)"
+        @unpublish="emit('unpublish', video.id)"
+      >
+        <template #trigger="{ toggle, isOpen, disabled, menuId, setTriggerRef }">
+          <div
+            :ref="(element) => setTriggerRef(element as HTMLElement | null)"
+            class="w-fit"
+          >
+            <PublicationBadge
+              :published-at="video.published_at"
+              interactive
+              :expanded="isOpen"
+              :disabled="disabled"
+              :controls-id="menuId"
+              @activate="toggle"
+            />
+          </div>
+        </template>
+      </VideoRowMenu>
+    </div>
 
     <div class="pl-video-row__action-slot">
       <PlButton

@@ -78,7 +78,7 @@ refresh_token=<opaque>;
 
 O `access_token` **não** é cookie da API — o body JSON é usado pelo browser para Pinia (Bearer client-side) e sincronizado no admin via `POST /api/session/sync` (cookie HttpOnly no domínio admin).
 
-**CORS com credentials:** `POST /v1/auth/login`, `/v1/auth/refresh` e `/v1/auth/logout` expõem `Access-Control-Allow-Credentials: true` para a origem do admin (`CORS_ADMIN_ORIGIN`). Demais rotas não usam credentials cross-origin — o client envia apenas `Authorization: Bearer`.
+**CORS com credentials:** `POST /v1/auth/login`, `/v1/auth/refresh` e `/v1/auth/logout` expõem `Access-Control-Allow-Credentials: true` para a origem do admin (`CORS_ADMIN_ORIGIN`). Demais rotas não usam credentials cross-origin — o client envia apenas `Authorization: Bearer`. O preflight dessas rotas aceita `GET`, `POST`, `PATCH`, `DELETE` e `PUT` (ex.: `PATCH /videos/:id/publish|schedule|unpublish`).
 
 ---
 
@@ -174,7 +174,7 @@ Retorna o perfil do usuário autenticado.
 
 Lista vídeos disponíveis.
 
-**Query params:** `page`, `limit`, `status` (`ready` | `processing` | `error`)
+**Query params:** `page`, `limit`, `status` (`ready` | `processing` | `error`), `include_unpublished` (`boolean`, default `false`, **somente admin**)
 
 **Response `200`:**
 
@@ -202,7 +202,7 @@ Lista vídeos disponíveis.
 
 **Filtros admin (v0):** pill **Em andamento** agrupa `queued` + `processing` no client — a API não expõe filtro único para ambos; `queued` aparece na listagem sem query param dedicado.
 
-**Filtro de publicação:** viewers (`role: viewer`) recebem apenas vídeos com `published_at` no passado ou presente (`published_at IS NOT NULL AND published_at <= NOW()`). Rascunhos (`published_at: null`) e agendados (data futura) ficam ocultos. Admins veem todos os vídeos, independentemente de `published_at`.
+**Filtro de publicação:** por padrão, todos os callers (incluindo admin) recebem apenas vídeos com `published_at` no passado ou presente (`published_at IS NOT NULL AND published_at <= NOW()`). Rascunhos (`published_at: null`) e agendados (data futura) ficam ocultos no catálogo web. O painel admin passa `include_unpublished=true` para listar rascunhos e agendados.
 
 ---
 
@@ -261,7 +261,9 @@ Retorna metadados completos de um vídeo, incluindo progresso salvo do usuário 
 
 Aplicável quando `status` é `pending`, `queued` ou `processing`. A implementação pode retornar `200` com metadados parciais (acima) **ou** `409` — a UI deve tratar ambos.
 
-**Filtro de publicação:** viewers recebem `404 VIDEO_NOT_FOUND` para vídeos não publicados (`published_at: null`) ou com publicação futura. Admins acessam qualquer vídeo por ID.
+**Query params:** `include_unpublished` (`boolean`, default `false`, **somente admin**)
+
+**Filtro de publicação:** por padrão retorna `404 VIDEO_NOT_FOUND` para vídeos não publicados (`published_at: null`) ou com publicação futura. Admin pode passar `include_unpublished=true` para acessar qualquer vídeo por ID (ex.: preview no painel).
 
 **Erros:** `404 VIDEO_NOT_FOUND` · `401 UNAUTHORIZED`
 

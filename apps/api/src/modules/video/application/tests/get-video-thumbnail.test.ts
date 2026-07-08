@@ -36,7 +36,7 @@ describe('GetVideoQuery — thumbnail_url', () => {
     };
     const query = new GetVideoQuery(videoRepository as never, {} as never, cdnBaseUrl);
 
-    const result = await query.execute(videoId);
+    const result = await query.execute(videoId, { includeUnpublished: true });
 
     expect(result.thumbnailUrl).toBe(`${cdnBaseUrl}/${thumbnailKey}`);
     expect(result.thumbnailKey).toBe(thumbnailKey);
@@ -65,7 +65,7 @@ describe('GetVideoQuery — thumbnail_url', () => {
     };
     const query = new GetVideoQuery(videoRepository as never, {} as never, cdnBaseUrl);
 
-    const result = await query.execute(videoId);
+    const result = await query.execute(videoId, { includeUnpublished: true });
 
     expect(result.thumbnailUrl).toBeNull();
   });

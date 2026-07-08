@@ -13,21 +13,30 @@ const baseItem: ApiVideoListItem = {
   duration: 120,
   thumbnail_url: null,
   status: 'queued',
+  published_at: null,
   created_at: '2026-06-01T00:00:00.000Z',
 };
 
 describe('buildVideosListPath', () => {
-  it('monta query de paginação sem filtro', () => {
-    expect(buildVideosListPath('all', 2, 20)).toBe('/videos?page=2&limit=20');
+  it('monta query de paginação com include_unpublished para admin', () => {
+    expect(buildVideosListPath('all', 2, 20)).toBe(
+      '/videos?page=2&limit=20&include_unpublished=true',
+    );
   });
 
   it('inclui status ready e error', () => {
-    expect(buildVideosListPath('ready', 1, 20)).toBe('/videos?page=1&limit=20&status=ready');
-    expect(buildVideosListPath('error', 1, 20)).toBe('/videos?page=1&limit=20&status=error');
+    expect(buildVideosListPath('ready', 1, 20)).toBe(
+      '/videos?page=1&limit=20&include_unpublished=true&status=ready',
+    );
+    expect(buildVideosListPath('error', 1, 20)).toBe(
+      '/videos?page=1&limit=20&include_unpublished=true&status=error',
+    );
   });
 
   it('não envia status para filtro active', () => {
-    expect(buildVideosListPath('active', 1, 20)).toBe('/videos?page=1&limit=20');
+    expect(buildVideosListPath('active', 1, 20)).toBe(
+      '/videos?page=1&limit=20&include_unpublished=true',
+    );
   });
 });
 
@@ -39,6 +48,17 @@ describe('mergeVideoRow', () => {
       ...baseItem,
       status: 'processing',
       progress: 42,
+      errorReason: undefined,
+    });
+  });
+
+  it('sobrepõe published_at do patch de publicação', () => {
+    expect(
+      mergeVideoRow(baseItem, undefined, { published_at: '2030-01-01T00:00:00.000Z' }),
+    ).toEqual({
+      ...baseItem,
+      published_at: '2030-01-01T00:00:00.000Z',
+      progress: undefined,
       errorReason: undefined,
     });
   });

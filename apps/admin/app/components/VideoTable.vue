@@ -5,11 +5,15 @@ import type { DisplayVideoRow } from '~/utils/videos';
 const props = defineProps<{
   videos: DisplayVideoRow[];
   transcodeLoadingId?: string | null;
+  publicationLoadingId?: string | null;
   webUrl: string;
 }>();
 
 const emit = defineEmits<{
   transcode: [videoId: string];
+  publish: [videoId: string];
+  schedule: [videoId: string];
+  unpublish: [videoId: string];
 }>();
 
 const liveMessage = ref('');
@@ -39,7 +43,11 @@ watch(
       :video="video"
       :web-url="webUrl"
       :transcode-loading="transcodeLoadingId === video.id"
+      :publication-loading="publicationLoadingId === video.id"
       @transcode="emit('transcode', $event)"
+      @publish="emit('publish', $event)"
+      @schedule="emit('schedule', $event)"
+      @unpublish="emit('unpublish', $event)"
     />
   </div>
 </template>

@@ -55,6 +55,7 @@ describe('ListVideosQuery', () => {
       page: 1,
       limit: 20,
       status: undefined,
+      publishedOnly: true,
     });
     expect(result).toEqual({
       data: [
@@ -85,8 +86,12 @@ describe('ListVideosQuery', () => {
       page: 1,
       limit: 20,
       status: VIDEO_STATUS.PROCESSING,
+      publishedOnly: true,
     });
-    expect(videoRepository.count).toHaveBeenCalledWith({ status: VIDEO_STATUS.PROCESSING });
+    expect(videoRepository.count).toHaveBeenCalledWith({
+      status: VIDEO_STATUS.PROCESSING,
+      publishedOnly: true,
+    });
   });
 
   it('normaliza page mínimo 1 e limit máximo 100', async () => {
@@ -101,6 +106,7 @@ describe('ListVideosQuery', () => {
       page: 1,
       limit: 100,
       status: undefined,
+      publishedOnly: true,
     });
   });
 

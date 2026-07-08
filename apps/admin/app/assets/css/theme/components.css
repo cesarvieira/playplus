@@ -1,4 +1,5 @@
 @layer components {
+
   /* ── Error page layout ── */
   .ple-brand {
     @apply text-pl-xl font-extrabold tracking-tight;
@@ -345,7 +346,7 @@
   }
 
   .pl-video-thumb__duration {
-    @apply absolute right-1.5 bottom-1.5 rounded-pl-sm bg-peach-ink/70 px-1.5 py-0.5 text-pl-2xs font-bold text-peach-surface;
+    @apply absolute right-1.5 bottom-1.5 rounded-pl-sm bg-peach-ink/70 px-1.5 pt-0.5 text-pl-2xs font-bold text-peach-surface;
   }
 
   .pl-video-row__title {
@@ -361,11 +362,55 @@
   }
 
   .pl-video-row__action-slot {
-    @apply flex w-36 shrink-0 justify-end;
+    @apply flex w-36 shrink-0 items-center justify-end gap-2;
+  }
+
+  .pl-video-row__badges {
+    @apply flex shrink-0 flex-col items-end gap-1.5;
   }
 
   .pl-video-row__action-text {
     @apply text-pl-xs font-semibold text-peach-label;
+  }
+
+  .pl-publication-badge {
+    @apply inline-flex max-w-[11rem] shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-pl-xs font-bold;
+  }
+
+  .pl-publication-badge--draft {
+    @apply bg-status-pending text-status-pending-fg;
+  }
+
+  .pl-publication-badge--scheduled {
+    @apply bg-status-queued text-status-queued-fg;
+  }
+
+  .pl-publication-badge--published {
+    @apply bg-status-ready text-status-ready-fg;
+  }
+
+  .pl-publication-badge--interactive {
+    @apply cursor-pointer transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .pl-video-row-menu-host {
+    @apply relative w-fit;
+  }
+
+  .pl-video-row-menu__trigger {
+    @apply inline-flex size-pl-icon-md items-center justify-center rounded-full text-peach-muted transition-colors hover:bg-peach-page hover:text-peach-ink disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .pl-video-row-menu {
+    @apply absolute top-full right-0 z-pl-modal mt-1 min-w-[11.5rem] overflow-hidden rounded-pl-md border border-peach-border bg-peach-surface py-1 shadow-pl-modal;
+  }
+
+  .pl-video-row-menu__item {
+    @apply flex w-full items-center gap-2 px-3 py-2 text-left text-pl-sm font-semibold text-peach-ink transition-colors hover:bg-peach-page;
+  }
+
+  .pl-video-row-menu__item--danger {
+    @apply text-status-error-fg hover:bg-status-error/10;
   }
 
   .pl-status-badge {

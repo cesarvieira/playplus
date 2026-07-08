@@ -69,7 +69,7 @@ describe('GetVideoQuery', () => {
     const { query, videoRepository } = createQuery();
     videoRepository.findById.mockResolvedValue(createVideo(VIDEO_STATUS.READY));
 
-    const result = await query.execute(videoId);
+    const result = await query.execute(videoId, { includeUnpublished: true });
 
     expect(result).toEqual({
       id: videoId,
@@ -89,7 +89,7 @@ describe('GetVideoQuery', () => {
     const { query, videoRepository } = createQuery();
     videoRepository.findById.mockResolvedValue(createVideo(VIDEO_STATUS.PROCESSING));
 
-    const result = await query.execute(videoId);
+    const result = await query.execute(videoId, { includeUnpublished: true });
 
     expect(result).toEqual({
       id: videoId,
@@ -112,7 +112,7 @@ describe('GetVideoQuery', () => {
     videoRepository.findById.mockResolvedValue(pendingVideo);
     storageClient.objectExists.mockResolvedValue(false);
 
-    const result = await query.execute(videoId);
+    const result = await query.execute(videoId, { includeUnpublished: true });
 
     expect(result.uploadComplete).toBe(false);
     expect(videoRepository.setUploadComplete).not.toHaveBeenCalled();

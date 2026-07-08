@@ -9,6 +9,7 @@ import {
   isDevelopmentLogger,
 } from './config/logger.ts';
 import { isTlsEnabled, loadTlsFileOptions } from './config/tls.ts';
+import { resolveCorsOrigin } from './http/cors-origins.ts';
 import { closeDatabase } from './infra/database/client.ts';
 import { closeValkey } from './infra/valkey/client.ts';
 import { closeTranscodeQueue } from './modules/video/infra/transcode.queue.ts';
@@ -40,8 +41,10 @@ export async function buildServer() {
 
   await authCorsPlugin(fastify);
   await fastify.register(cors, {
-    origin: env.NODE_ENV === 'development',
+    origin: resolveCorsOrigin,
     credentials: false,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
   await fastify.register(cookie);
   await errorHandlerPlugin(fastify);

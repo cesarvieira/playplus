@@ -97,13 +97,13 @@ export class ListVideosQuery {
       page,
       limit,
       status: input.status,
-      ...(input.includeUnpublished === false ? { publishedOnly: true } : {}),
+      ...(input.includeUnpublished !== true ? { publishedOnly: true } : {}),
     };
 
     const [videos, total] = await Promise.all([
       this.videoRepository.list(repositoryParams),
       this.videoRepository.count(
-        input.includeUnpublished === false
+        input.includeUnpublished !== true
           ? { status: input.status, publishedOnly: true }
           : { status: input.status },
       ),

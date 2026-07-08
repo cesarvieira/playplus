@@ -8,11 +8,13 @@ import { resolveErrorMessage } from '~/utils/error-messages';
 import {
   type ApiEnqueueTranscodeResponse,
   type ApiListVideosResponse,
+  type ApiPublicationResponse,
   buildVideosListPath,
   filterActiveVideos,
   mergeVideoRow,
   type DisplayVideoRow,
   type VideoListFilter,
+  type VideoPublicationPatch,
 } from '~/utils/videos';
 
 const LIST_REFRESH_DEBOUNCE_MS = 500;
@@ -32,6 +34,10 @@ export interface UseVideosListReturn {
   subtitle: ComputedRef<string>;
   transcodeLoadingId: Readonly<Ref<string | null>>;
   enqueueTranscode: (videoId: string) => Promise<void>;
+  publicationLoadingId: Readonly<Ref<string | null>>;
+  publishVideo: (videoId: string) => Promise<void>;
+  scheduleVideo: (videoId: string, publishedAt: string) => Promise<void>;
+  unpublishVideo: (videoId: string) => Promise<void>;
   setFilter: (nextFilter: VideoListFilter) => void;
   goToPage: (nextPage: number) => void;
 }
@@ -45,6 +51,8 @@ export function useVideosList(): UseVideosListReturn {
   const page = ref(1);
   const limit = ref(20);
   const transcodeLoadingId = ref<string | null>(null);
+  const publicationLoadingId = ref<string | null>(null);
+  const publicationPatches = ref<Record<string, VideoPublicationPatch>>({});
 
   const listAsync = useLazyAsyncData(
     'videos-list',
@@ -54,7 +62,7 @@ export function useVideosList(): UseVideosListReturn {
 
   const statsAsync = useLazyAsyncData(
     'videos-stats',
-    () => api<ApiListVideosResponse>('/videos?limit=100'),
+    () => api<ApiListVideosResponse>('/videos?limit=100&include_unpublished=true'),
     CLIENT_ONLY,
   );
 
@@ -126,7 +134,13 @@ export function useVideosList(): UseVideosListReturn {
 
   const mergedRows = computed(() => {
     const items = data.value?.data ?? [];
-    const rows = items.map(item => mergeVideoRow(item, patches.value[item.id]));
+    const rows = items.map(item =>
+      mergeVideoRow(
+        item,
+        patches.value[item.id],
+        publicationPatches.value[item.id],
+      ),
+    );
 
     if (filter.value === 'active') {
       return filterActiveVideos(rows);
@@ -157,7 +171,11 @@ export function useVideosList(): UseVideosListReturn {
     let processing = 0;
 
     for (const item of statsData.value.data) {
-      const row = mergeVideoRow(item, patches.value[item.id]);
+      const row = mergeVideoRow(
+        item,
+        patches.value[item.id],
+        publicationPatches.value[item.id],
+      );
       if (row.status === 'queued') {
         queued += 1;
       }
@@ -188,6 +206,63 @@ export function useVideosList(): UseVideosListReturn {
     }
   }
 
+  function applyPublicationPatch(videoId: string, publishedAt: string | null) {
+    publicationPatches.value = {
+      ...publicationPatches.value,
+      [videoId]: { published_at: publishedAt },
+    };
+  }
+
+  async function runPublicationAction(
+    videoId: string,
+    request: () => Promise<ApiPublicationResponse>,
+    successMessage: string,
+  ) {
+    publicationLoadingId.value = videoId;
+
+    try {
+      const response = await request();
+      applyPublicationPatch(videoId, response.published_at);
+      show(successMessage, 'success');
+    } catch (err) {
+      const apiError = parseApiError(err);
+      show(
+        resolveErrorMessage(apiError?.code, 'default', apiError?.message),
+        'error',
+      );
+    } finally {
+      publicationLoadingId.value = null;
+    }
+  }
+
+  async function publishVideo(videoId: string) {
+    await runPublicationAction(
+      videoId,
+      () => api<ApiPublicationResponse>(`/videos/${videoId}/publish`, { method: 'PATCH' }),
+      'Vídeo publicado.',
+    );
+  }
+
+  async function scheduleVideo(videoId: string, publishedAt: string) {
+    await runPublicationAction(
+      videoId,
+      () =>
+        api<ApiPublicationResponse>(`/videos/${videoId}/schedule`, {
+          method: 'PATCH',
+          body: { published_at: publishedAt },
+        }),
+      'Publicação agendada.',
+    );
+  }
+
+  async function unpublishVideo(videoId: string) {
+    await runPublicationAction(
+      videoId,
+      () => api<ApiPublicationResponse>(`/videos/${videoId}/unpublish`, { method: 'PATCH' }),
+      'Vídeo despublicado.',
+    );
+  }
+
   function setFilter(nextFilter: VideoListFilter) {
     filter.value = nextFilter;
     page.value = 1;
@@ -211,6 +286,10 @@ export function useVideosList(): UseVideosListReturn {
     subtitle,
     transcodeLoadingId: readonly(transcodeLoadingId),
     enqueueTranscode,
+    publicationLoadingId: readonly(publicationLoadingId),
+    publishVideo,
+    scheduleVideo,
+    unpublishVideo,
     setFilter,
     goToPage,
   };

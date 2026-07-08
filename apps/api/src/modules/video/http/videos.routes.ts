@@ -23,9 +23,11 @@ import {
   createVideoResponseSchema,
   enqueueTranscodeResponseSchema,
   errorResponseSchema,
+  getVideoQuerySchema,
   getVideoResponseSchema,
   listVideosQuerySchema,
   listVideosResponseSchema,
+  type GetVideoQuerystring,
   type ListVideosQuerystring,
   publishVideoResponseSchema,
   renewUploadUrlResponseSchema,
@@ -34,6 +36,13 @@ import {
   type ScheduleVideoRequestBody,
   videoIdParamsSchema,
 } from './videos.schemas.ts';
+
+function resolveIncludeUnpublished(
+  role: string,
+  includeUnpublished?: boolean,
+): boolean {
+  return role === USER_ROLE.ADMIN && includeUnpublished === true;
+}
 
 export default async function videosRoutes(fastify: FastifyInstance): Promise<void> {
   const authenticate = createAuthMiddleware();
@@ -67,7 +76,10 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
     },
     async (request, reply) => {
       const query = request.query as ListVideosQuerystring;
-      const includeUnpublished = request.user.role === USER_ROLE.ADMIN;
+      const includeUnpublished = resolveIncludeUnpublished(
+        request.user.role,
+        query.include_unpublished,
+      );
       const result = await listVideosQuery.execute({
         page: query.page,
         limit: query.limit,
@@ -96,6 +108,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
     {
       schema: {
         params: videoIdParamsSchema,
+        querystring: getVideoQuerySchema,
         response: {
           200: getVideoResponseSchema,
           401: errorResponseSchema,
@@ -106,7 +119,11 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
     },
     async (request, reply) => {
       const { id } = request.params as { id: string };
-      const includeUnpublished = request.user.role === USER_ROLE.ADMIN;
+      const query = request.query as GetVideoQuerystring;
+      const includeUnpublished = resolveIncludeUnpublished(
+        request.user.role,
+        query.include_unpublished,
+      );
       const result = await getVideoQuery.execute(id, { includeUnpublished });
 
       return reply.status(200).send({

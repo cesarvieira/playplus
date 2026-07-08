@@ -80,7 +80,8 @@ function onVolumeInput(event: Event) {
             height="18"
             viewBox="0 0 24 24"
             fill="currentColor"
-            class="translate-x-0.5"
+            class="translate-x-px"
+            aria-hidden="true"
           >
             <path d="M8 5v14l11-7z" />
           </svg>
