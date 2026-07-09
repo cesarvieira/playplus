@@ -1,12 +1,11 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolveVideoStatusWsUrl } from './app/utils/ws-url';
-import { loadDevTlsHttps, resolveViewerPublicUrl } from './dev-tls';
+import { resolveViewerPublicUrl } from './dev-tls';
 import { createSecurityHeaders } from './security-headers';
 
 const adminRoot = dirname(fileURLToPath(import.meta.url));
 const sharedEntry = resolve(adminRoot, '../../packages/shared/src/index.ts');
-const devTlsHttps = loadDevTlsHttps();
 const isDev = process.env.NODE_ENV !== 'production';
 const securityHeaders = createSecurityHeaders(isDev);
 const publicApiUrl = process.env.NUXT_PUBLIC_API_URL ?? 'http://localhost:3000/v1';
@@ -61,13 +60,11 @@ export default defineNuxtConfig({
     '@playplus/shared': sharedEntry,
   },
   devServer: {
+    // Bind apenas em loopback: o dev server nunca é exposto na LAN. O TLS e o
+    // hostname público (admin.playplus.localhost) são providos pelo Caddy, que
+    // alcança este processo via host.docker.internal:3002.
+    host: process.env.NUXT_DEV_HOST || '127.0.0.1',
     port: 3002,
-    ...(devTlsHttps
-      ? {
-          host: 'admin.playplus.localhost',
-          https: devTlsHttps,
-        }
-      : {}),
   },
   compatibilityDate: '2025-07-15',
   nitro: {
@@ -107,6 +104,15 @@ export default defineNuxtConfig({
     },
   },
   vite: {
+    server: {
+      // HMR trafega pelo Caddy: o browser conecta wss na porta 443 (mesmo host
+      // público) e o Caddy encaminha o upgrade para este dev server.
+      hmr: {
+        protocol: 'wss',
+        clientPort: 443,
+        port: 24681,
+      },
+    },
     optimizeDeps: {
       include: ['@tabler/icons-vue', '@vue/devtools-core', '@vue/devtools-kit', 'gravatar-url'],
     },

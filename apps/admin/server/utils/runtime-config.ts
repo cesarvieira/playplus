@@ -6,6 +6,12 @@ export interface ServerRuntimeConfig {
   delegationJwtSecret: string;
   jwtSecret: string;
   delegationJwtTtlSeconds: number;
+  /**
+   * Base usada apenas no SSR (server-to-server): fala direto com a API por HTTP
+   * no loopback, evitando o hop pelo Caddy e o TLS local. O browser usa
+   * `public.apiUrl` (via Caddy).
+   */
+  apiInternalBaseUrl: string;
   public: {
     apiUrl: string;
     wsUrl: string;
@@ -21,6 +27,8 @@ export function getServerRuntimeConfig(): ServerRuntimeConfig {
     delegationJwtSecret: process.env.DELEGATION_JWT_SECRET ?? '',
     jwtSecret: process.env.JWT_SECRET ?? '',
     delegationJwtTtlSeconds: Number(process.env.DELEGATION_JWT_TTL_SECONDS ?? 60),
+    apiInternalBaseUrl:
+      process.env.NUXT_API_INTERNAL_BASE_URL ?? 'http://127.0.0.1:3000/v1',
     public: {
       apiUrl: publicApiUrl,
       wsUrl: resolveVideoStatusWsUrl(

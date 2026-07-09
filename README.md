@@ -77,9 +77,11 @@ cp .env.example .env
 
 Edite `.env` e defina pelo menos `JWT_SECRET` (≥ 32 caracteres), `M2M_SERVICE_TOKEN`, `DELEGATION_JWT_SECRET` e `ADMIN_SEED_PASSWORD`. O arquivo `.env` não é versionado.
 
-### 3. HTTPS local com mkcert (auth cross-origin do admin)
+### 3. HTTPS local com mkcert + Caddy (auth cross-origin do admin)
 
 O refresh token usa `SameSite=None; Secure` — só funciona com **HTTPS** em dev. Necessário para testar o [ADR-006](docs/adr/adr-auth-ssr-m2m.md) localmente.
+
+Neste modo o **Caddy** (container) é o único ponto que termina TLS: escuta em `:443` e faz reverse proxy para os dev servers, que rodam no host bindados em `127.0.0.1` (sem exposição na LAN, alcançados via `host.docker.internal`). Por isso as URLs ficam **sem porta**. O MinIO é servido pelo próprio Caddy em `storage.playplus.localhost`.
 
 **3.1. Instalar o mkcert**
 
@@ -103,7 +105,7 @@ Confirme o prompt do sistema. O browser passará a confiar nos certificados gera
 Edite `C:\Windows\System32\drivers\etc\hosts` (Windows, como administrador) ou `/etc/hosts` (macOS/Linux):
 
 ```text
-127.0.0.1 admin.playplus.localhost api.playplus.localhost storage.playplus.localhost web.playplus.localhost
+127.0.0.1 admin.playplus.localhost api.playplus.localhost storage.playplus.localhost web.playplus.localhost minio.playplus.localhost
 ```
 
 **3.4. Gerar certificados**
@@ -112,7 +114,7 @@ Na raiz do repositório:
 
 ```bash
 mkdir certs
-mkcert -cert-file certs/playplus.pem -key-file certs/playplus-key.pem admin.playplus.localhost api.playplus.localhost storage.playplus.localhost web.playplus.localhost minio localhost 127.0.0.1
+mkcert -cert-file certs/playplus.pem -key-file certs/playplus-key.pem admin.playplus.localhost api.playplus.localhost storage.playplus.localhost web.playplus.localhost minio.playplus.localhost minio localhost 127.0.0.1
 ```
 
 A pasta `certs/` não é versionada (`.gitignore`).
@@ -122,33 +124,36 @@ A pasta `certs/` não é versionada (`.gitignore`).
 Descomente e configure no `.env`:
 
 ```env
-DEV_TLS_CERT=certs/playplus.pem
-DEV_TLS_KEY=certs/playplus-key.pem
+# DEV_TLS_* NÃO são necessários neste modo — o TLS é do Caddy, que lê os certs
+# direto de ./certs (montados no container). Deixe comentado para a API servir
+# HTTP atrás do proxy.
 COOKIE_SECURE=true
 COOKIE_SAME_SITE=none
 COOKIE_DOMAIN=api.playplus.localhost
-CORS_ADMIN_ORIGIN=https://admin.playplus.localhost:3002
-STORAGE_ENDPOINT=https://storage.playplus.localhost:9000
-NUXT_PUBLIC_API_URL=https://api.playplus.localhost:3000/v1
-NUXT_PUBLIC_WS_URL=wss://api.playplus.localhost:3000/v1/ws
-NUXT_PUBLIC_WEB_URL=https://web.playplus.localhost:3001
+CORS_ADMIN_ORIGIN=https://admin.playplus.localhost
+STORAGE_ENDPOINT=https://storage.playplus.localhost
+NUXT_PUBLIC_API_URL=https://api.playplus.localhost/v1
+NUXT_PUBLIC_WS_URL=wss://api.playplus.localhost/v1/ws
+NUXT_PUBLIC_WEB_URL=https://web.playplus.localhost
+NUXT_API_INTERNAL_BASE_URL=http://127.0.0.1:3000/v1
 ```
 
-O MinIO serve HTTPS diretamente na porta **9000** com os certificados mkcert (`certs/playplus.pem` montados no container). Requer `mkcert -install` no host para que API e worker confiem no certificado (`--use-system-ca`).
+O MinIO serve HTTP internamente na porta 9000 e é exposto via TLS pelo Caddy em `storage.playplus.localhost`. As presigned URLs são assinadas para esse host (`MINIO_SERVER_URL`). Requer `mkcert -install` no host para que API e worker confiem no certificado servido pelo Caddy.
 
-**3.6. Subir com HTTPS**
+**3.6. Subir com HTTPS (Caddy)**
 
 ```bash
-docker compose up -d
-pnpm dev
+docker compose up -d   # inclui o serviço caddy (portas 80/443)
+pnpm dev               # dev servers bindam em 127.0.0.1; o Caddy os expõe via TLS
 ```
 
-URLs esperadas:
+URLs esperadas (sem porta — o Caddy resolve):
 
-- Web (viewer): `https://web.playplus.localhost:3001`
-- Admin: `https://admin.playplus.localhost:3002`
-- API: `https://api.playplus.localhost:3000/v1`
-- Storage: `https://storage.playplus.localhost:9000`
+- Web (viewer): `https://web.playplus.localhost`
+- Admin: `https://admin.playplus.localhost`
+- API: `https://api.playplus.localhost/v1`
+- Storage: `https://storage.playplus.localhost`
+- MinIO console: `https://minio.playplus.localhost`
 
 **3.7. Verificar**
 
@@ -165,7 +170,7 @@ Na raiz do repositório:
 docker compose up -d
 ```
 
-Isso sobe **PostgreSQL**, **Valkey** e **MinIO** (com bucket `playplus` criado automaticamente).
+Isso sobe **PostgreSQL**, **Valkey**, **MinIO** (com bucket `playplus` criado automaticamente) e o **Caddy** (reverse proxy TLS em `:80`/`:443` para o modo HTTPS da seção 3).
 
 Para parar a infra:
 

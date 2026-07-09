@@ -1,0 +1,34 @@
+# Play+ — reverse proxy de desenvolvimento (TLS local com mkcert)
+#
+# O Caddy é o único ponto que termina TLS em dev. Ele escuta em :443 e faz
+# reverse proxy para os dev servers (Nuxt web/admin e API Fastify) que rodam
+# no host, bindados em 127.0.0.1 (inacessíveis pela LAN). MinIO é proxied
+# diretamente pelo container.
+#
+# Os apps do host são alcançados via host.docker.internal (Docker Desktop).
+# Os certificados mkcert são montados em /certs pelo docker-compose.
+
+web.playplus.localhost {
+	tls /certs/playplus.pem /certs/playplus-key.pem
+	reverse_proxy host.docker.internal:3001
+}
+
+admin.playplus.localhost {
+	tls /certs/playplus.pem /certs/playplus-key.pem
+	reverse_proxy host.docker.internal:3002
+}
+
+api.playplus.localhost {
+	tls /certs/playplus.pem /certs/playplus-key.pem
+	reverse_proxy host.docker.internal:3000
+}
+
+storage.playplus.localhost {
+	tls /certs/playplus.pem /certs/playplus-key.pem
+	reverse_proxy minio:9000
+}
+
+minio.playplus.localhost {
+	tls /certs/playplus.pem /certs/playplus-key.pem
+	reverse_proxy minio:9001
+}
