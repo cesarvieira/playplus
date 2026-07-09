@@ -45,8 +45,6 @@ const envSchema = z.object({
     value => (value === '' || value === undefined ? undefined : value),
     z.url().optional(),
   ),
-  DEV_TLS_CERT: optionalNonEmptyString,
-  DEV_TLS_KEY: optionalNonEmptyString,
 });
 
 type Env = z.infer<typeof envSchema>;

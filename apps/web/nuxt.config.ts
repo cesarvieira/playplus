@@ -17,6 +17,12 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'Play+',
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' },
+        { rel: 'icon', type: 'image/png', sizes: '48x48', href: '/favicon-48.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+      ],
       meta: [
         { name: 'theme-color', content: '#14100D' },
       ],
@@ -81,12 +87,11 @@ export default defineNuxtConfig({
   vite: {
     server: {
       strictPort: true,
-      // HMR trafega pelo Caddy: o browser conecta wss na porta 443 (mesmo host
-      // público) e o Caddy encaminha o upgrade para este dev server.
+      // HMR: o browser conecta wss na 443 (mesmo host público) e o Caddy
+      // encaminha o upgrade para a porta deste dev server.
       hmr: {
         protocol: 'wss',
         clientPort: 443,
-        port: 24679,
       },
     },
     optimizeDeps: {

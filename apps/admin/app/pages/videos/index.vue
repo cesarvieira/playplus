@@ -76,7 +76,7 @@ const emptyMessage = computed(() =>
     <div class="pl-catalog-header">
       <div>
         <h1 class="pl-page-title">
-          Meus vídeos
+          Vídeos da plataforma
         </h1>
         <p
           v-if="!isLoading && !error"

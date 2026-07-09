@@ -78,7 +78,7 @@ describe('index page', () => {
     const wrapper = await mountIndexWithAuth();
     await flushPromises();
 
-    expect(wrapper.text()).toContain('Meus vídeos');
+    expect(wrapper.text()).toContain('Vídeos disponíveis');
     expect(wrapper.text()).toContain('1 vídeo');
     expect(wrapper.find('.pl-catalog-grid').exists()).toBe(true);
     expect(wrapper.find('a.pl-media-card').attributes('href')).toBe('/video-1');

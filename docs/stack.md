@@ -39,10 +39,10 @@ Mantido BullMQ pela maturidade e observabilidade.
 
 ## Storage
 
-| Ambiente | Serviço | Motivo |
-|---|---|---|
-| Desenvolvimento | MinIO (self-hosted, Docker) | Sem custo, sem dependência externa, API S3-compatible |
-| Produção | Cloudflare R2 | Egress gratuito, integra com CDN Cloudflare nativamente |
+| Ambiente        | Serviço                     | Motivo                                                  |
+| --------------- | --------------------------- | ------------------------------------------------------- |
+| Desenvolvimento | MinIO (self-hosted, Docker) | Sem custo, sem dependência externa, API S3-compatible   |
+| Produção        | Cloudflare R2               | Egress gratuito, integra com CDN Cloudflare nativamente |
 
 Ambos expõem a mesma API S3-compatible — nenhuma mudança de código entre ambientes.
 Configuração via variáveis de ambiente: `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`.
@@ -97,6 +97,8 @@ services:
 
 Em produção: mesmo Compose sem o serviço MinIO, apontando para R2 via env vars.
 
+Em produção, como o SSR fala com a API pela rede interna do Compose, defina `NUXT_API_INTERNAL_BASE_URL=http://api:3000/v1` (o default `127.0.0.1` só vale quando os apps rodam no host, como em dev).
+
 ---
 
 ## Observabilidade
@@ -109,6 +111,7 @@ Em produção: mesmo Compose sem o serviço MinIO, apontando para R2 via env var
 - Plano gratuito suficiente para uso pessoal (5k erros/mês)
 
 Integração em três pontos críticos:
+
 - `api` — erros de rota, autenticação e acesso ao storage
 - `worker` — falhas de FFmpeg e jobs com retry esgotado
 - `nuxt` — erros de player, falha de carregamento de segmentos HLS
@@ -117,15 +120,15 @@ Integração em três pontos críticos:
 
 ## Resumo
 
-| Camada | Tecnologia |
-|---|---|
-| Backend | Fastify (TypeScript) |
-| Banco de dados | PostgreSQL |
-| Job queue | BullMQ + Valkey |
-| Storage (dev) | MinIO |
-| Storage (prod) | Cloudflare R2 |
-| CDN | Cloudflare |
-| Transcodificação | FFmpeg |
-| Frontend | Nuxt 4 + Vue 3 + Tailwind CSS 4 |
-| Observabilidade | Sentry |
-| Infra | Docker Compose |
+| Camada           | Tecnologia                      |
+| ---------------- | ------------------------------- |
+| Backend          | Fastify (TypeScript)            |
+| Banco de dados   | PostgreSQL                      |
+| Job queue        | BullMQ + Valkey                 |
+| Storage (dev)    | MinIO                           |
+| Storage (prod)   | Cloudflare R2                   |
+| CDN              | Cloudflare                      |
+| Transcodificação | FFmpeg                          |
+| Frontend         | Nuxt 4 + Vue 3 + Tailwind CSS 4 |
+| Observabilidade  | Sentry                          |
+| Infra            | Docker Compose                  |

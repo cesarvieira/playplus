@@ -124,9 +124,8 @@ A pasta `certs/` não é versionada (`.gitignore`).
 Descomente e configure no `.env`:
 
 ```env
-# DEV_TLS_* NÃO são necessários neste modo — o TLS é do Caddy, que lê os certs
-# direto de ./certs (montados no container). Deixe comentado para a API servir
-# HTTP atrás do proxy.
+# O TLS é sempre do Caddy, que lê os certs direto de ./certs (montados no
+# container). A API sempre serve HTTP atrás do proxy.
 COOKIE_SECURE=true
 COOKIE_SAME_SITE=none
 COOKIE_DOMAIN=api.playplus.localhost
@@ -137,6 +136,8 @@ NUXT_PUBLIC_WS_URL=wss://api.playplus.localhost/v1/ws
 NUXT_PUBLIC_WEB_URL=https://web.playplus.localhost
 NUXT_API_INTERNAL_BASE_URL=http://127.0.0.1:3000/v1
 ```
+
+`NUXT_API_INTERNAL_BASE_URL` usa loopback aqui porque em dev os apps rodam no host; em produção containerizada (mesmo Compose) deve apontar para o nome do serviço da API, ex.: `http://api:3000/v1`.
 
 O MinIO serve HTTP internamente na porta 9000 e é exposto via TLS pelo Caddy em `storage.playplus.localhost`. As presigned URLs são assinadas para esse host (`MINIO_SERVER_URL`). Requer `mkcert -install` no host para que API e worker confiem no certificado servido pelo Caddy.
 
@@ -160,8 +161,6 @@ URLs esperadas (sem porta — o Caddy resolve):
 - Cadeado válido no browser (sem aviso de certificado)
 - DevTools → Application → Cookies: `refresh_token` em `api.playplus.localhost` após login
 
-Para desenvolvimento rápido sem cross-origin, `pnpm dev` com HTTP e as variáveis padrão do `.env.example` ainda funciona.
-
 ### 4. Subir a infraestrutura local
 
 Na raiz do repositório:
@@ -170,13 +169,25 @@ Na raiz do repositório:
 docker compose up -d
 ```
 
-Isso sobe **PostgreSQL**, **Valkey**, **MinIO** (com bucket `playplus` criado automaticamente) e o **Caddy** (reverse proxy TLS em `:80`/`:443` para o modo HTTPS da seção 3).
+Isso sobe **PostgreSQL**, **Valkey**, **MinIO** (com bucket `playplus` criado automaticamente) e o **Caddy** (reverse proxy TLS em `:80`/`:443`, ver seção 3).
 
 Para parar a infra:
 
 ```bash
 docker compose down
 ```
+
+**Produção — mesmo Caddyfile, outro domínio.** Nada de hostname fica hardcoded: o `Caddyfile` monta todos os hosts a partir de `APP_DOMAIN` e lê TLS/upstreams de variáveis. Em produção, defina no `.env`:
+
+```env
+APP_DOMAIN=playplus.com.br
+CADDY_TLS=ops@playplus.com.br        # e-mail ACME → HTTPS automático (Let's Encrypt)
+WEB_UPSTREAM=web:3000                # apps como serviços do compose (não host.docker.internal)
+ADMIN_UPSTREAM=admin:3000
+API_UPSTREAM=api:3000
+```
+
+E ajuste as URLs dos apps para o domínio real (`NUXT_PUBLIC_*`, `CORS_ADMIN_ORIGIN`, `COOKIE_DOMAIN`, `STORAGE_ENDPOINT`). Sem `CADDY_TLS` de arquivo, o Caddy obtém e renova os certificados sozinho — dispensa mkcert. Em dev, os defaults (`playplus.localhost` + mkcert + `host.docker.internal`) já vêm embutidos no compose.
 
 ### 5. Aplicar migrations do banco (API)
 
@@ -188,18 +199,15 @@ pnpm db:migrate
 
 ### 6. Rodar o monorepo em desenvolvimento
 
-Com a infra no ar:
+Com a infra no ar (Caddy incluso, seção 4):
 
 ```bash
-pnpm dev          # HTTP — localhost
+pnpm dev          # dev servers bindam em 127.0.0.1; o Caddy os expõe via HTTPS
 ```
 
 O Turbo executa o script `dev` de cada app/package em paralelo — **API**, **worker** (fila BullMQ + FFmpeg HLS), web e admin.
 
-URLs HTTP em dev:
-
-- Web (viewer): `http://localhost:3001` — `pnpm --filter @playplus/web dev`
-- Admin: `http://localhost:3002` — `pnpm --filter @playplus/admin dev`
+URLs em dev (ver seção 3.6): `https://web.playplus.localhost` (viewer) e `https://admin.playplus.localhost` (admin).
 
 Ordem recomendada: infra Docker → migrations → FFmpeg instalado → `pnpm dev`. O worker conecta PostgreSQL, Valkey e MinIO via `.env` (localhost), valida FFmpeg no startup e consome jobs `video.transcode`.
 

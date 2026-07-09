@@ -105,12 +105,11 @@ export default defineNuxtConfig({
   },
   vite: {
     server: {
-      // HMR trafega pelo Caddy: o browser conecta wss na porta 443 (mesmo host
-      // público) e o Caddy encaminha o upgrade para este dev server.
+      // HMR: o browser conecta wss na 443 (mesmo host público) e o Caddy
+      // encaminha o upgrade para a porta deste dev server.
       hmr: {
         protocol: 'wss',
         clientPort: 443,
-        port: 24681,
       },
     },
     optimizeDeps: {

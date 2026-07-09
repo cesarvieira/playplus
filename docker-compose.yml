@@ -38,9 +38,10 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-      # URL pública (via Caddy) usada para validar a assinatura das presigned URLs.
-      MINIO_SERVER_URL: https://storage.playplus.localhost
-      MINIO_API_CORS_ALLOW_ORIGIN: http://localhost:3001,http://localhost:3002,https://admin.playplus.localhost,https://web.playplus.localhost
+      # Endereço público canônico do MinIO (via Caddy) — deve casar com o host
+      # das presigned URLs assinadas pela API (STORAGE_ENDPOINT).
+      MINIO_SERVER_URL: https://storage.${APP_DOMAIN:-playplus.localhost}
+      MINIO_API_CORS_ALLOW_ORIGIN: https://admin.${APP_DOMAIN:-playplus.localhost},https://web.${APP_DOMAIN:-playplus.localhost}
     volumes:
       - minio_data:/data
     healthcheck:
@@ -74,6 +75,16 @@ services:
     ports:
       - '80:80'
       - '443:443'
+    environment:
+      # Defaults de dev; em prod sobrescreva no .env (domínio real, e-mail ACME
+      # e upstreams apontando para os serviços do compose).
+      APP_DOMAIN: ${APP_DOMAIN:-playplus.localhost}
+      CADDY_TLS: ${CADDY_TLS:-/certs/playplus.pem /certs/playplus-key.pem}
+      WEB_UPSTREAM: ${WEB_UPSTREAM:-host.docker.internal:3001}
+      ADMIN_UPSTREAM: ${ADMIN_UPSTREAM:-host.docker.internal:3002}
+      API_UPSTREAM: ${API_UPSTREAM:-host.docker.internal:3000}
+      MINIO_UPSTREAM: ${MINIO_UPSTREAM:-minio:9000}
+      MINIO_CONSOLE_UPSTREAM: ${MINIO_CONSOLE_UPSTREAM:-minio:9001}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./certs:/certs:ro

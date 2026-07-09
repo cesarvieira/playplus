@@ -35,13 +35,23 @@ describe('security-headers', () => {
 
     expect(buildConnectSrc(true)).toEqual(
       expect.arrayContaining([
-        'http://localhost:9000',
         'https://storage.playplus.localhost',
         'wss://admin.playplus.localhost',
       ]),
     );
 
     process.env.STORAGE_ENDPOINT = originalStorage;
+  });
+
+  it('não inclui mais origens do antigo modo HTTP rápido em dev', () => {
+    expect(buildConnectSrc(true)).toEqual(
+      expect.not.arrayContaining([
+        'http://localhost:9000',
+        'ws://localhost:3002',
+        'http://localhost:3000',
+        'ws://localhost:3000',
+      ]),
+    );
   });
 
   it('usa nonce em produção e unsafe-inline em dev', () => {
