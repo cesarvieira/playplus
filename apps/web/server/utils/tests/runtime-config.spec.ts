@@ -24,6 +24,7 @@ describe('getServerRuntimeConfig', () => {
       delegationJwtSecret: 'delegation-secret',
       jwtSecret: 'jwt-secret',
       delegationJwtTtlSeconds: 120,
+      apiInternalBaseUrl: 'http://127.0.0.1:3000/v1',
       public: {
         apiUrl: 'http://api.test/v1',
         siteUrl: 'https://web.test',
@@ -38,6 +39,7 @@ describe('getServerRuntimeConfig', () => {
     delete process.env.DELEGATION_JWT_TTL_SECONDS;
     delete process.env.NUXT_PUBLIC_API_URL;
     delete process.env.NUXT_PUBLIC_WEB_URL;
+    delete process.env.NUXT_API_INTERNAL_BASE_URL;
 
     const config = getServerRuntimeConfig();
 
@@ -46,5 +48,6 @@ describe('getServerRuntimeConfig', () => {
     expect(config.jwtSecret).toBe('');
     expect(config.delegationJwtTtlSeconds).toBe(60);
     expect(config.public.apiUrl).toBe('http://localhost:3000/v1');
+    expect(config.apiInternalBaseUrl).toBe('http://127.0.0.1:3000/v1');
   });
 });

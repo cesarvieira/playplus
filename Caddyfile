@@ -1,0 +1,43 @@
+# Play+ — reverse proxy (único ponto de terminação TLS).
+#
+# Um mesmo arquivo serve dev e produção; tudo que muda entre ambientes vem de
+# variáveis de ambiente (definidas no docker-compose a partir do .env):
+#
+#   APP_DOMAIN   domínio base. Dev: playplus.localhost | Prod: playplus.com.br
+#   CADDY_TLS    argumentos do diretivo `tls`:
+#                  • dev  → "/certs/playplus.pem /certs/playplus-key.pem" (mkcert)
+#                  • prod → e-mail ACME (ex.: "ops@playplus.com.br") → Let's Encrypt
+#   *_UPSTREAM   destino de cada proxy:
+#                  • dev  → host.docker.internal:PORTA (apps rodam no host)
+#                  • prod → nome do serviço no compose (ex.: web:3000)
+#
+# Em produção com R2, os blocos storage/minio podem ser removidos.
+
+(tls_config) {
+	tls {$CADDY_TLS}
+}
+
+web.{$APP_DOMAIN} {
+	import tls_config
+	reverse_proxy {$WEB_UPSTREAM}
+}
+
+admin.{$APP_DOMAIN} {
+	import tls_config
+	reverse_proxy {$ADMIN_UPSTREAM}
+}
+
+api.{$APP_DOMAIN} {
+	import tls_config
+	reverse_proxy {$API_UPSTREAM}
+}
+
+storage.{$APP_DOMAIN} {
+	import tls_config
+	reverse_proxy {$MINIO_UPSTREAM}
+}
+
+minio.{$APP_DOMAIN} {
+	import tls_config
+	reverse_proxy {$MINIO_CONSOLE_UPSTREAM}
+}

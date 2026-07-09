@@ -61,7 +61,7 @@ export async function refreshServerSession(event: H3Event): Promise<SessionPaylo
 
   const response = await apiOfetchRaw<ApiAuthResponse>('/auth/refresh', {
     method: 'POST',
-    baseURL: config.public.apiUrl,
+    baseURL: config.apiInternalBaseUrl,
     headers: {
       cookie: cookieHeader,
     },

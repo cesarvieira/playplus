@@ -13,6 +13,7 @@ vi.mock('../runtime-config', () => ({
     m2mServiceToken: 'm2m-token',
     delegationJwtSecret: 'delegation-secret',
     delegationJwtTtlSeconds: 60,
+    apiInternalBaseUrl: 'http://localhost:3000/v1',
     public: { apiUrl: 'http://localhost:3000/v1' },
   }),
 }));

@@ -31,29 +31,25 @@ services:
 
   minio:
     image: minio/minio:latest
-    command: server /data --console-address ':9001' --certs-dir /certs
+    command: server /data --console-address ':9001'
     ports:
       - '9000:9000'
       - '9001:9001'
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_SERVER_URL: https://storage.playplus.localhost:9000
-      MINIO_API_CORS_ALLOW_ORIGIN: http://localhost:3001,http://localhost:3002,https://admin.playplus.localhost:3002,https://web.playplus.localhost:3001
+      # Endereço público canônico do MinIO (via Caddy) — deve casar com o host
+      # das presigned URLs assinadas pela API (STORAGE_ENDPOINT).
+      MINIO_SERVER_URL: https://storage.${APP_DOMAIN:-playplus.localhost}
+      MINIO_API_CORS_ALLOW_ORIGIN: https://admin.${APP_DOMAIN:-playplus.localhost},https://web.${APP_DOMAIN:-playplus.localhost}
     volumes:
       - minio_data:/data
-      - ./certs/playplus.pem:/certs/public.crt:ro
-      - ./certs/playplus-key.pem:/certs/private.key:ro
     healthcheck:
-      test: ['CMD', 'curl', '-fk', 'https://localhost:9000/minio/health/live']
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 5s
       timeout: 5s
       retries: 12
       start_period: 10s
-    networks:
-      default:
-        aliases:
-          - storage.playplus.localhost
     restart: no
 
   minio-init:
@@ -68,12 +64,38 @@ services:
       STORAGE_BUCKET: ${STORAGE_BUCKET:-playplus}
     entrypoint: >
       /bin/sh -c "
-      mc --insecure alias set local https://storage.playplus.localhost:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
-      mc --insecure mb --ignore-existing local/$$STORAGE_BUCKET &&
-      mc --insecure anonymous set download local/$$STORAGE_BUCKET &&
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+      mc mb --ignore-existing local/$$STORAGE_BUCKET &&
+      mc anonymous set download local/$$STORAGE_BUCKET &&
       exit 0
       "
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      # Defaults de dev; em prod sobrescreva no .env (domínio real, e-mail ACME
+      # e upstreams apontando para os serviços do compose).
+      APP_DOMAIN: ${APP_DOMAIN:-playplus.localhost}
+      CADDY_TLS: ${CADDY_TLS:-/certs/playplus.pem /certs/playplus-key.pem}
+      WEB_UPSTREAM: ${WEB_UPSTREAM:-host.docker.internal:3001}
+      ADMIN_UPSTREAM: ${ADMIN_UPSTREAM:-host.docker.internal:3002}
+      API_UPSTREAM: ${API_UPSTREAM:-host.docker.internal:3000}
+      MINIO_UPSTREAM: ${MINIO_UPSTREAM:-minio:9000}
+      MINIO_CONSOLE_UPSTREAM: ${MINIO_CONSOLE_UPSTREAM:-minio:9001}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    restart: no
 
 volumes:
   postgres_data:
   minio_data:
+  caddy_data:
+  caddy_config:

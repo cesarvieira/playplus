@@ -38,7 +38,7 @@ export async function serverApiFetch<T>(
   return apiOfetch<T>(path, {
     method: options.method,
     body: options.body,
-    baseURL: config.public.apiUrl,
+    baseURL: config.apiInternalBaseUrl,
     headers,
   });
 }

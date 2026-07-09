@@ -8,7 +8,6 @@ import {
   createLoggerConfig,
   isDevelopmentLogger,
 } from './config/logger.ts';
-import { isTlsEnabled, loadTlsFileOptions } from './config/tls.ts';
 import { resolveCorsOrigin } from './http/cors-origins.ts';
 import { closeDatabase } from './infra/database/client.ts';
 import { closeValkey } from './infra/valkey/client.ts';
@@ -22,12 +21,9 @@ import meRoutes from './modules/user/http/me.routes.ts';
 import videosRoutes from './modules/video/http/videos.routes.ts';
 
 export async function buildServer() {
-  const tlsOptions = loadTlsFileOptions(env.DEV_TLS_CERT, env.DEV_TLS_KEY);
-
   const fastify = Fastify({
     logger: createLoggerConfig(),
     disableRequestLogging: isDevelopmentLogger(),
-    ...(tlsOptions ? { https: tlsOptions } : {}),
   });
 
   if (isDevelopmentLogger()) {
@@ -90,12 +86,10 @@ async function start(): Promise<void> {
   });
 
   try {
-    const tlsEnabled = isTlsEnabled(env.DEV_TLS_CERT, env.DEV_TLS_KEY);
-
     await server.listen({
       port: env.API_PORT,
       host: env.API_HOST,
-      listenTextResolver: createListenTextResolver(env.API_PORT, { secure: tlsEnabled }),
+      listenTextResolver: createListenTextResolver(env.API_PORT, { secure: false }),
     });
   } catch (error) {
     server.log.error(error);

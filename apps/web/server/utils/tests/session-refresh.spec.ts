@@ -23,6 +23,7 @@ vi.mock('h3', async (importOriginal) => {
 vi.mock('../runtime-config', () => ({
   getServerRuntimeConfig: () => ({
     jwtSecret: JWT_SECRET,
+    apiInternalBaseUrl: 'http://localhost:3000/v1',
     public: { apiUrl: 'http://localhost:3000/v1' },
   }),
 }));

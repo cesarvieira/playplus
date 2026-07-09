@@ -33,16 +33,8 @@ export function buildConnectSrc(isDev: boolean): string[] {
   }
 
   if (isDev) {
-    sources.add('ws://localhost:3002');
-    sources.add('ws://localhost:24678');
-    sources.add('wss://admin.playplus.localhost:3001');
-    sources.add('https://admin.playplus.localhost:3001');
-    sources.add('http://localhost:3000');
-    sources.add('https://localhost:3000');
-    sources.add('http://localhost:9000');
-    sources.add('https://api.playplus.localhost:3000');
-    sources.add('wss://api.playplus.localhost:3000');
-    sources.add('https://storage.playplus.localhost:9000');
+    // HMR do dev server trafega pelo Caddy: wss para o próprio host do admin.
+    sources.add('wss://admin.playplus.localhost');
   }
 
   return [...sources];

@@ -12,7 +12,7 @@ const testEnvDefaults: Record<string, string> = {
   ADMIN_SEED_EMAIL: 'admin@playplus.localhost',
   ADMIN_SEED_PASSWORD: 'test-password',
   API_PORT: '3000',
-  API_HOST: '0.0.0.0',
+  API_HOST: '127.0.0.1',
   NODE_ENV: 'test',
   COOKIE_SECURE: 'false',
   COOKIE_SAME_SITE: 'lax',

@@ -56,7 +56,7 @@ watch(page, (nextPage) => {
   <div class="flex flex-col">
     <header class="mb-6">
       <h1 class="text-pl-2xl font-extrabold tracking-pl-tight text-night-text">
-        Meus vídeos
+        Vídeos disponíveis
       </h1>
       <p
         v-if="catalog.status !== 'loading'"

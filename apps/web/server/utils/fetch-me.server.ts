@@ -17,7 +17,7 @@ export async function fetchMeWithServerSession(event: H3Event): Promise<ApiMeRes
 
   try {
     return await apiOfetch<ApiMeResponse>('/me', {
-      baseURL: config.public.apiUrl,
+      baseURL: config.apiInternalBaseUrl,
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
