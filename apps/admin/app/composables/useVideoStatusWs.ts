@@ -1,6 +1,7 @@
 import {
   VIDEO_STATUS,
   type VideoErrorEvent,
+  type VideoRetryEvent,
   type VideoStatus,
   type VideoStatusEvent,
 } from '@playplus/shared';
@@ -16,13 +17,30 @@ const WS_CLOSE_NORMAL = 1000;
 const INITIAL_BACKOFF_MS = 1000;
 export const MAX_BACKOFF_MS = 30000;
 
+export type VideoWsEvent = VideoStatusEvent | VideoErrorEvent | VideoRetryEvent;
+
 export function applyVideoEventToPatches(
   patches: Record<string, VideoLivePatch>,
-  event: VideoStatusEvent | VideoErrorEvent,
+  event: VideoWsEvent,
+  now = new Date().toISOString(),
 ): Record<string, VideoLivePatch> {
   if (event.type === 'video.status') {
-    const { video_id: videoId, status, progress } = event.payload;
+    const { video_id: videoId, status, progress, reason } = event.payload;
     const existing = patches[videoId];
+
+    if (status === VIDEO_STATUS.ERROR) {
+      return {
+        ...patches,
+        [videoId]: {
+          status: VIDEO_STATUS.ERROR,
+          errorReason: reason,
+          progress: undefined,
+          retryAttempt: undefined,
+          maxAttempts: undefined,
+          lastActivityAt: now,
+        },
+      };
+    }
 
     return {
       ...patches,
@@ -30,6 +48,26 @@ export function applyVideoEventToPatches(
         status: status as VideoStatus,
         progress: progress ?? existing?.progress,
         errorReason: undefined,
+        retryAttempt: undefined,
+        maxAttempts: undefined,
+        lastActivityAt: now,
+      },
+    };
+  }
+
+  if (event.type === 'video.retry') {
+    const { video_id: videoId, attempt, max_attempts: maxAttempts } = event.payload;
+    const existing = patches[videoId];
+
+    return {
+      ...patches,
+      [videoId]: {
+        status: VIDEO_STATUS.PROCESSING,
+        progress: existing?.progress,
+        errorReason: undefined,
+        retryAttempt: attempt,
+        maxAttempts,
+        lastActivityAt: now,
       },
     };
   }
@@ -39,6 +77,10 @@ export function applyVideoEventToPatches(
     [event.payload.video_id]: {
       status: VIDEO_STATUS.ERROR,
       errorReason: event.payload.reason,
+      progress: undefined,
+      retryAttempt: undefined,
+      maxAttempts: undefined,
+      lastActivityAt: now,
     },
   };
 }

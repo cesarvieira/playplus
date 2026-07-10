@@ -6,15 +6,20 @@ export interface ApiVideoListItem {
   duration: number | null;
   thumbnail_url: string | null;
   status: VideoStatus;
+  error_reason?: string | null;
   published_at: string | null;
   upload_complete?: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 export interface VideoLivePatch {
   status: VideoStatus;
   progress?: number;
   errorReason?: string;
+  retryAttempt?: number;
+  maxAttempts?: number;
+  lastActivityAt?: string;
 }
 
 export interface VideoPublicationPatch {
@@ -24,9 +29,15 @@ export interface VideoPublicationPatch {
 export interface DisplayVideoRow extends ApiVideoListItem {
   progress?: number;
   errorReason?: string;
+  retryAttempt?: number;
+  maxAttempts?: number;
+  liveUpdatedAt?: string;
 }
 
 export type VideoListFilter = 'all' | 'ready' | 'active' | 'error';
+
+/** Alinhado ao default de VIDEO_STALE_MINUTES na API (minutos). */
+export const VIDEO_STALE_MINUTES = 120;
 
 export function buildVideosListPath(
   filter: VideoListFilter,
@@ -57,7 +68,10 @@ export function mergeVideoRow(
     published_at: publicationPatch?.published_at ?? item.published_at,
     status: patch?.status ?? item.status,
     progress: patch?.progress,
-    errorReason: patch?.errorReason,
+    errorReason: patch?.errorReason ?? item.error_reason ?? undefined,
+    retryAttempt: patch?.retryAttempt,
+    maxAttempts: patch?.maxAttempts,
+    liveUpdatedAt: patch?.lastActivityAt,
   };
 }
 
@@ -65,6 +79,31 @@ export function filterActiveVideos(rows: DisplayVideoRow[]): DisplayVideoRow[] {
   return rows.filter(
     row => row.status === 'queued' || row.status === 'processing',
   );
+}
+
+export function isProcessingStale(updatedAt: string, staleMinutes = VIDEO_STALE_MINUTES): boolean {
+  const updatedMs = Date.parse(updatedAt);
+
+  if (Number.isNaN(updatedMs)) {
+    return false;
+  }
+
+  return Date.now() - updatedMs > staleMinutes * 60 * 1000;
+}
+
+export function capProcessingProgress(
+  status: VideoStatus,
+  progress: number | undefined,
+): number | undefined {
+  if (progress === undefined) {
+    return undefined;
+  }
+
+  if (status === 'ready') {
+    return progress;
+  }
+
+  return Math.min(progress, 99);
 }
 
 export interface ApiListVideosResponse {

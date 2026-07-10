@@ -13,6 +13,7 @@ import { logger } from '../config/logger.ts';
 import { downloadObject, uploadFile, uploadHlsDirectory } from '../infra/storage.ts';
 import { extractThumbnailFrame } from './ffmpeg/extract-thumbnail.ts';
 import { transcodeToHls } from './ffmpeg/hls-transcoder.ts';
+import { mapEncodeProgress, TRANSCODE_PROGRESS } from './progress.ts';
 
 export interface TranscodeResult {
   durationSeconds: number;
@@ -105,12 +106,17 @@ export function createFfmpegTranscodeProcessor(
         );
 
         await deps.download(payload.storageOriginalKey, inputPath);
+        context?.onProgress?.(TRANSCODE_PROGRESS.DOWNLOAD);
 
         const result = await deps.transcode({
           inputPath,
           outputDir,
           ffmpegPath: deps.ffmpegPath,
-          onProgress: context?.onProgress,
+          onProgress: context?.onProgress
+            ? (localPercent) => {
+                context.onProgress?.(mapEncodeProgress(localPercent));
+              }
+            : undefined,
         });
 
         try {
@@ -132,6 +138,8 @@ export function createFfmpegTranscodeProcessor(
           );
         }
 
+        context?.onProgress?.(TRANSCODE_PROGRESS.THUMBNAIL);
+
         await deps.upload(outputDir, storageHlsPrefix);
 
         let thumbnailKey: string | undefined;
@@ -152,7 +160,7 @@ export function createFfmpegTranscodeProcessor(
           }
         }
 
-        context?.onProgress?.(100);
+        context?.onProgress?.(TRANSCODE_PROGRESS.UPLOAD);
 
         logger.info(
           {

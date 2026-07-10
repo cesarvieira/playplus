@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildVideosListPath,
+  capProcessingProgress,
   filterActiveVideos,
   mergeVideoRow,
   type ApiVideoListItem,
@@ -15,6 +16,7 @@ const baseItem: ApiVideoListItem = {
   status: 'queued',
   published_at: null,
   created_at: '2026-06-01T00:00:00.000Z',
+  updated_at: '2026-06-01T00:00:00.000Z',
 };
 
 describe('buildVideosListPath', () => {
@@ -61,6 +63,31 @@ describe('mergeVideoRow', () => {
       progress: undefined,
       errorReason: undefined,
     });
+  });
+
+  it('usa error_reason do REST quando patch WS não tem motivo', () => {
+    expect(
+      mergeVideoRow(
+        { ...baseItem, status: 'error', error_reason: 'ffmpeg_exit_code_1' },
+        { status: 'error' },
+      ).errorReason,
+    ).toBe('ffmpeg_exit_code_1');
+  });
+  it('expõe liveUpdatedAt do patch WS', () => {
+    expect(
+      mergeVideoRow(baseItem, {
+        status: 'processing',
+        progress: 42,
+        lastActivityAt: '2026-07-09T12:00:00.000Z',
+      }).liveUpdatedAt,
+    ).toBe('2026-07-09T12:00:00.000Z');
+  });
+});
+
+describe('capProcessingProgress', () => {
+  it('limita progresso a 99 enquanto não está ready', () => {
+    expect(capProcessingProgress('processing', 100)).toBe(99);
+    expect(capProcessingProgress('ready', 100)).toBe(100);
   });
 });
 

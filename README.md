@@ -217,6 +217,10 @@ Para subir apenas o worker:
 pnpm --filter @playplus/worker dev
 ```
 
+### Worker em produção
+
+Em produção o worker deve reiniciar automaticamente (`Restart=on-failure` no systemd ou `restart: unless-stopped` no Docker). Opcional: `SENTRY_DSN` para alertas de falha terminal. Detalhes em [docs/worker-operations.md](docs/worker-operations.md).
+
 ### Comandos úteis
 
 ```bash
@@ -232,6 +236,7 @@ pnpm build         # build de todos os packages
 - [Stack e decisões técnicas](docs/stack.md)
 - [Estrutura de pastas](docs/folder-structure.md)
 - [Contratos da API](docs/api.md)
+- [Operação do worker](docs/worker-operations.md)
 - [ADR-006 — Auth SSR + M2M](docs/adr/adr-auth-ssr-m2m.md)
 - [Checklist E2E auth (ADR-006)](docs/checklist-auth-ssr-m2m.md)
 

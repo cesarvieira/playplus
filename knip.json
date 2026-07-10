@@ -4,7 +4,8 @@
     ".": {
       "vitest": {
         "config": ["vitest.shared.node.ts", "vitest.shared.nuxt.ts"]
-      }
+      },
+      "ignore": ["infra/media-gate/**"]
     },
     "apps/api": {
       "entry": ["src/index.ts"],

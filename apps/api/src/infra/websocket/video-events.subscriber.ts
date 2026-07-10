@@ -1,7 +1,6 @@
 import {
   VIDEO_EVENTS_CHANNEL,
-  type VideoErrorEvent,
-  type VideoStatusEvent,
+  type VideoEvent,
 } from '@playplus/shared';
 import type { Redis } from 'ioredis';
 
@@ -9,7 +8,7 @@ import { getInfraLogger } from '#config/logger';
 
 import { parseVideoEvent } from './parse-video-event.ts';
 
-export type VideoEvent = VideoStatusEvent | VideoErrorEvent;
+export type { VideoEvent };
 
 export interface VideoEventsSubscriber {
   start(): Promise<void>;

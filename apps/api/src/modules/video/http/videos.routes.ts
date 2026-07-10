@@ -4,6 +4,7 @@ import { USER_ROLE } from '@playplus/shared';
 
 import { env } from '#config/env';
 import { db } from '#infra/database/client';
+import { createMediaTokenSigner } from '#infra/media/media-token.factory';
 import { createStorageClient } from '#infra/storage/storage.factory';
 import { createAuthMiddleware } from '#modules/user/http/create-auth.middleware';
 import { requireRole } from '#modules/user/http/require-role.middleware';
@@ -11,6 +12,7 @@ import { requireRole } from '#modules/user/http/require-role.middleware';
 import { CreateVideoUseCase } from '../application/create-video.use-case.ts';
 import { EnqueueTranscodeUseCase } from '../application/enqueue-transcode.use-case.ts';
 import { GetVideoQuery } from '../application/get-video.query.ts';
+import { IssueMediaTokenQuery } from '../application/issue-media-token.query.ts';
 import { ListVideosQuery } from '../application/list-videos.query.ts';
 import { PublishVideoUseCase } from '../application/publish-video.use-case.ts';
 import { RenewUploadUrlUseCase } from '../application/renew-upload-url.use-case.ts';
@@ -26,6 +28,7 @@ import {
   getVideoQuerySchema,
   getVideoResponseSchema,
   listVideosQuerySchema,
+  mediaTokenResponseSchema,
   listVideosResponseSchema,
   type GetVideoQuerystring,
   type ListVideosQuerystring,
@@ -48,6 +51,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   const authenticate = createAuthMiddleware();
   const videoRepository = new VideoRepository(db);
   const storageClient = createStorageClient();
+  const mediaTokenSigner = createMediaTokenSigner();
   const transcodeQueue = createTranscodeQueue();
   const createVideoUseCase = new CreateVideoUseCase(videoRepository, storageClient);
   const renewUploadUrlUseCase = new RenewUploadUrlUseCase(videoRepository, storageClient);
@@ -56,8 +60,19 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
     storageClient,
     transcodeQueue,
   );
-  const listVideosQuery = new ListVideosQuery(videoRepository, storageClient, env.CDN_BASE_URL);
-  const getVideoQuery = new GetVideoQuery(videoRepository, storageClient, env.CDN_BASE_URL);
+  const listVideosQuery = new ListVideosQuery(
+    videoRepository,
+    storageClient,
+    env.CDN_BASE_URL,
+    mediaTokenSigner,
+  );
+  const getVideoQuery = new GetVideoQuery(
+    videoRepository,
+    storageClient,
+    env.CDN_BASE_URL,
+    mediaTokenSigner,
+  );
+  const issueMediaTokenQuery = new IssueMediaTokenQuery(videoRepository, mediaTokenSigner);
   const publishVideoUseCase = new PublishVideoUseCase(videoRepository);
   const scheduleVideoUseCase = new ScheduleVideoUseCase(videoRepository);
   const unpublishVideoUseCase = new UnpublishVideoUseCase(videoRepository);
@@ -95,8 +110,10 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
           thumbnail_url: item.thumbnailUrl,
           status: item.status,
           ...(item.uploadComplete !== undefined ? { upload_complete: item.uploadComplete } : {}),
+          ...(item.errorReason !== undefined ? { error_reason: item.errorReason } : {}),
           published_at: item.publishedAt,
           created_at: item.createdAt,
+          updated_at: item.updatedAt,
         })),
         meta: result.meta,
       });
@@ -134,9 +151,41 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
         ...(result.streamUrl !== undefined ? { stream_url: result.streamUrl } : {}),
         status: result.status,
         ...(result.uploadComplete !== undefined ? { upload_complete: result.uploadComplete } : {}),
+        ...(result.errorReason !== undefined ? { error_reason: result.errorReason } : {}),
         progress: result.progress,
         published_at: result.publishedAt,
         created_at: result.createdAt,
+        updated_at: result.updatedAt,
+      });
+    },
+  );
+
+  fastify.get(
+    '/videos/:id/media-token',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        querystring: getVideoQuerySchema,
+        response: {
+          200: mediaTokenResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('viewer')],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const query = request.query as GetVideoQuerystring;
+      const includeUnpublished = resolveIncludeUnpublished(
+        request.user.role,
+        query.include_unpublished,
+      );
+      const result = await issueMediaTokenQuery.execute(id, { includeUnpublished });
+
+      return reply.status(200).send({
+        token: result.token,
+        expires_in: env.MEDIA_TOKEN_TTL_SECONDS,
       });
     },
   );

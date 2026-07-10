@@ -9,6 +9,7 @@ export interface VideoStatusEvent {
     job_id: string;
     status: VideoStatus;
     progress?: number;
+    reason?: string;
   };
 }
 
@@ -20,3 +21,16 @@ export interface VideoErrorEvent {
     reason: string;
   };
 }
+
+export interface VideoRetryEvent {
+  type: 'video.retry';
+  payload: {
+    video_id: string;
+    job_id: string;
+    attempt: number;
+    max_attempts: number;
+    reason: string;
+  };
+}
+
+export type VideoEvent = VideoStatusEvent | VideoErrorEvent | VideoRetryEvent;

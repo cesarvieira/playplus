@@ -1,0 +1,16 @@
+{
+  "name": "@playplus/media-gate",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Cloudflare Worker que protege o R2 privado do Play+ (ADR-007).",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240909.0",
+    "typescript": "^5.6.0",
+    "wrangler": "^3.78.0"
+  }
+}

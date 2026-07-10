@@ -34,4 +34,21 @@ describe('createVideoEventPublisher', () => {
       }),
     );
   });
+
+  it('publica video.retry no canal ADR-002', async () => {
+    const publisher = createVideoEventPublisher({ publish } as never);
+
+    await publisher.publishVideoRetry({
+      video_id: '00000000-0000-4000-8000-000000000001',
+      job_id: 'transcode:job',
+      attempt: 2,
+      max_attempts: 3,
+      reason: 'ffmpeg_exit_code_1',
+    });
+
+    expect(publish).toHaveBeenCalledWith(
+      VIDEO_EVENTS_CHANNEL,
+      expect.stringContaining('"type":"video.retry"'),
+    );
+  });
 });

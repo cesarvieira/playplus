@@ -27,6 +27,9 @@ const envSchema = z.object({
   STORAGE_REGION: z.string().min(1),
   CDN_BASE_URL: z.url().default('http://localhost:8080/media'),
   PRESIGNED_UPLOAD_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
+  // Token de acesso à mídia (ADR-007) — secret compartilhado com o gate de entrega.
+  MEDIA_TOKEN_SECRET: z.string().min(32),
+  MEDIA_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(600),
   JWT_SECRET: z.string().min(32),
   JWT_ACCESS_TTL_SECONDS: z.coerce.number().int().positive(),
   JWT_REFRESH_TTL_SECONDS: z.coerce.number().int().positive(),
@@ -45,6 +48,7 @@ const envSchema = z.object({
     value => (value === '' || value === undefined ? undefined : value),
     z.url().optional(),
   ),
+  VIDEO_STALE_MINUTES: z.coerce.number().int().positive().default(120),
 });
 
 type Env = z.infer<typeof envSchema>;

@@ -8,6 +8,7 @@ import { GetVideoQuery, buildStreamUrl } from '#modules/video/application/get-vi
 const videoId = '00000000-0000-4000-8000-000000000001';
 const createdAt = new Date('2025-01-01T00:00:00Z');
 const cdnBaseUrl = 'http://localhost:8080/media';
+const mediaToken = 'signed-media-token';
 
 function createVideo(
   status: typeof VIDEO_STATUS.PENDING | typeof VIDEO_STATUS.PROCESSING | typeof VIDEO_STATUS.READY,
@@ -38,7 +39,12 @@ function createQuery() {
   const storageClient = {
     objectExists: vi.fn(),
   };
-  const query = new GetVideoQuery(videoRepository as never, storageClient as never, cdnBaseUrl);
+  const query = new GetVideoQuery(
+    videoRepository as never,
+    storageClient as never,
+    cdnBaseUrl,
+    { sign: () => mediaToken } as never,
+  );
 
   return { query, videoRepository, storageClient };
 }
@@ -77,11 +83,12 @@ describe('GetVideoQuery', () => {
       duration: 7240,
       thumbnailKey: null,
       thumbnailUrl: null,
-      streamUrl: `http://localhost:8080/media/videos/${videoId}/hls/master.m3u8`,
+      streamUrl: `http://localhost:8080/media/videos/${videoId}/hls/master.m3u8?t=${mediaToken}`,
       status: VIDEO_STATUS.READY,
       progress: null,
       publishedAt: null,
       createdAt: createdAt.toISOString(),
+      updatedAt: createdAt.toISOString(),
     });
   });
 
@@ -101,6 +108,7 @@ describe('GetVideoQuery', () => {
       progress: null,
       publishedAt: null,
       createdAt: createdAt.toISOString(),
+      updatedAt: createdAt.toISOString(),
     });
     expect(result).not.toHaveProperty('streamUrl');
   });

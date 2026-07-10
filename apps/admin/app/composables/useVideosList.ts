@@ -20,6 +20,10 @@ import {
 const LIST_REFRESH_DEBOUNCE_MS = 500;
 const CLIENT_ONLY = { server: false, immediate: false } as const;
 
+// Atualização ao vivo: WebSocket (status, progresso, retry, erro).
+// REST apenas em carga inicial/navegação, reconexão WS e estados terminais
+// (ready/error) que exigem metadados do banco (thumbnail, duration, error_reason).
+
 export interface UseVideosListReturn {
   filter: Ref<VideoListFilter>;
   page: Ref<number>;
@@ -195,6 +199,7 @@ export function useVideosList(): UseVideosListReturn {
         method: 'POST',
       });
       await refreshListData();
+      show('Transcodificação reenfileirada.', 'success');
     } catch (err) {
       const apiError = parseApiError(err);
       show(

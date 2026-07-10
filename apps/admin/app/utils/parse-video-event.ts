@@ -1,6 +1,7 @@
 import {
   VIDEO_STATUS,
   type VideoErrorEvent,
+  type VideoRetryEvent,
   type VideoStatusEvent,
 } from '@playplus/shared';
 
@@ -14,7 +15,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object';
 }
 
-export function parseVideoEvent(raw: string): VideoStatusEvent | VideoErrorEvent | null {
+function isPositiveInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0;
+}
+
+export type ParsedVideoEvent = VideoStatusEvent | VideoErrorEvent | VideoRetryEvent;
+
+export function parseVideoEvent(raw: string): ParsedVideoEvent | null {
   let parsed: unknown;
 
   try {
@@ -37,6 +44,7 @@ export function parseVideoEvent(raw: string): VideoStatusEvent | VideoErrorEvent
     const jobId = payload.job_id;
     const status = payload.status;
     const progress = payload.progress;
+    const reason = payload.reason;
 
     if (!isNonEmptyString(videoId) || !isNonEmptyString(jobId)) {
       return null;
@@ -53,6 +61,10 @@ export function parseVideoEvent(raw: string): VideoStatusEvent | VideoErrorEvent
       return null;
     }
 
+    if (reason !== undefined && !isNonEmptyString(reason)) {
+      return null;
+    }
+
     return {
       type: 'video.status',
       payload: {
@@ -60,6 +72,7 @@ export function parseVideoEvent(raw: string): VideoStatusEvent | VideoErrorEvent
         job_id: jobId,
         status: status as VideoStatusEvent['payload']['status'],
         ...(progress !== undefined ? { progress } : {}),
+        ...(reason !== undefined ? { reason } : {}),
       },
     };
   }
@@ -81,6 +94,40 @@ export function parseVideoEvent(raw: string): VideoStatusEvent | VideoErrorEvent
     return {
       type: 'video.error',
       payload: { video_id: videoId, job_id: jobId, reason },
+    };
+  }
+
+  if (parsed.type === 'video.retry') {
+    if (!isRecord(parsed.payload)) {
+      return null;
+    }
+
+    const payload = parsed.payload;
+    const videoId = payload.video_id;
+    const jobId = payload.job_id;
+    const attempt = payload.attempt;
+    const maxAttempts = payload.max_attempts;
+    const reason = payload.reason;
+
+    if (
+      !isNonEmptyString(videoId) ||
+      !isNonEmptyString(jobId) ||
+      !isPositiveInteger(attempt) ||
+      !isPositiveInteger(maxAttempts) ||
+      !isNonEmptyString(reason)
+    ) {
+      return null;
+    }
+
+    return {
+      type: 'video.retry',
+      payload: {
+        video_id: videoId,
+        job_id: jobId,
+        attempt,
+        max_attempts: maxAttempts,
+        reason,
+      },
     };
   }
 

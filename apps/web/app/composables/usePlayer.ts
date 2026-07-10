@@ -1,10 +1,22 @@
 import { ref, watch, onBeforeUnmount, type Ref, toValue } from 'vue';
-import Hls from 'hls.js';
+import Hls, { type LoaderContext, type LoaderConfiguration, type LoaderCallbacks } from 'hls.js';
 import { logger } from '~/utils/logger';
+import { appendMediaToken, extractMediaToken, getTokenExpiry } from '~/utils/media-token';
+
+// Renovação do token de mídia (ADR-007): reemite antes de expirar para não
+// quebrar a reprodução de vídeos mais longos que o TTL do token.
+const TOKEN_REFRESH_SKEW_MS = 60_000;
+const TOKEN_REFRESH_RETRY_MS = 15_000;
+
+export interface UsePlayerOptions {
+  /** Reemite um token de mídia fresco; `null` mantém o token atual. */
+  refreshToken?: () => Promise<string | null>;
+}
 
 export function usePlayer(
   videoRef: Ref<HTMLVideoElement | null>,
   src: Ref<string | undefined> | (() => string | undefined) | string | undefined,
+  options: UsePlayerOptions = {},
 ) {
   const isBuffering = ref(false);
   const isError = ref(false);
@@ -21,9 +33,17 @@ export function usePlayer(
   const nativeHeight = ref(0);
 
   let hlsInstance: Hls | null = null;
+  let tokenRefreshTimer: ReturnType<typeof setTimeout> | null = null;
   let networkRetryCount = 0;
   let mediaRetryCount = 0;
   const MAX_RETRIES = 3;
+
+  function clearTokenRefresh() {
+    if (tokenRefreshTimer !== null) {
+      clearTimeout(tokenRefreshTimer);
+      tokenRefreshTimer = null;
+    }
+  }
 
   function handleWaiting() {
     isBuffering.value = true;
@@ -124,6 +144,8 @@ export function usePlayer(
   }
 
   function cleanup() {
+    clearTokenRefresh();
+
     if (hlsInstance) {
       hlsInstance.destroy();
       hlsInstance = null;
@@ -214,14 +236,69 @@ export function usePlayer(
     nativeHeight.value = video.videoHeight || 0;
     updateResolutionLabel();
 
-    // Support check for Native HLS (like Safari)
-    if (video.canPlayType('application/vnd.apple.mpegurl') || video.canPlayType('audio/mpegurl')) {
-      video.src = currentSrc;
-    } else if (Hls.isSupported()) {
-      // Support check for hls.js (Chrome, Firefox, etc.)
-      hlsInstance = new Hls({ enableWorker: true });
+    // Token de mídia (ADR-007): a stream_url chega assinada; o loader do hls.js
+    // reanexa o token atual a cada playlist/segmento (URLs relativas perdem a query).
+    // `mediaToken` é mutável — o refresh proativo o troca in-place antes de expirar.
+    let mediaToken = extractMediaToken(currentSrc);
+
+    async function refreshMediaToken(): Promise<void> {
+      try {
+        const next = await options.refreshToken?.();
+
+        if (next) {
+          mediaToken = next;
+          scheduleTokenRefresh();
+          return;
+        }
+      } catch (err) {
+        logger.warn('Falha ao renovar token de mídia:', err);
+      }
+
+      // Sem token novo (falha ou vazio): tenta de novo dentro da janela de skew.
+      tokenRefreshTimer = setTimeout(() => void refreshMediaToken(), TOKEN_REFRESH_RETRY_MS);
+    }
+
+    function scheduleTokenRefresh() {
+      clearTokenRefresh();
+
+      if (!options.refreshToken || !mediaToken) {
+        return;
+      }
+
+      const expiry = getTokenExpiry(mediaToken);
+      if (expiry === null) {
+        return;
+      }
+
+      const delay = Math.max(0, expiry - Date.now() - TOKEN_REFRESH_SKEW_MS);
+      tokenRefreshTimer = setTimeout(() => void refreshMediaToken(), delay);
+    }
+
+    // Preferimos hls.js (MSE) sempre que suportado — só ele consegue injetar o
+    // token nos segmentos. HLS nativo (iOS Safari) fica como fallback; nele os
+    // segmentos relativos não carregam o token (ver ADR-007, pendência iOS).
+    if (Hls.isSupported()) {
+      const BaseLoader = Hls.DefaultConfig.loader;
+
+      hlsInstance = new Hls({
+        enableWorker: true,
+        loader: class MediaTokenLoader extends BaseLoader {
+          override load(
+            context: LoaderContext,
+            config: LoaderConfiguration,
+            callbacks: LoaderCallbacks<LoaderContext>,
+          ): void {
+            context.url = appendMediaToken(context.url, mediaToken);
+            super.load(context, config, callbacks);
+          }
+        },
+      });
       hlsInstance.loadSource(currentSrc);
       hlsInstance.attachMedia(video);
+
+      // Renova o token antes de expirar (só o caminho hls.js propaga token nos
+      // segmentos; HLS nativo/iOS segue como pendência do ADR-007).
+      scheduleTokenRefresh();
 
       const manifestParsedEvent = Hls.Events?.MANIFEST_PARSED || 'hlsManifestParsed';
       const levelSwitchedEvent = Hls.Events?.LEVEL_SWITCHED || 'hlsLevelSwitched';
@@ -272,6 +349,12 @@ export function usePlayer(
           }
         }
       });
+    } else if (
+      video.canPlayType('application/vnd.apple.mpegurl') ||
+      video.canPlayType('audio/mpegurl')
+    ) {
+      // HLS nativo (iOS Safari): fallback quando MSE não está disponível.
+      video.src = appendMediaToken(currentSrc, mediaToken);
     } else {
       logger.error('HLS is not supported in this browser.');
       isError.value = true;

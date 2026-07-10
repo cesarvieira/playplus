@@ -34,6 +34,21 @@ api.{$APP_DOMAIN} {
 
 storage.{$APP_DOMAIN} {
 	import tls_config
+
+	# ADR-007: gate de mídia. Só leituras públicas (GET/HEAD SEM assinatura AWS)
+	# passam pelo forward_auth — a API valida o token `?t=` e responde 204 (libera)
+	# ou 403 (nega); no 204 o Caddy faz proxy do objeto no MinIO. Ficam de fora:
+	#   • uploads (PUT presignado) — outro método;
+	#   • chamadas assinadas do SDK da API (HeadObject etc.) — header Authorization;
+	#   • preflight CORS (OPTIONS) — outro método, vai direto ao MinIO.
+	@gated {
+		method GET HEAD
+		not header Authorization *
+	}
+	forward_auth @gated {$API_UPSTREAM} {
+		uri /v1/media/verify
+	}
+
 	reverse_proxy {$MINIO_UPSTREAM}
 }
 

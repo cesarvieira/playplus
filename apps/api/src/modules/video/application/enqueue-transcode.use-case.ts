@@ -59,10 +59,11 @@ export class EnqueueTranscodeUseCase {
     assertValidStatusTransition(video.status, VIDEO_STATUS.QUEUED);
 
     if (video.status === VIDEO_STATUS.ERROR) {
-      await this.transcodeQueue.removeFailedJob(videoId);
+      await this.transcodeQueue.removeOrphanJob(videoId);
+      await this.videoRepository.updateStatus(videoId, VIDEO_STATUS.QUEUED, { errorReason: null });
+    } else {
+      await this.videoRepository.updateStatus(videoId, VIDEO_STATUS.QUEUED);
     }
-
-    await this.videoRepository.updateStatus(videoId, VIDEO_STATUS.QUEUED);
     await this.transcodeQueue.enqueue({
       videoId: video.id,
       storageOriginalKey: video.storageOriginalKey,

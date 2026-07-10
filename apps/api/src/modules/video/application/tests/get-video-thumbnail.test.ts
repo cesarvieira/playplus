@@ -9,6 +9,8 @@ const videoId = '00000000-0000-4000-8000-000000000001';
 const createdAt = new Date('2025-01-01T00:00:00Z');
 const cdnBaseUrl = 'http://localhost:8080/media';
 const thumbnailKey = `videos/${videoId}/hls/thumbnail.jpg`;
+const mediaToken = 'signed-media-token';
+const signerStub = { sign: () => mediaToken } as never;
 
 function createVideoWithThumbnail() {
   return VideoEntity.fromPersistence({
@@ -34,11 +36,11 @@ describe('GetVideoQuery — thumbnail_url', () => {
     const videoRepository = {
       findById: vi.fn().mockResolvedValue(createVideoWithThumbnail()),
     };
-    const query = new GetVideoQuery(videoRepository as never, {} as never, cdnBaseUrl);
+    const query = new GetVideoQuery(videoRepository as never, {} as never, cdnBaseUrl, signerStub);
 
     const result = await query.execute(videoId, { includeUnpublished: true });
 
-    expect(result.thumbnailUrl).toBe(`${cdnBaseUrl}/${thumbnailKey}`);
+    expect(result.thumbnailUrl).toBe(`${cdnBaseUrl}/${thumbnailKey}?t=${mediaToken}`);
     expect(result.thumbnailKey).toBe(thumbnailKey);
   });
 
@@ -63,7 +65,7 @@ describe('GetVideoQuery — thumbnail_url', () => {
         }),
       ),
     };
-    const query = new GetVideoQuery(videoRepository as never, {} as never, cdnBaseUrl);
+    const query = new GetVideoQuery(videoRepository as never, {} as never, cdnBaseUrl, signerStub);
 
     const result = await query.execute(videoId, { includeUnpublished: true });
 

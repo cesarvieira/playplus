@@ -43,6 +43,7 @@ describe('processTranscodeJob — pub/sub video.error', () => {
   const eventPublisher: VideoEventPublisher = {
     publishVideoStatus: vi.fn(),
     publishVideoError: vi.fn(),
+    publishVideoRetry: vi.fn(),
   };
 
   beforeEach(() => {
@@ -50,6 +51,7 @@ describe('processTranscodeJob — pub/sub video.error', () => {
     vi.mocked(videoRepo.updateStatus).mockReset().mockResolvedValue(undefined);
     vi.mocked(eventPublisher.publishVideoStatus).mockReset().mockResolvedValue(undefined);
     vi.mocked(eventPublisher.publishVideoError).mockReset().mockResolvedValue(undefined);
+    vi.mocked(eventPublisher.publishVideoRetry).mockReset().mockResolvedValue(undefined);
   });
 
   it('publica video.error na última tentativa com reason do FFmpeg', async () => {
@@ -78,6 +80,13 @@ describe('processTranscodeJob — pub/sub video.error', () => {
     ).rejects.toBeInstanceOf(FfmpegProcessError);
 
     expect(eventPublisher.publishVideoError).not.toHaveBeenCalled();
+    expect(eventPublisher.publishVideoRetry).toHaveBeenCalledWith({
+      video_id: videoId,
+      job_id: 'transcode:job',
+      attempt: 1,
+      max_attempts: 3,
+      reason: 'ffmpeg_exit_code_1',
+    });
   });
 
   it('usa reason fallback para falha opaca na última tentativa', async () => {

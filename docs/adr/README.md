@@ -10,5 +10,6 @@ Registro de decisões arquiteturais do Play+. Numeração sequencial.
 | [ADR-004](./ADR-004-admin-role-includes-viewer.md)                | Role admin inclui permissões viewer         | Aceito |
 | [ADR-005](./ADR-005-video-upload-complete-and-job-idempotency.md) | upload_complete e idempotência de transcode | Aceito |
 | [ADR-006](./adr-auth-ssr-m2m.md)                                  | Autenticação SSR + M2M com token rotation   | Aceito |
+| [ADR-007](./ADR-007-media-private-origin-signed-token.md)         | Origin privado + token assinado na borda    | Aceito |
 
 Baseline já decidida em [stack.md](../stack.md) — não duplicar em ADR.
