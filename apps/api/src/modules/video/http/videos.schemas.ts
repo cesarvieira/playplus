@@ -138,6 +138,39 @@ export const listVideosResponseSchema = {
   },
 } as const;
 
+const namedRefSchema = {
+  type: 'object',
+  required: ['id', 'name'],
+  additionalProperties: false,
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    name: { type: 'string' },
+  },
+} as const;
+
+const sluggedRefSchema = {
+  type: 'object',
+  required: ['id', 'name', 'slug'],
+  additionalProperties: false,
+  properties: {
+    id: { type: 'string', format: 'uuid' },
+    name: { type: 'string' },
+    slug: { type: 'string' },
+  },
+} as const;
+
+const videoMetadataProperties = {
+  description: { type: 'string' },
+  release_date: { type: 'string', format: 'date' },
+  rating: { type: 'string', enum: ['livre', '10', '12', '14', '16', '18'] },
+  rating_reason: { type: 'string' },
+  score: { type: 'number' },
+  directors: { type: 'array', items: namedRefSchema },
+  cast: { type: 'array', items: namedRefSchema },
+  genres: { type: 'array', items: sluggedRefSchema },
+  tags: { type: 'array', items: sluggedRefSchema },
+} as const;
+
 export const getVideoResponseSchema = {
   type: 'object',
   required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'progress', 'published_at', 'created_at', 'updated_at'],
@@ -155,6 +188,7 @@ export const getVideoResponseSchema = {
     error_reason: { type: ['string', 'null'] },
     upload_complete: { type: 'boolean' },
     progress: { type: 'null' },
+    ...videoMetadataProperties,
     published_at: { type: ['string', 'null'], format: 'date-time' },
     created_at: { type: 'string', format: 'date-time' },
     updated_at: { type: 'string', format: 'date-time' },

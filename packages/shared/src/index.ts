@@ -13,6 +13,7 @@ export type { Director } from './types/director.ts';
 export type { Actor } from './types/actor.ts';
 export type { Tag } from './types/tag.ts';
 export type { Genre } from './types/genre.ts';
+export type { RelationInput } from './types/relation-input.ts';
 
 export type { LoginDto } from './dtos/login.dto.ts';
 export type { AuthResponseDto } from './dtos/auth-response.dto.ts';

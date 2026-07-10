@@ -228,10 +228,21 @@ Retorna metadados completos de um vídeo, incluindo progresso salvo do usuário 
     "position": 3420,
     "updated_at": "2025-01-01T00:00:00Z"
   },
+  "description": "Sinopse do filme.",
+  "release_date": "2010-07-16",
+  "rating": "14",
+  "rating_reason": "Violência",
+  "score": 8.5,
+  "directors": [{ "id": "uuid", "name": "Christopher Nolan" }],
+  "cast": [{ "id": "uuid", "name": "Leonardo DiCaprio" }],
+  "genres": [{ "id": "uuid", "name": "Ficção Científica", "slug": "ficcao-cientifica" }],
+  "tags": [{ "id": "uuid", "name": "Ação", "slug": "acao" }],
   "published_at": "2025-01-01T00:00:00Z",
   "created_at": "2025-01-01T00:00:00Z"
 }
 ```
+
+**Campos de metadados** (`description`, `release_date`, `rating`, `rating_reason`, `score`, `directors`, `cast`, `genres`, `tags`): **omitidos** quando vazios/nulos. `rating` segue a enum `video_rating` (`livre`, `10`, `12`, `14`, `16`, `18`). Editáveis via `PATCH /videos/:id`.
 
 **Response `200`** (vídeo com `status` diferente de `ready` — metadados sem reprodução):
 
@@ -417,6 +428,49 @@ Despublica o vídeo — define `published_at = NULL` (rascunho, invisível no ca
 ```
 
 **Erros:** `401 UNAUTHORIZED` · `403 FORBIDDEN` · `404 VIDEO_NOT_FOUND`
+
+---
+
+### `PATCH /videos/:id` 🔒 admin
+
+Edita os metadados de um vídeo. **Patch parcial:** apenas os campos enviados são alterados. Campos escalares aceitam `null` para limpar; relações aceitam `[]` para esvaziar.
+
+**Body** (todos os campos opcionais):
+
+```json
+{
+  "title": "Novo título",
+  "description": "Sinopse atualizada.",
+  "release_date": "2010-07-16",
+  "rating": "14",
+  "rating_reason": "Violência",
+  "score": 8.5,
+  "directors": [{ "id": "uuid-existente" }, { "name": "Christopher Nolan" }],
+  "cast": [{ "name": "Leonardo DiCaprio" }],
+  "genres": [{ "id": "uuid-existente" }],
+  "tags": [{ "name": "Ação" }]
+}
+```
+
+**Relações (`directors`, `cast`, `genres`, `tags`):** cada item aceita **`{ "id": "uuid" }`** para vincular uma entidade existente **ou** **`{ "name": "texto" }`** para criá-la (find-or-create — tags/genres deduplicam por `slug`, directors/actors por `name`).
+
+**Validação:** Zod. `score` entre `0` e `10`; `rating` na enum `video_rating`; `release_date` no formato `YYYY-MM-DD`.
+
+**Response `200`:** mesmo contrato de `GET /videos/:id`, com os metadados atualizados.
+
+**Erros:**
+
+- `422 VALIDATION_ERROR` — id de tag/categoria/diretor/ator inexistente, ou corpo inválido (score fora da faixa, rating inválido, campo desconhecido).
+- `404 VIDEO_NOT_FOUND` · `401 UNAUTHORIZED` · `403 FORBIDDEN`.
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Tag não encontrado: <uuid>"
+  }
+}
+```
 
 ---
 

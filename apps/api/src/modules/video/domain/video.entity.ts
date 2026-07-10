@@ -1,4 +1,13 @@
-import type { CreateVideoDto, Video, VideoStatus } from '@playplus/shared';
+import type {
+  Actor,
+  CreateVideoDto,
+  Director,
+  Genre,
+  Tag,
+  Video,
+  VideoRating,
+  VideoStatus,
+} from '@playplus/shared';
 import {
   VIDEO_STATUS,
   buildStorageHlsPrefix,
@@ -7,7 +16,19 @@ import {
 
 export { buildStorageHlsPrefix, buildStorageOriginalKey };
 
-interface VideoPersistenceProps {
+interface VideoMetadataProps {
+  description?: string | null;
+  releaseDate?: string | null;
+  rating?: VideoRating | null;
+  ratingReason?: string | null;
+  score?: number | null;
+  directors?: Director[];
+  cast?: Actor[];
+  genres?: Genre[];
+  tags?: Tag[];
+}
+
+interface VideoPersistenceProps extends VideoMetadataProps {
   id: string;
   title: string;
   fileName: string;
@@ -40,6 +61,16 @@ export class VideoEntity {
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
+  readonly description: string | null;
+  readonly releaseDate: string | null;
+  readonly rating: VideoRating | null;
+  readonly ratingReason: string | null;
+  readonly score: number | null;
+  readonly directors: Director[];
+  readonly cast: Actor[];
+  readonly genres: Genre[];
+  readonly tags: Tag[];
+
   private constructor(props: VideoPersistenceProps) {
     this.id = props.id;
     this.title = props.title;
@@ -55,6 +86,16 @@ export class VideoEntity {
     this.publishedAt = props.publishedAt;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
+
+    this.description = props.description ?? null;
+    this.releaseDate = props.releaseDate ?? null;
+    this.rating = props.rating ?? null;
+    this.ratingReason = props.ratingReason ?? null;
+    this.score = props.score ?? null;
+    this.directors = props.directors ?? [];
+    this.cast = props.cast ?? [];
+    this.genres = props.genres ?? [];
+    this.tags = props.tags ?? [];
   }
 
   static fromPersistence(props: VideoPersistenceProps): VideoEntity {
@@ -87,6 +128,10 @@ export class VideoEntity {
     return {
       id: this.id,
       title: this.title,
+      description: this.description ?? undefined,
+      directors: this.directors.length > 0 ? this.directors : undefined,
+      releaseDate: this.releaseDate ?? undefined,
+      cast: this.cast.length > 0 ? this.cast : undefined,
       fileName: this.fileName,
       fileSize: this.fileSize,
       duration: this.duration,
@@ -97,10 +142,14 @@ export class VideoEntity {
       thumbnailKey: this.thumbnailKey,
       thumbnailUrl: null,
       errorReason: this.errorReason,
+      rating: this.rating ?? undefined,
+      ratingReason: this.ratingReason ?? undefined,
+      score: this.score ?? undefined,
+      genres: this.genres.length > 0 ? this.genres : undefined,
+      tags: this.tags.length > 0 ? this.tags : undefined,
       publishedAt: this.publishedAt ? this.publishedAt.toISOString() : null,
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
     };
   }
 }
-
