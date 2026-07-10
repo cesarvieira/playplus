@@ -15,7 +15,7 @@
     "@aws-sdk/client-s3": "3.1079.0",
     "@playplus/shared": "workspace:*",
     "@sentry/node": "^10.64.0",
-    "bullmq": "^5.79.0",
+    "bullmq": "^5.80.1",
     "ioredis": "^5.9.3",
     "pino": "10.3.1",
     "postgres": "^3.4.8",
