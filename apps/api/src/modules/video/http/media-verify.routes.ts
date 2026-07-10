@@ -16,6 +16,12 @@ export default async function mediaVerifyRoutes(fastify: FastifyInstance): Promi
   fastify.route({
     method: ['GET', 'HEAD'],
     url: '/media/verify',
+    config: {
+      rateLimit: {
+        max: 100,
+        timeWindow: '1 minute',
+      },
+    },
     handler: async (request, reply) => {
       const method =
         (request.headers['x-forwarded-method'] as string | undefined) ?? request.method;
