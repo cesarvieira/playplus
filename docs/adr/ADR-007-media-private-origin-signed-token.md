@@ -26,10 +26,10 @@ Nenhum objeto público é alcançável sem passar pelo gate.
 
 ### Camada 1 — Token assinado, escopado por vídeo, validado na borda
 
-- **Token:** HMAC-SHA256 sobre payload compacto `{ prefix: "videos/{id}", exp, nonce }`, chave `MEDIA_TOKEN_SECRET`. Emitido pela **API**.
+- **Token:** HMAC-SHA256 sobre payload compacto `{ p: prefix, e: exp }` (prefixo `videos/{id}` e expiração em epoch seconds), chave `MEDIA_TOKEN_SECRET`. Emitido pela **API**.
 - **Escopo:** o token autoriza o **prefixo** `videos/{id}` inteiro — cobre `master.m3u8`, playlists por qualidade, segmentos `.ts` e a thumbnail com uma única credencial.
 - **Transporte:** **query param `?t=` em toda requisição**. O manifesto é entregue com `?t=<token>`; um loader custom do `hls.js` (Fase 5) propaga o **mesmo** token para cada playlist e segmento (as URLs relativas do HLS perdem a query na resolução, então o player a reanexa). Escolhido em vez de cookie porque o gate de dev usa `forward_auth` no Caddy, onde setar cookie no cliente no caminho de sucesso é inviável; o modelo query-per-request valida cada requisição de forma independente e stateless — idêntico no Worker de prod.
-- **TTL:** curto (default `600s`), renovável reemitindo o token via `GET /videos/:id`.
+- **TTL:** curto (default `600s`), renovável via endpoint dedicado `GET /videos/:id/media-token`, que reemite um token novo para o mesmo prefixo. No caminho `hls.js` (MSE), o player renova **proativamente**: agenda a reemissão antes do `exp` (skew de 60s; retry de 15s em caso de falha) e troca o token in-place, de modo que o loader reanexa o token atualizado a cada segmento — fechando o gap "TTL expira mid-playback em vídeo longo" que motivou a rejeição de presigned URLs (ver Alternativas). HLS nativo (iOS Safari) não passa pelo loader custom e por isso **não renova**; permanece pendência conhecida deste ADR.
 - **Validação no gate:** confere assinatura + `exp` + que o objeto requisitado casa com `prefix`.
 
 ### Onde o gate roda
@@ -47,7 +47,7 @@ Cache-key na Cloudflare ignora o token (não fragmenta o cache), mas o Worker va
 
 ## Alternativas consideradas
 
-- **Presigned URLs + reescrita de manifesto:** TTL expira mid-playback em vídeo longo e joga lógica para o player. Rejeitado (também já rejeitado no ADR-003).
+- **Presigned URLs + reescrita de manifesto:** TTL expira mid-playback em vídeo longo e joga lógica para o player. Rejeitado (também já rejeitado no ADR-003). Gap resolvido pelo refresh proativo do token descrito na Camada 1 — o player renova antes do `exp` no caminho `hls.js`; iOS nativo ainda não renova.
 - **API faz proxy de todos os segmentos em prod:** egress do vídeo passa pela VPS, perde egress grátis do R2 e cache de borda. Rejeitado para prod; usado apenas como gate em dev.
 - **Bucket público + bloqueio só por `Referer`:** trivialmente burlável. Rejeitado.
 - **AES-128 / DRM:** fora do escopo v0 (camadas 2/3); podem ser adicionados depois sobre o mesmo gate.

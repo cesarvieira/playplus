@@ -161,6 +161,16 @@ export const getVideoResponseSchema = {
   },
 } as const;
 
+export const mediaTokenResponseSchema = {
+  type: 'object',
+  required: ['token', 'expires_in'],
+  additionalProperties: false,
+  properties: {
+    token: { type: 'string' },
+    expires_in: { type: 'integer', minimum: 1 },
+  },
+} as const;
+
 export const errorResponseSchema = {
   type: 'object',
   required: ['error'],

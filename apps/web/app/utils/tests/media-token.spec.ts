@@ -1,8 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
-import { appendMediaToken, extractMediaToken } from '~/utils/media-token';
+import { appendMediaToken, extractMediaToken, getTokenExpiry } from '~/utils/media-token';
 
 const token = 'eyJwIjoidmlkZW9zLzEifQ.c2ln';
+
+/** Monta um token com payload `{ p, e }` (base64url) e assinatura fictícia. */
+function tokenWithExpiry(expSeconds: number): string {
+  const payload = btoa(JSON.stringify({ p: 'videos/1', e: expSeconds }))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+  return `${payload}.c2ln`;
+}
 
 describe('extractMediaToken', () => {
   it('extrai o token da query', () => {
@@ -40,5 +49,23 @@ describe('appendMediaToken', () => {
     expect(appendMediaToken('https://cdn/videos/1/hls/master.m3u8', null)).toBe(
       'https://cdn/videos/1/hls/master.m3u8',
     );
+  });
+});
+
+describe('getTokenExpiry', () => {
+  it('devolve o exp em ms epoch', () => {
+    expect(getTokenExpiry(tokenWithExpiry(1_700_000_000))).toBe(1_700_000_000_000);
+  });
+
+  it('retorna null quando o payload não tem exp numérico', () => {
+    expect(getTokenExpiry(token)).toBeNull();
+  });
+
+  it('retorna null para token sem assinatura', () => {
+    expect(getTokenExpiry('semponto')).toBeNull();
+  });
+
+  it('retorna null para payload ilegível', () => {
+    expect(getTokenExpiry('!!!.c2ln')).toBeNull();
   });
 });

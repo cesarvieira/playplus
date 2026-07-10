@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import PlayLogo from '~/components/PlayLogo.vue';
 import type { VideoDetail } from '~/composables/useVideoDetail';
 import { usePlayer } from '~/composables/usePlayer';
+import { useApi } from '~/composables/useApi';
 import PlayerControls from '~/components/PlayerControls.vue';
 
 const props = withDefaults(
@@ -18,6 +19,20 @@ const props = withDefaults(
 const videoRef = ref<HTMLVideoElement | null>(null);
 const containerRef = ref<HTMLDivElement | null>(null);
 const streamUrl = computed(() => props.video.stream_url);
+
+const { api } = useApi();
+
+// Renovação do token de mídia (ADR-007): reemite via API antes de expirar.
+async function refreshMediaToken(): Promise<string | null> {
+  try {
+    const { token } = await api<{ token: string; expires_in: number }>(
+      `/videos/${props.video.id}/media-token`,
+    );
+    return token;
+  } catch {
+    return null;
+  }
+}
 
 const {
   isBuffering,
@@ -36,7 +51,7 @@ const {
   toggleMute,
   toggleFullscreen,
   retry,
-} = usePlayer(videoRef, streamUrl);
+} = usePlayer(videoRef, streamUrl, { refreshToken: refreshMediaToken });
 
 const showControls = ref(true);
 let hideTimeout: NodeJS.Timeout | null = null;

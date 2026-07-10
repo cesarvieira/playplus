@@ -7,6 +7,38 @@
  * assim que o gate (Worker em prod, Caddy em dev) autoriza cada segmento.
  */
 
+/** Converte base64url em base64 padrão (com padding) para o `atob`. */
+function base64UrlToBase64(input: string): string {
+  const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
+  return normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+}
+
+/**
+ * Lê o `exp` do payload do token (mesmo formato de `apps/api/.../media-token.ts`)
+ * e devolve o instante de expiração em ms epoch, ou `null` se ilegível. Usado pelo
+ * player para renovar o token antes de expirar.
+ */
+export function getTokenExpiry(token: string): number | null {
+  const separator = token.lastIndexOf('.');
+  if (separator <= 0) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(atob(base64UrlToBase64(token.slice(0, separator)))) as {
+      e?: unknown;
+    };
+
+    if (typeof payload.e !== 'number' || !Number.isFinite(payload.e)) {
+      return null;
+    }
+
+    return payload.e * 1000;
+  } catch {
+    return null;
+  }
+}
+
 /** Extrai o token `t` da query de uma URL. */
 export function extractMediaToken(url: string): string | null {
   const queryIndex = url.indexOf('?');

@@ -1,5 +1,5 @@
 import { ref, createApp, defineComponent, nextTick } from 'vue';
-import { describe, expect, it, vi, beforeEach, type Mock } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import Hls from 'hls.js';
 import { usePlayer } from '~/composables/usePlayer';
 
@@ -41,6 +41,15 @@ const { mockHlsInstance, HlsMock } = vi.hoisted(() => {
 vi.mock('hls.js', () => {
   return { default: HlsMock };
 });
+
+/** Monta um token com payload `{ p, e }` (base64url) e assinatura fictícia. */
+function tokenWithExpiry(expSeconds: number): string {
+  const payload = btoa(JSON.stringify({ p: 'videos/1', e: expSeconds }))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+  return `${payload}.c2ln`;
+}
 
 function createMockVideo() {
   const listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
@@ -287,6 +296,92 @@ describe('usePlayer', () => {
     expect(videoElement.removeAttribute).toHaveBeenCalledWith('src');
     expect(videoElement.load).toHaveBeenCalled();
     expect(videoElement.removeEventListener).toHaveBeenCalledWith('waiting', expect.any(Function));
+  });
+
+  describe('media token refresh (ADR-007)', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    function srcWithToken(ttlSeconds: number): string {
+      const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
+      return `http://example.com/videos/1/hls/master.m3u8?t=${tokenWithExpiry(exp)}`;
+    }
+
+    it('renova o token antes de expirar e reagenda', async () => {
+      const video = createMockVideo() as unknown as HTMLVideoElement;
+      const videoRef = ref<HTMLVideoElement | null>(video);
+      const srcRef = ref<string | undefined>(srcWithToken(120));
+      const refreshToken = vi.fn(async () =>
+        tokenWithExpiry(Math.floor(Date.now() / 1000) + 120),
+      );
+
+      withSetup(() => usePlayer(videoRef, srcRef, { refreshToken }));
+      await nextTick();
+
+      // TTL 120s, skew 60s → primeiro refresh em ~60s.
+      expect(refreshToken).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(refreshToken).toHaveBeenCalledTimes(1);
+
+      // Token novo (TTL 120s) reagenda outro refresh ~60s depois.
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(refreshToken).toHaveBeenCalledTimes(2);
+    });
+
+    it('tenta de novo em breve quando o refresh falha', async () => {
+      const video = createMockVideo() as unknown as HTMLVideoElement;
+      const videoRef = ref<HTMLVideoElement | null>(video);
+      const srcRef = ref<string | undefined>(srcWithToken(120));
+      const refreshToken = vi
+        .fn<() => Promise<string | null>>()
+        .mockResolvedValueOnce(null)
+        .mockResolvedValue(tokenWithExpiry(Math.floor(Date.now() / 1000) + 3600));
+
+      withSetup(() => usePlayer(videoRef, srcRef, { refreshToken }));
+      await nextTick();
+
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(refreshToken).toHaveBeenCalledTimes(1);
+
+      // Falha (null) → retry curto de 15s.
+      await vi.advanceTimersByTimeAsync(15_000);
+      expect(refreshToken).toHaveBeenCalledTimes(2);
+    });
+
+    it('não agenda refresh quando a src não tem token', async () => {
+      const video = createMockVideo() as unknown as HTMLVideoElement;
+      const videoRef = ref<HTMLVideoElement | null>(video);
+      const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
+      const refreshToken = vi.fn(async () => tokenWithExpiry(0));
+
+      withSetup(() => usePlayer(videoRef, srcRef, { refreshToken }));
+      await nextTick();
+
+      await vi.advanceTimersByTimeAsync(600_000);
+      expect(refreshToken).not.toHaveBeenCalled();
+    });
+
+    it('para de renovar após unmount', async () => {
+      const video = createMockVideo() as unknown as HTMLVideoElement;
+      const videoRef = ref<HTMLVideoElement | null>(video);
+      const srcRef = ref<string | undefined>(srcWithToken(120));
+      const refreshToken = vi.fn(async () =>
+        tokenWithExpiry(Math.floor(Date.now() / 1000) + 120),
+      );
+
+      const [, app] = withSetup(() => usePlayer(videoRef, srcRef, { refreshToken }));
+      await nextTick();
+
+      app.unmount();
+      await vi.advanceTimersByTimeAsync(600_000);
+      expect(refreshToken).not.toHaveBeenCalled();
+    });
   });
 
   describe('custom player controls and properties', () => {

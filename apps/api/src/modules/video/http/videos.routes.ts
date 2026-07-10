@@ -12,6 +12,7 @@ import { requireRole } from '#modules/user/http/require-role.middleware';
 import { CreateVideoUseCase } from '../application/create-video.use-case.ts';
 import { EnqueueTranscodeUseCase } from '../application/enqueue-transcode.use-case.ts';
 import { GetVideoQuery } from '../application/get-video.query.ts';
+import { IssueMediaTokenQuery } from '../application/issue-media-token.query.ts';
 import { ListVideosQuery } from '../application/list-videos.query.ts';
 import { PublishVideoUseCase } from '../application/publish-video.use-case.ts';
 import { RenewUploadUrlUseCase } from '../application/renew-upload-url.use-case.ts';
@@ -27,6 +28,7 @@ import {
   getVideoQuerySchema,
   getVideoResponseSchema,
   listVideosQuerySchema,
+  mediaTokenResponseSchema,
   listVideosResponseSchema,
   type GetVideoQuerystring,
   type ListVideosQuerystring,
@@ -70,6 +72,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
     env.CDN_BASE_URL,
     mediaTokenSigner,
   );
+  const issueMediaTokenQuery = new IssueMediaTokenQuery(videoRepository, mediaTokenSigner);
   const publishVideoUseCase = new PublishVideoUseCase(videoRepository);
   const scheduleVideoUseCase = new ScheduleVideoUseCase(videoRepository);
   const unpublishVideoUseCase = new UnpublishVideoUseCase(videoRepository);
@@ -153,6 +156,36 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
         published_at: result.publishedAt,
         created_at: result.createdAt,
         updated_at: result.updatedAt,
+      });
+    },
+  );
+
+  fastify.get(
+    '/videos/:id/media-token',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        querystring: getVideoQuerySchema,
+        response: {
+          200: mediaTokenResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('viewer')],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const query = request.query as GetVideoQuerystring;
+      const includeUnpublished = resolveIncludeUnpublished(
+        request.user.role,
+        query.include_unpublished,
+      );
+      const result = await issueMediaTokenQuery.execute(id, { includeUnpublished });
+
+      return reply.status(200).send({
+        token: result.token,
+        expires_in: env.MEDIA_TOKEN_TTL_SECONDS,
       });
     },
   );
