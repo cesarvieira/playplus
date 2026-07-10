@@ -41,7 +41,7 @@
     "@fastify/websocket": "^11.2.0",
     "@node-rs/argon2": "^2.0.2",
     "@playplus/shared": "workspace:*",
-    "bullmq": "^5.79.0",
+    "bullmq": "^5.80.1",
     "drizzle-orm": "^0.45.1",
     "fastify": "^5.8.5",
     "ioredis": "^5.9.3",
