@@ -24,9 +24,10 @@ function setAuthCorsHeaders(request: FastifyRequest, reply: FastifyReply): void 
 
 export default async function authCorsPlugin(fastify: FastifyInstance): Promise<void> {
   await fastify.register(fastifyRateLimit, {
-    global: false,
+    global: true,
     max: 60,
     timeWindow: 60_000,
+    allowList: (request) => !isAuthCorsRoute(request.url),
     keyGenerator: (request) => `${request.ip}:${request.url.split('?')[0]}`,
   });
 
@@ -34,8 +35,6 @@ export default async function authCorsPlugin(fastify: FastifyInstance): Promise<
     if (!isAuthCorsRoute(request.url)) {
       return;
     }
-
-    await fastify.rateLimit()(request, reply);
 
     if (request.method === 'OPTIONS') {
       const origin = request.headers.origin;
