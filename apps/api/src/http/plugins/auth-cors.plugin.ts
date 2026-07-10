@@ -36,6 +36,10 @@ export default async function authCorsPlugin(fastify: FastifyInstance): Promise<
       return;
     }
 
+    if (typeof request.rateLimit === 'function') {
+      await request.rateLimit();
+    }
+
     if (request.method === 'OPTIONS') {
       const origin = request.headers.origin;
 
