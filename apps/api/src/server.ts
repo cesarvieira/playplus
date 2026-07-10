@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 
 import { env } from './config/env.ts';
 import {
@@ -45,6 +46,9 @@ export async function buildServer() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
   await fastify.register(cookie);
+  // Rate limiting opt-in por rota (global: false) — habilitado apenas onde é
+  // necessário, ex.: o gate de mídia (ADR-007). Ver videos/http/media-verify.routes.
+  await fastify.register(rateLimit, { global: false });
   await errorHandlerPlugin(fastify);
   await fastify.register(wsPlugin, { prefix: '/v1' });
   await fastify.register(videoReconcilePlugin);
