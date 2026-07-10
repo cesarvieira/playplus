@@ -23,6 +23,8 @@ vi.mock('#config/env', () => ({
     STORAGE_SECRET_KEY: 'minioadmin',
     STORAGE_REGION: 'us-east-1',
     PRESIGNED_UPLOAD_TTL_SECONDS: 3600,
+    MEDIA_TOKEN_SECRET: 'test-media-token-secret-at-least-32-chars',
+    MEDIA_TOKEN_TTL_SECONDS: 600,
   },
 }));
 
@@ -132,6 +134,7 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
             status: VIDEO_STATUS.READY,
             publishedAt: null,
             createdAt: '2025-01-01T00:00:00Z',
+            updatedAt: '2025-01-01T00:00:00Z',
           },
         ],
         meta: { total: 1, page: 1, limit: 20 },
@@ -154,6 +157,7 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
             status: VIDEO_STATUS.READY,
             published_at: null,
             created_at: '2025-01-01T00:00:00Z',
+            updated_at: '2025-01-01T00:00:00Z',
           },
         ],
         meta: { total: 1, page: 1, limit: 20 },
@@ -189,6 +193,7 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
             status: VIDEO_STATUS.READY,
             publishedAt: null,
             createdAt: '2025-01-01T00:00:00Z',
+            updatedAt: '2025-01-01T00:00:00Z',
           },
         ],
         meta: { total: 1, page: 1, limit: 20 },
@@ -209,6 +214,7 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
         status: VIDEO_STATUS.READY,
         published_at: null,
         created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
       });
       expect(response.json().data[0]).not.toHaveProperty('thumbnail_key');
     });
@@ -236,6 +242,7 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
         progress: null,
         publishedAt: null,
         createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
       });
 
       const response = await app.inject({
@@ -255,6 +262,7 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
         progress: null,
         published_at: null,
         created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
       });
     });
 
@@ -272,6 +280,7 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
         progress: null,
         publishedAt: null,
         createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
       });
 
       const response = await app.inject({
@@ -291,6 +300,7 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
         progress: null,
         published_at: null,
         created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
       });
       expect(response.json()).not.toHaveProperty('thumbnail_key');
     });
@@ -306,6 +316,7 @@ describe('GET /v1/videos e GET /v1/videos/:id', () => {
         progress: null,
         publishedAt: null,
         createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
       });
 
       const response = await app.inject({

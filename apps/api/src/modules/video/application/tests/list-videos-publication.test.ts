@@ -33,7 +33,12 @@ function createQuery() {
     setUploadComplete: vi.fn(),
   };
   const storageClient = { objectExists: vi.fn() };
-  const query = new ListVideosQuery(videoRepository as never, storageClient as never, 'http://cdn.test');
+  const query = new ListVideosQuery(
+    videoRepository as never,
+    storageClient as never,
+    'http://cdn.test',
+    { sign: () => 'signed-media-token' } as never,
+  );
 
   return { query, videoRepository };
 }

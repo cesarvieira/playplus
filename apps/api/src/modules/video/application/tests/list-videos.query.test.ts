@@ -36,7 +36,12 @@ function createQuery() {
   const storageClient = {
     objectExists: vi.fn(),
   };
-  const query = new ListVideosQuery(videoRepository as never, storageClient as never, 'http://localhost:8080/media');
+  const query = new ListVideosQuery(
+    videoRepository as never,
+    storageClient as never,
+    'http://localhost:8080/media',
+    { sign: () => 'signed-media-token' } as never,
+  );
 
   return { query, videoRepository, storageClient };
 }
@@ -68,6 +73,7 @@ describe('ListVideosQuery', () => {
           status: VIDEO_STATUS.READY,
           publishedAt: null,
           createdAt: createdAt.toISOString(),
+          updatedAt: createdAt.toISOString(),
         },
       ],
       meta: { total: 1, page: 1, limit: 20 },

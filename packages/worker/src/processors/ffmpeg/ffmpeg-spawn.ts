@@ -76,7 +76,6 @@ export function spawnFfmpeg(args: string[], options: SpawnFfmpegOptions): Promis
       }
 
       if (code === 0) {
-        options.onProgress?.(100);
         resolve();
         return;
       }

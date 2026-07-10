@@ -20,6 +20,10 @@ export const workerEnvSchema = z.object({
   STORAGE_REGION: z.string().min(1),
   NODE_ENV: z.enum(['development', 'production', 'test']),
   FFMPEG_PATH: z.string().min(1).optional(),
+  SENTRY_DSN: z.preprocess(
+    value => (value === '' || value === undefined ? undefined : value),
+    z.url().optional(),
+  ),
 });
 
 export type WorkerEnv = z.infer<typeof workerEnvSchema>;

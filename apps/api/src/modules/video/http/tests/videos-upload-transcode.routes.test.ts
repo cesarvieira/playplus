@@ -22,6 +22,8 @@ vi.mock('#config/env', () => ({
     STORAGE_SECRET_KEY: 'minioadmin',
     STORAGE_REGION: 'us-east-1',
     PRESIGNED_UPLOAD_TTL_SECONDS: 3600,
+    MEDIA_TOKEN_SECRET: 'test-media-token-secret-at-least-32-chars',
+    MEDIA_TOKEN_TTL_SECONDS: 600,
   },
 }));
 

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import path from 'node:path';
 
 import { createFfmpegTranscodeProcessor } from '../transcode.processor.ts';
+import { TRANSCODE_PROGRESS } from '../progress.ts';
 
 const mkdtempMock = vi.hoisted(() => vi.fn());
 const rmMock = vi.hoisted(() => vi.fn());
@@ -59,11 +60,11 @@ describe('createFfmpegTranscodeProcessor', () => {
       expect.objectContaining({
         inputPath: path.join('/tmp/playplus-transcode-workspace', 'movie.mp4'),
         outputDir: path.join('/tmp/playplus-transcode-workspace', 'hls'),
-        onProgress,
+        onProgress: expect.any(Function),
         ffmpegPath: 'ffmpeg',
       }),
     );
-    expect(onProgress).toHaveBeenCalledWith(100);
+    expect(onProgress).toHaveBeenCalledWith(TRANSCODE_PROGRESS.DOWNLOAD);
     expect(rmMock).toHaveBeenCalledWith('/tmp/playplus-transcode-workspace', {
       recursive: true,
       force: true,

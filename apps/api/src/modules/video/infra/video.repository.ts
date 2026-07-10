@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNotNull, lte, sql } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, isNotNull, lt, lte, sql } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
@@ -203,5 +203,14 @@ export class VideoRepository {
     const rows = filters ? await baseQuery.where(filters) : await baseQuery;
 
     return rows[0]?.total ?? 0;
+  }
+
+  async findStaleByStatus(statuses: VideoStatus[], olderThan: Date): Promise<VideoEntity[]> {
+    const rows = await this.db
+      .select()
+      .from(videos)
+      .where(and(inArray(videos.status, statuses), lt(videos.updatedAt, olderThan)));
+
+    return rows.map(mapRowToEntity);
   }
 }

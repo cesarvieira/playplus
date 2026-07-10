@@ -48,6 +48,7 @@ function createUseCase() {
   const transcodeQueue = {
     isJobActive: vi.fn(),
     removeFailedJob: vi.fn(),
+    removeOrphanJob: vi.fn(),
     enqueue: vi.fn(),
   };
 
@@ -145,7 +146,10 @@ describe('EnqueueTranscodeUseCase', () => {
 
     await useCase.execute(videoId);
 
-    expect(transcodeQueue.removeFailedJob).toHaveBeenCalledWith(videoId);
+    expect(transcodeQueue.removeOrphanJob).toHaveBeenCalledWith(videoId);
+    expect(videoRepository.updateStatus).toHaveBeenCalledWith(videoId, VIDEO_STATUS.QUEUED, {
+      errorReason: null,
+    });
     expect(transcodeQueue.enqueue).toHaveBeenCalled();
   });
 });

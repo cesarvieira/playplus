@@ -19,6 +19,8 @@ const testEnvDefaults: Record<string, string> = {
   M2M_SERVICE_TOKEN: 'test-m2m-service-token-at-least-32-chars',
   DELEGATION_JWT_SECRET: 'test-delegation-secret-at-least-32-chars',
   DELEGATION_JWT_TTL_SECONDS: '60',
+  MEDIA_TOKEN_SECRET: 'test-media-token-secret-at-least-32-chars',
+  MEDIA_TOKEN_TTL_SECONDS: '600',
 };
 
 for (const [key, value] of Object.entries(testEnvDefaults)) {

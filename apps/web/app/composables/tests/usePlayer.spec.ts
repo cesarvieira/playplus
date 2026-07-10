@@ -19,7 +19,14 @@ const { mockHlsInstance, HlsMock } = vi.hoisted(() => {
     return instance;
   }
 
+  // Base loader que o MediaTokenLoader estende (ADR-007).
+  function BaseLoaderMock(this: unknown) {}
+  BaseLoaderMock.prototype.load = vi.fn();
+  BaseLoaderMock.prototype.abort = vi.fn();
+  BaseLoaderMock.prototype.destroy = vi.fn();
+
   MockHls.isSupported = vi.fn().mockReturnValue(true);
+  MockHls.DefaultConfig = { loader: BaseLoaderMock };
   MockHls.Events = {
     ERROR: 'hlsError',
   };
@@ -80,6 +87,8 @@ function withSetup<T>(composable: () => T) {
 describe('usePlayer', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // clearAllMocks zera chamadas mas não a implementação; garanta o default.
+    (HlsMock.isSupported as Mock).mockReturnValue(true);
   });
 
   it('does not initialize if videoRef is null', async () => {
@@ -107,9 +116,9 @@ describe('usePlayer', () => {
     expect(player.isError.value).toBe(false);
   });
 
-  it('uses native playback when browser supports HLS natively (Safari)', async () => {
+  it('prefers hls.js over native HLS when MSE is supported', async () => {
     const video = createMockVideo();
-    // Simulate Safari native HLS support
+    // Safari expõe HLS nativo, mas com MSE disponível preferimos hls.js (ADR-007).
     video.canPlayType.mockImplementation((type: string) => {
       return type === 'application/vnd.apple.mpegurl' ? 'maybe' : '';
     });
@@ -117,10 +126,27 @@ describe('usePlayer', () => {
     const videoRef = ref<HTMLVideoElement | null>(videoElement);
     const srcRef = ref<string | undefined>('http://example.com/stream.m3u8');
 
+    withSetup(() => usePlayer(videoRef, srcRef));
+    await nextTick();
+
+    expect(mockHlsInstance.loadSource).toHaveBeenCalledWith('http://example.com/stream.m3u8');
+    expect(videoElement.src).toBe('');
+  });
+
+  it('falls back to native HLS with token appended when MSE is unsupported (iOS)', async () => {
+    (HlsMock.isSupported as Mock).mockReturnValue(false);
+    const video = createMockVideo();
+    video.canPlayType.mockImplementation((type: string) => {
+      return type === 'application/vnd.apple.mpegurl' ? 'maybe' : '';
+    });
+    const videoElement = video as unknown as HTMLVideoElement;
+    const videoRef = ref<HTMLVideoElement | null>(videoElement);
+    const srcRef = ref<string | undefined>('http://example.com/videos/1/hls/master.m3u8?t=tok123');
+
     const [player] = withSetup(() => usePlayer(videoRef, srcRef));
     await nextTick();
 
-    expect(videoElement.src).toBe('http://example.com/stream.m3u8');
+    expect(videoElement.src).toBe('http://example.com/videos/1/hls/master.m3u8?t=tok123');
     expect(player.isBuffering.value).toBe(true);
   });
 

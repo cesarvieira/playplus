@@ -97,7 +97,7 @@ export interface GetVideoQuerystring {
 
 const videoListItemSchema = {
   type: 'object',
-  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'published_at', 'created_at'],
+  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'published_at', 'created_at', 'updated_at'],
   additionalProperties: false,
   properties: {
     id: { type: 'string', format: 'uuid' },
@@ -108,9 +108,11 @@ const videoListItemSchema = {
       type: 'string',
       enum: ['pending', 'queued', 'processing', 'ready', 'error'],
     },
+    error_reason: { type: ['string', 'null'] },
     upload_complete: { type: 'boolean' },
     published_at: { type: ['string', 'null'], format: 'date-time' },
     created_at: { type: 'string', format: 'date-time' },
+    updated_at: { type: 'string', format: 'date-time' },
   },
 } as const;
 
@@ -138,7 +140,7 @@ export const listVideosResponseSchema = {
 
 export const getVideoResponseSchema = {
   type: 'object',
-  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'progress', 'published_at', 'created_at'],
+  required: ['id', 'title', 'duration', 'thumbnail_url', 'status', 'progress', 'published_at', 'created_at', 'updated_at'],
   additionalProperties: false,
   properties: {
     id: { type: 'string', format: 'uuid' },
@@ -150,10 +152,12 @@ export const getVideoResponseSchema = {
       type: 'string',
       enum: ['pending', 'queued', 'processing', 'ready', 'error'],
     },
+    error_reason: { type: ['string', 'null'] },
     upload_complete: { type: 'boolean' },
     progress: { type: 'null' },
     published_at: { type: ['string', 'null'], format: 'date-time' },
     created_at: { type: 'string', format: 'date-time' },
+    updated_at: { type: 'string', format: 'date-time' },
   },
 } as const;
 

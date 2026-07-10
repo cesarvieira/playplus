@@ -1,0 +1,27 @@
+# Play+ — Media Gate (ADR-007). Worker que protege o R2 privado em produção.
+#
+# Deploy:
+#   cd infra/media-gate
+#   npm install
+#   wrangler secret put MEDIA_TOKEN_SECRET   # MESMO secret da API (env MEDIA_TOKEN_SECRET)
+#   wrangler deploy
+#
+# Depois, aponte CDN_BASE_URL da API para a rota do Worker, ex.:
+#   CDN_BASE_URL=https://cdn.playplus.com.br
+
+name = "playplus-media-gate"
+main = "src/index.ts"
+compatibility_date = "2026-07-09"
+
+# R2 privado — NÃO habilite o domínio público r2.dev nem um custom domain direto
+# no bucket; o único caminho de leitura deve ser este Worker.
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "playplus"
+
+# Roteie o hostname do CDN para o Worker (ajuste zone_name para o seu domínio):
+# [[routes]]
+# pattern = "cdn.playplus.com.br/*"
+# zone_name = "playplus.com.br"
+
+# MEDIA_TOKEN_SECRET é injetado como secret (wrangler secret put), nunca aqui.

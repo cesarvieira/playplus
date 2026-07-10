@@ -4,11 +4,16 @@ import { VIDEO_STATUS } from '@playplus/shared';
 
 import { formatDate, formatDuration } from '~/utils/format';
 import {
+  getProcessingProgressLabel,
   getRowPrimaryAction,
   getRowSecondaryText,
   resolveVideoErrorReason,
 } from '~/utils/video-copy';
-import type { DisplayVideoRow } from '~/utils/videos';
+import {
+  capProcessingProgress,
+  isProcessingStale,
+  type DisplayVideoRow,
+} from '~/utils/videos';
 
 const props = defineProps<{
   video: DisplayVideoRow;
@@ -28,9 +33,27 @@ const primaryAction = computed(() =>
   getRowPrimaryAction(props.video.status, props.video.upload_complete),
 );
 
-const secondaryText = computed(() =>
-  getRowSecondaryText(props.video.status, props.video.upload_complete),
+const displayProgress = computed(() =>
+  capProcessingProgress(props.video.status, props.video.progress),
 );
+
+const showProgress = computed(
+  () =>
+    props.video.status === VIDEO_STATUS.PROCESSING && displayProgress.value !== undefined,
+);
+
+const secondaryText = computed(() =>
+  getRowSecondaryText(props.video.status, props.video.upload_complete, {
+    hasProgress: showProgress.value,
+    retryAttempt: props.video.retryAttempt,
+    maxAttempts: props.video.maxAttempts,
+    isStale:
+      props.video.status === VIDEO_STATUS.PROCESSING &&
+      isProcessingStale(props.video.liveUpdatedAt ?? props.video.updated_at),
+  }),
+);
+
+const progressLabel = computed(() => getProcessingProgressLabel(displayProgress.value));
 
 const durationLabel = computed(() => formatDuration(props.video.duration));
 
@@ -47,10 +70,6 @@ const formattedDate = computed(() =>
 const watchUrl = computed(() => `${props.webUrl.replace(/\/$/, '')}/${props.video.id}`);
 
 const thumbClass = computed(() => `pl-video-thumb pl-video-thumb--${props.video.status}`);
-
-const showProgress = computed(
-  () => props.video.status === VIDEO_STATUS.PROCESSING && props.video.progress !== undefined,
-);
 
 const errorCopy = computed(() => resolveVideoErrorReason(props.video.errorReason));
 </script>
@@ -103,11 +122,18 @@ const errorCopy = computed(() => resolveVideoErrorReason(props.video.errorReason
       >
         <PlProgressBar
           class="flex-1"
-          :value="video.progress ?? 0"
+          :value="displayProgress ?? 0"
+          :label="progressLabel"
           :show-value="true"
-          :value-text="`Processando ${video.progress ?? 0} por cento`"
+          :value-text="`Processando ${displayProgress ?? 0} por cento`"
         />
       </div>
+      <p
+        v-else-if="secondaryText && video.status === VIDEO_STATUS.PROCESSING"
+        class="pl-video-row__meta"
+      >
+        {{ secondaryText }}
+      </p>
       <p
         v-else-if="video.status === VIDEO_STATUS.ERROR"
         class="pl-video-row__error"
@@ -175,7 +201,7 @@ const errorCopy = computed(() => resolveVideoErrorReason(props.video.errorReason
         Tentar de novo
       </PlButton>
       <span
-        v-else-if="secondaryText"
+        v-else-if="secondaryText && !showProgress"
         class="pl-video-row__action-text"
       >
         {{ secondaryText }}

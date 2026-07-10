@@ -14,6 +14,7 @@ import { logServiceConnectionError } from '#infra/connection-error';
 import { valkey } from '#infra/valkey/client';
 
 const ACTIVE_JOB_STATES = new Set(['waiting', 'active', 'delayed']);
+const REMOVABLE_JOB_STATES = new Set(['failed', 'stalled']);
 const VALKEY_SERVICE_NAME = 'Valkey';
 
 type TranscodeQueueClient = Queue<TranscodeJobPayload, unknown, typeof VIDEO_TRANSCODE_JOB_NAME>;
@@ -50,7 +51,21 @@ export class TranscodeQueue {
     return ACTIVE_JOB_STATES.has(state);
   }
 
+  async getJobState(videoId: string): Promise<string | null> {
+    const job = await this.queue.getJob(buildTranscodeJobId(videoId));
+
+    if (!job) {
+      return null;
+    }
+
+    return job.getState();
+  }
+
   async removeFailedJob(videoId: string): Promise<void> {
+    await this.removeOrphanJob(videoId);
+  }
+
+  async removeOrphanJob(videoId: string): Promise<void> {
     const job = await this.queue.getJob(buildTranscodeJobId(videoId));
 
     if (!job) {
@@ -59,7 +74,7 @@ export class TranscodeQueue {
 
     const state = await job.getState();
 
-    if (state === 'failed') {
+    if (REMOVABLE_JOB_STATES.has(state)) {
       await job.remove();
     }
   }

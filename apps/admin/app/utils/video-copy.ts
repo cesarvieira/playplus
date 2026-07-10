@@ -47,6 +47,7 @@ export function getStatusBadgeLabel(status: VideoStatus): string {
 export function getRowSecondaryText(
   status: VideoStatus,
   uploadComplete?: boolean,
+  options?: { hasProgress?: boolean; retryAttempt?: number; maxAttempts?: number; isStale?: boolean },
 ): string | null {
   if (status === VIDEO_STATUS.PENDING) {
     return uploadComplete ? 'Pronto para transcodificar' : 'Aguardando upload…';
@@ -57,6 +58,18 @@ export function getRowSecondaryText(
   }
 
   if (status === VIDEO_STATUS.PROCESSING) {
+    if (options?.isStale) {
+      return 'Processamento parado — aguarde reconciliação ou tente de novo em breve';
+    }
+
+    if (options?.retryAttempt !== undefined && options?.maxAttempts !== undefined) {
+      return `Tentativa ${options.retryAttempt} de ${options.maxAttempts}…`;
+    }
+
+    if (options?.hasProgress) {
+      return null;
+    }
+
     return 'Transcodificando…';
   }
 
@@ -65,6 +78,18 @@ export function getRowSecondaryText(
   }
 
   return null;
+}
+
+export function getProcessingProgressLabel(progress: number | undefined): string | undefined {
+  if (progress === undefined) {
+    return undefined;
+  }
+
+  if (progress >= 75) {
+    return 'Finalizando…';
+  }
+
+  return undefined;
 }
 
 export function getRowPrimaryAction(

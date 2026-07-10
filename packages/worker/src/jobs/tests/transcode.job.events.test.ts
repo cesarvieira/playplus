@@ -47,6 +47,7 @@ describe('processTranscodeJob — pub/sub video.status', () => {
   const eventPublisher: VideoEventPublisher = {
     publishVideoStatus: vi.fn(),
     publishVideoError: vi.fn(),
+    publishVideoRetry: vi.fn(),
   };
 
   beforeEach(() => {

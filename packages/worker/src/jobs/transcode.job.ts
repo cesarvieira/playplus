@@ -7,7 +7,6 @@ import {
   buildTranscodeJobId,
   type TranscodeJobPayload,
 } from '@playplus/shared';
-
 import { logger } from '../config/logger.ts';
 import type { VideoRepository } from '../infra/database/video.repository.ts';
 import { videoRepository } from '../infra/database/video.repository.ts';
@@ -17,6 +16,7 @@ import {
   type VideoEventPublisher,
 } from '../infra/events/video-events.ts';
 import { FfmpegProcessError } from '../processors/ffmpeg/errors.ts';
+import { TRANSCODE_PROGRESS } from '../processors/progress.ts';
 import type { TranscodeProcessor, TranscodeResult } from '../processors/transcode.processor.ts';
 import { createFfmpegTranscodeProcessor } from '../processors/transcode.processor.ts';
 
@@ -38,6 +38,9 @@ const noopEventPublisher: VideoEventPublisher = {
     void Promise.resolve();
   },
   async publishVideoError() {
+    void Promise.resolve();
+  },
+  async publishVideoRetry() {
     void Promise.resolve();
   },
 };
@@ -140,7 +143,7 @@ export async function processTranscodeJob(
     const result: TranscodeResult = await deps.processor.transcode(payload, transcodeContext);
 
     if (shouldPublishProgress) {
-      progressThrottle.flush(100);
+      progressThrottle.flush(TRANSCODE_PROGRESS.FINALIZE);
     }
 
     assertValidStatusTransition(VIDEO_STATUS.PROCESSING, VIDEO_STATUS.READY);
@@ -163,6 +166,8 @@ export async function processTranscodeJob(
     const message = error instanceof Error ? error.message : 'Falha na transcodificação';
 
     if (isLastAttempt(job)) {
+      const reason = resolveVideoErrorReason(error);
+
       await deps.videoRepo.updateStatus(payload.videoId, VIDEO_STATUS.ERROR, {
         errorReason: message,
       });
@@ -171,7 +176,14 @@ export async function processTranscodeJob(
         await eventPublisher.publishVideoError({
           video_id: payload.videoId,
           job_id: jobId,
-          reason: resolveVideoErrorReason(error),
+          reason,
+        });
+
+        await eventPublisher.publishVideoStatus({
+          video_id: payload.videoId,
+          job_id: jobId,
+          status: VIDEO_STATUS.ERROR,
+          reason,
         });
       }
 
@@ -179,6 +191,14 @@ export async function processTranscodeJob(
         { jobId, videoId: payload.videoId, err: error },
         'Transcode esgotou tentativas',
       );
+    } else if (shouldPublishProgress) {
+      await eventPublisher.publishVideoRetry({
+        video_id: payload.videoId,
+        job_id: jobId,
+        attempt: job.attemptsMade + 1,
+        max_attempts: getMaxAttempts(job),
+        reason: resolveVideoErrorReason(error),
+      });
     }
 
     throw error;

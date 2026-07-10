@@ -200,6 +200,10 @@ Lista vídeos disponíveis.
 
 `upload_complete`: `boolean` — presente em itens com `status: pending`. `false` = aguardando upload ao storage; `true` = arquivo no storage, pronto para `POST /videos/:id/transcode`. Omitido ou `true` nos demais status.
 
+`error_reason`: `string | null` — presente em itens com `status: error`. Motivo persistido da última falha de transcodificação. Omitido nos demais status.
+
+`updated_at`: `string` (ISO 8601) — última atualização do registro no banco (útil para detectar jobs presos no admin).
+
 **Filtros admin (v0):** pill **Em andamento** agrupa `queued` + `processing` no client — a API não expõe filtro único para ambos; `queued` aparece na listagem sem query param dedicado.
 
 **Filtro de publicação:** por padrão, todos os callers (incluindo admin) recebem apenas vídeos com `published_at` no passado ou presente (`published_at IS NOT NULL AND published_at <= NOW()`). Rascunhos (`published_at: null`) e agendados (data futura) ficam ocultos no catálogo web. O painel admin passa `include_unpublished=true` para listar rascunhos e agendados.
@@ -482,7 +486,29 @@ Emitido pelo worker durante e após a transcodificação.
 ```
 
 `status`: `queued` | `processing` | `ready` | `error`
-`progress`: 0–100, percentual de conclusão do FFmpeg.
+`progress`: 0–100, percentual global do pipeline (download, encode, upload). `100` apenas com `status: ready`.
+`reason`: `string` opcional — presente quando `status: error` (motivo da falha).
+
+Na falha terminal (após esgotar retries), o worker emite **`video.error`** e **`video.status`** com `status: error` e `reason`.
+
+---
+
+#### `video.retry`
+
+Emitido nas falhas intermediárias (antes de esgotar as tentativas BullMQ).
+
+```json
+{
+  "type": "video.retry",
+  "payload": {
+    "video_id": "uuid",
+    "job_id": "transcode-uuid",
+    "attempt": 2,
+    "max_attempts": 3,
+    "reason": "ffmpeg_exit_code_1"
+  }
+}
+```
 
 ---
 
