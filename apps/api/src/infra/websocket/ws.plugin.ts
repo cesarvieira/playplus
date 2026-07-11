@@ -1,10 +1,9 @@
 import rateLimit from '@fastify/rate-limit';
 import websocket from '@fastify/websocket';
 import type { FastifyPluginAsync } from 'fastify';
-import type { Redis } from 'ioredis';
 
 import { env } from '#config/env';
-import { valkey } from '#infra/valkey/client';
+import { valkey, type RedisClient } from '#infra/valkey/client';
 import { JwtService } from '#modules/user/infra/jwt.service';
 
 import { ConnectionRegistry } from './connection-registry.ts';
@@ -20,7 +19,7 @@ const WS_CLOSE_UNAUTHORIZED = 1008;
 
 export interface WsPluginOptions {
   jwtService?: JwtService;
-  valkeyClient?: Redis;
+  valkeyClient?: RedisClient;
   createSubscriber?: (onEvent: (event: VideoEvent) => void) => VideoEventsSubscriber;
 }
 

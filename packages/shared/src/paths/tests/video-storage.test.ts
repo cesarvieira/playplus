@@ -4,7 +4,14 @@ import {
   buildStorageHlsPrefix,
   buildStorageOriginalKey,
   buildStorageThumbnailKey,
+  buildStorageVideoPrefix,
 } from '../video-storage.ts';
+
+describe('buildStorageVideoPrefix', () => {
+  it('monta prefixo raiz do vídeo no storage', () => {
+    expect(buildStorageVideoPrefix('abc-123')).toBe('videos/abc-123/');
+  });
+});
 
 describe('buildStorageOriginalKey', () => {
   it('monta caminho do original no storage', () => {

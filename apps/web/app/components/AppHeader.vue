@@ -18,7 +18,7 @@ const userLabel = computed(() => {
 const avatarUrl = computed(() => {
   const email = userEmail.value;
 
-  return email ? getGravatarUrl(email, 68) : getGravatarUrl('', 68);
+  return email ? getAvatarUrl(email, 68) : getAvatarUrl('', 68);
 });
 </script>
 

@@ -21,6 +21,7 @@ import healthRoutes from './http/routes/health.routes.ts';
 import authRoutes from './modules/user/http/auth.routes.ts';
 import meRoutes from './modules/user/http/me.routes.ts';
 import videosRoutes from './modules/video/http/videos.routes.ts';
+import categoriesRoutes from './modules/video/http/categories.routes.ts';
 import mediaVerifyRoutes from './modules/video/http/media-verify.routes.ts';
 
 export async function buildServer() {
@@ -56,6 +57,7 @@ export async function buildServer() {
   await fastify.register(authRoutes, { prefix: '/v1' });
   await fastify.register(meRoutes, { prefix: '/v1' });
   await fastify.register(videosRoutes, { prefix: '/v1' });
+  await fastify.register(categoriesRoutes, { prefix: '/v1' });
   await fastify.register(mediaVerifyRoutes, { prefix: '/v1' });
 
   return fastify;

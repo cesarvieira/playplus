@@ -6,6 +6,7 @@ import { VideoEntity } from '#modules/video/domain/video.entity';
 import { VideoRepository } from '../video.repository.ts';
 
 const videoId = '00000000-0000-4000-8000-000000000002';
+const tagId = '00000000-0000-4000-8000-0000000000a1';
 
 interface VideoRowFixture {
   id: string;
@@ -138,11 +139,14 @@ describe('VideoRepository', () => {
   });
 
   it('findById retorna VideoEntity quando existe', async () => {
-    const findByIdChain = {
-      from: vi.fn().mockReturnThis(),
-      where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([videoRow]),
-    };
+    const limitSpy = vi.fn().mockResolvedValue([videoRow]);
+    // Chain thenable: `.limit(1)` resolve o vídeo; `await chain` (loadRelations) resolve [].
+    const findByIdChain: Record<string, unknown> = {};
+    findByIdChain.from = () => findByIdChain;
+    findByIdChain.innerJoin = () => findByIdChain;
+    findByIdChain.where = () => findByIdChain;
+    findByIdChain.limit = limitSpy;
+    findByIdChain.then = (onFulfilled: (rows: unknown[]) => unknown) => onFulfilled([]);
 
     const db = {
       select: vi.fn().mockReturnValue(findByIdChain),
@@ -152,7 +156,7 @@ describe('VideoRepository', () => {
 
     const result = await repository.findById(videoId);
 
-    expect(findByIdChain.limit).toHaveBeenCalledWith(1);
+    expect(limitSpy).toHaveBeenCalledWith(1);
     expect(result).toBeInstanceOf(VideoEntity);
     expect(result?.id).toBe(videoRow.id);
     expect(result?.thumbnailKey).toBeNull();
@@ -261,5 +265,44 @@ describe('VideoRepository', () => {
     await repository.count({ status: VIDEO_STATUS.ERROR });
 
     expect(selectChain.where).toHaveBeenCalled();
+  });
+
+  it('updateMetadata aplica escalares e sincroniza pivots numa transação', async () => {
+    const setSpy = vi.fn().mockReturnThis();
+    const txUpdateChain = { set: setSpy, where: vi.fn().mockResolvedValue(undefined) };
+    const txDeleteChain = { where: vi.fn().mockResolvedValue(undefined) };
+    const txInsertChain = { values: vi.fn().mockResolvedValue(undefined) };
+    const tx = {
+      update: vi.fn().mockReturnValue(txUpdateChain),
+      delete: vi.fn().mockReturnValue(txDeleteChain),
+      insert: vi.fn().mockReturnValue(txInsertChain),
+    };
+
+    // Chain thenable: `.limit(1)` resolve o vídeo; `await chain` (loadRelations) resolve [].
+    const selectChain: Record<string, unknown> = {};
+    selectChain.from = () => selectChain;
+    selectChain.innerJoin = () => selectChain;
+    selectChain.where = () => selectChain;
+    selectChain.limit = () => Promise.resolve([videoRow]);
+    selectChain.then = (onFulfilled: (rows: unknown[]) => unknown) => onFulfilled([]);
+
+    const db = {
+      transaction: vi.fn().mockImplementation(async (cb: (t: typeof tx) => Promise<void>) => cb(tx)),
+      select: vi.fn().mockReturnValue(selectChain),
+    };
+
+    const repository = new VideoRepository(db as never);
+
+    const result = await repository.updateMetadata(videoId, {
+      scalars: { description: 'Nova sinopse' },
+      relations: { tagIds: [tagId] },
+    });
+
+    expect(db.transaction).toHaveBeenCalled();
+    expect(setSpy).toHaveBeenCalledWith(expect.objectContaining({ description: 'Nova sinopse' }));
+    expect(tx.delete).toHaveBeenCalled();
+    expect(txInsertChain.values).toHaveBeenCalledWith([{ videoId, tagId }]);
+    expect(result).toBeInstanceOf(VideoEntity);
+    expect(result?.id).toBe(videoRow.id);
   });
 });

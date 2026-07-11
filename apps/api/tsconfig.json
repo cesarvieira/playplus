@@ -9,7 +9,8 @@
       "#config/*": ["./src/config/*.ts"],
       "#http/*": ["./src/http/*.ts"],
       "#infra/*": ["./src/infra/*.ts"],
-      "#modules/*": ["./src/modules/*.ts"]
+      "#modules/*": ["./src/modules/*.ts"],
+      "#shared/*": ["./src/shared/*.ts"]
     }
   },
   "include": ["src/**/*.ts"]

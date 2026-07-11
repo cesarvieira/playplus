@@ -6,6 +6,7 @@ const props = defineProps<{
   videos: DisplayVideoRow[];
   transcodeLoadingId?: string | null;
   publicationLoadingId?: string | null;
+  deleteLoadingId?: string | null;
   webUrl: string;
 }>();
 
@@ -14,6 +15,7 @@ const emit = defineEmits<{
   publish: [videoId: string];
   schedule: [videoId: string];
   unpublish: [videoId: string];
+  delete: [videoId: string];
 }>();
 
 const liveMessage = ref('');
@@ -44,10 +46,12 @@ watch(
       :web-url="webUrl"
       :transcode-loading="transcodeLoadingId === video.id"
       :publication-loading="publicationLoadingId === video.id"
+      :delete-loading="deleteLoadingId === video.id"
       @transcode="emit('transcode', $event)"
       @publish="emit('publish', $event)"
       @schedule="emit('schedule', $event)"
       @unpublish="emit('unpublish', $event)"
+      @delete="emit('delete', $event)"
     />
   </div>
 </template>

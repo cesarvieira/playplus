@@ -8,7 +8,8 @@
       "#config/*": ["./src/config/*.js"],
       "#http/*": ["./src/http/*.js"],
       "#infra/*": ["./src/infra/*.js"],
-      "#modules/*": ["./src/modules/*.js"]
+      "#modules/*": ["./src/modules/*.js"],
+      "#shared/*": ["./src/shared/*.js"]
     }
   },
   "include": ["src/**/*.ts"],

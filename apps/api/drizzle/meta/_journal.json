@@ -22,6 +22,13 @@
       "when": 1783005550439,
       "tag": "0002_brave_karnak",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783722719284,
+      "tag": "0003_busy_centennial",
+      "breakpoints": true
     }
   ]
 }

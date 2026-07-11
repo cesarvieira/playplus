@@ -1,5 +1,4 @@
 import { computed, onMounted, readonly, ref, watch, type ComputedRef, type Ref } from 'vue';
-
 import { useApi } from '~/composables/useApi';
 import { usePlToast } from '~/composables/usePlToast';
 import { useVideoStatusWs } from '~/composables/useVideoStatusWs';
@@ -42,6 +41,8 @@ export interface UseVideosListReturn {
   publishVideo: (videoId: string) => Promise<void>;
   scheduleVideo: (videoId: string, publishedAt: string) => Promise<void>;
   unpublishVideo: (videoId: string) => Promise<void>;
+  deleteLoadingId: Readonly<Ref<string | null>>;
+  deleteVideo: (videoId: string) => Promise<boolean>;
   setFilter: (nextFilter: VideoListFilter) => void;
   goToPage: (nextPage: number) => void;
 }
@@ -56,6 +57,7 @@ export function useVideosList(): UseVideosListReturn {
   const limit = ref(20);
   const transcodeLoadingId = ref<string | null>(null);
   const publicationLoadingId = ref<string | null>(null);
+  const deleteLoadingId = ref<string | null>(null);
   const publicationPatches = ref<Record<string, VideoPublicationPatch>>({});
 
   const listAsync = useLazyAsyncData(
@@ -268,6 +270,26 @@ export function useVideosList(): UseVideosListReturn {
     );
   }
 
+  async function deleteVideo(videoId: string): Promise<boolean> {
+    deleteLoadingId.value = videoId;
+
+    try {
+      await api(`/videos/${videoId}`, { method: 'DELETE' });
+      await refresh();
+      show('Vídeo excluído.', 'success');
+      return true;
+    } catch (err) {
+      const apiError = parseApiError(err);
+      show(
+        resolveErrorMessage(apiError?.code, 'default', apiError?.message),
+        'error',
+      );
+      return false;
+    } finally {
+      deleteLoadingId.value = null;
+    }
+  }
+
   function setFilter(nextFilter: VideoListFilter) {
     filter.value = nextFilter;
     page.value = 1;
@@ -295,6 +317,8 @@ export function useVideosList(): UseVideosListReturn {
     publishVideo,
     scheduleVideo,
     unpublishVideo,
+    deleteLoadingId: readonly(deleteLoadingId),
+    deleteVideo,
     setFilter,
     goToPage,
   };

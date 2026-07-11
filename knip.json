@@ -18,8 +18,7 @@
       "project": ["app/**/*.{ts,vue}", "server/**/*.ts"],
       "vitest": {
         "config": ["vitest.config.ts"]
-      },
-      "ignore": ["app/components/ConfirmDialog.vue"]
+      }
     },
     "apps/web": {
       "project": ["app/**/*.{ts,vue}"],
@@ -36,7 +35,8 @@
         "app/components/AppHeader.vue",
         "app/components/PlayerNotFound.vue",
         "app/components/PlayerUnavailable.vue",
-        "app/components/PlayerScrubber.vue"
+        "app/components/PlayerScrubber.vue",
+        "app/utils/avatar.ts"
       ]
     },
     "packages/*": {

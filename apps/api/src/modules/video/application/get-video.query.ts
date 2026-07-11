@@ -1,5 +1,5 @@
 import { VideoNotFoundError, VIDEO_STATUS } from '@playplus/shared';
-import type { VideoStatus } from '@playplus/shared';
+import type { Actor, Director, Genre, Tag, VideoRating, VideoStatus } from '@playplus/shared';
 
 import type { MediaTokenSigner } from '#infra/media/media-token';
 import type { StorageClient } from '#infra/storage/storage.client';
@@ -42,6 +42,15 @@ interface VideoDetail {
   updatedAt: string;
   streamUrl?: string;
   uploadComplete?: boolean;
+  description?: string;
+  releaseDate?: string;
+  rating?: VideoRating;
+  ratingReason?: string;
+  score?: number;
+  directors?: Director[];
+  cast?: Actor[];
+  genres?: Genre[];
+  tags?: Tag[];
 }
 
 export class GetVideoQuery {
@@ -125,6 +134,16 @@ async function mapToDetail(video: VideoEntity, deps: VideoMapDeps): Promise<Vide
   if (video.status === VIDEO_STATUS.READY) {
     detail.streamUrl = buildStreamUrl(cdnBaseUrl, video.id, mediaToken);
   }
+
+  if (video.description !== null) detail.description = video.description;
+  if (video.releaseDate !== null) detail.releaseDate = video.releaseDate;
+  if (video.rating !== null) detail.rating = video.rating;
+  if (video.ratingReason !== null) detail.ratingReason = video.ratingReason;
+  if (video.score !== null) detail.score = video.score;
+  if (video.directors.length > 0) detail.directors = video.directors;
+  if (video.cast.length > 0) detail.cast = video.cast;
+  if (video.genres.length > 0) detail.genres = video.genres;
+  if (video.tags.length > 0) detail.tags = video.tags;
 
   return detail;
 }

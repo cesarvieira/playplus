@@ -1,10 +1,13 @@
 import {
   bigint,
   boolean,
+  date,
   index,
   integer,
+  numeric,
   pgEnum,
   pgTable,
+  text,
   timestamp,
   uuid,
   varchar,
@@ -18,11 +21,25 @@ export const videoStatusEnum = pgEnum('video_status', [
   'error',
 ]);
 
+export const videoRatingEnum = pgEnum('video_rating', [
+  'livre',
+  '10',
+  '12',
+  '14',
+  '16',
+  '18',
+]);
+
 export const videos = pgTable(
   'videos',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     title: varchar('title', { length: 255 }).notNull(),
+    description: text('description'),
+    releaseDate: date('release_date'),
+    rating: videoRatingEnum('rating'),
+    ratingReason: text('rating_reason'),
+    score: numeric('score', { precision: 3, scale: 1, mode: 'number' }),
     fileName: varchar('file_name', { length: 255 }).notNull(),
     fileSize: bigint('file_size', { mode: 'number' }).notNull(),
     duration: integer('duration'),

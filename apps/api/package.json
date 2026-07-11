@@ -19,6 +19,10 @@
     "#modules/*": {
       "development": "./src/modules/*.ts",
       "default": "./dist/modules/*.js"
+    },
+    "#shared/*": {
+      "development": "./src/shared/*.ts",
+      "default": "./dist/shared/*.js"
     }
   },
   "scripts": {
@@ -48,6 +52,7 @@
     "jsonwebtoken": "^9.0.2",
     "pino": "10.3.1",
     "postgres": "^3.4.8",
+    "slugify": "^1.6.9",
     "ws": "^8.21.0",
     "zod": "^4.4.3"
   },

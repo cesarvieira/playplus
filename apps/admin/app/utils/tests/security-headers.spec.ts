@@ -63,4 +63,12 @@ describe('security-headers', () => {
     expect(dev['script-src']).toContain('\'unsafe-inline\'');
     expect(dev['script-src']).not.toContain('\'nonce-{{nonce}}\'');
   });
+
+  it('permite workers via blob em dev para o client do Vite', () => {
+    const dev = createContentSecurityPolicy(true);
+    const prod = createContentSecurityPolicy(false);
+
+    expect(dev['worker-src']).toEqual(['\'self\'', 'blob:']);
+    expect(prod['worker-src']).toBeUndefined();
+  });
 });

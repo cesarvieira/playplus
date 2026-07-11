@@ -23,15 +23,32 @@ const {
   publishVideo,
   scheduleVideo,
   unpublishVideo,
+  deleteLoadingId,
+  deleteVideo,
   setFilter,
   goToPage,
 } = useVideosList();
 
 const scheduleTargetId = ref<string | null>(null);
+const deleteTargetId = ref<string | null>(null);
 
 const scheduleTargetVideo = computed(() =>
   mergedRows.value.find(video => video.id === scheduleTargetId.value) ?? null,
 );
+
+const deleteTargetVideo = computed(() =>
+  mergedRows.value.find(video => video.id === deleteTargetId.value) ?? null,
+);
+
+const deleteDialogMessage = computed(() => {
+  const title = deleteTargetVideo.value?.title;
+
+  if (!title) {
+    return 'Esta ação é irreversível. O vídeo e os arquivos associados serão removidos.';
+  }
+
+  return `O vídeo «${title}» e todos os arquivos serão removidos permanentemente.`;
+});
 
 function onPublish(videoId: string) {
   void publishVideo(videoId);
@@ -56,6 +73,26 @@ async function onScheduleConfirm(publishedAt: string) {
 
   await scheduleVideo(scheduleTargetId.value, publishedAt);
   scheduleTargetId.value = null;
+}
+
+function onDeleteOpen(videoId: string) {
+  deleteTargetId.value = videoId;
+}
+
+function onDeleteClose() {
+  deleteTargetId.value = null;
+}
+
+async function onDeleteConfirm() {
+  if (!deleteTargetId.value) {
+    return;
+  }
+
+  const deleted = await deleteVideo(deleteTargetId.value);
+
+  if (deleted) {
+    deleteTargetId.value = null;
+  }
 }
 
 const showPagination = computed(() => meta.value.total > meta.value.limit);
@@ -130,11 +167,13 @@ const emptyMessage = computed(() =>
         :videos="mergedRows"
         :transcode-loading-id="transcodeLoadingId"
         :publication-loading-id="publicationLoadingId"
+        :delete-loading-id="deleteLoadingId"
         :web-url="config.public.webUrl"
         @transcode="enqueueTranscode"
         @publish="onPublish"
         @schedule="onScheduleOpen"
         @unpublish="onUnpublish"
+        @delete="onDeleteOpen"
       />
 
       <SchedulePublicationModal
@@ -143,6 +182,15 @@ const emptyMessage = computed(() =>
         :video-title="scheduleTargetVideo?.title"
         @close="onScheduleClose"
         @confirm="onScheduleConfirm"
+      />
+
+      <ConfirmDialog
+        enabled
+        :open="deleteTargetId !== null"
+        :loading="deleteLoadingId === deleteTargetId"
+        :message="deleteDialogMessage"
+        @close="onDeleteClose"
+        @confirm="onDeleteConfirm"
       />
 
       <nav

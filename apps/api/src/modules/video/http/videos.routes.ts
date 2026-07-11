@@ -10,6 +10,7 @@ import { createAuthMiddleware } from '#modules/user/http/create-auth.middleware'
 import { requireRole } from '#modules/user/http/require-role.middleware';
 
 import { CreateVideoUseCase } from '../application/create-video.use-case.ts';
+import { DeleteVideoUseCase } from '../application/delete-video.use-case.ts';
 import { EnqueueTranscodeUseCase } from '../application/enqueue-transcode.use-case.ts';
 import { GetVideoQuery } from '../application/get-video.query.ts';
 import { IssueMediaTokenQuery } from '../application/issue-media-token.query.ts';
@@ -18,8 +19,11 @@ import { PublishVideoUseCase } from '../application/publish-video.use-case.ts';
 import { RenewUploadUrlUseCase } from '../application/renew-upload-url.use-case.ts';
 import { ScheduleVideoUseCase } from '../application/schedule-video.use-case.ts';
 import { UnpublishVideoUseCase } from '../application/unpublish-video.use-case.ts';
+import { UpdateVideoMetadataUseCase } from '../application/update-video-metadata.use-case.ts';
 import { createTranscodeQueue } from '../infra/transcode.queue.ts';
+import { TaxonomyRepository } from '../infra/taxonomy.repository.ts';
 import { VideoRepository } from '../infra/video.repository.ts';
+import type { GetVideoQuery as GetVideoQueryType } from '../application/get-video.query.ts';
 import {
   createVideoBodySchema,
   createVideoResponseSchema,
@@ -40,11 +44,40 @@ import {
   videoIdParamsSchema,
 } from './videos.schemas.ts';
 
+type VideoDetail = Awaited<ReturnType<GetVideoQueryType['execute']>>;
+
 function resolveIncludeUnpublished(
   role: string,
   includeUnpublished?: boolean,
 ): boolean {
   return role === USER_ROLE.ADMIN && includeUnpublished === true;
+}
+
+/** Serializa o detalhe de um vídeo (GET e PATCH) para snake_case, omitindo campos ausentes. */
+function serializeVideoDetail(result: VideoDetail): Record<string, unknown> {
+  return {
+    id: result.id,
+    title: result.title,
+    duration: result.duration,
+    thumbnail_url: result.thumbnailUrl,
+    ...(result.streamUrl !== undefined ? { stream_url: result.streamUrl } : {}),
+    status: result.status,
+    ...(result.uploadComplete !== undefined ? { upload_complete: result.uploadComplete } : {}),
+    ...(result.errorReason !== undefined ? { error_reason: result.errorReason } : {}),
+    progress: result.progress,
+    ...(result.description !== undefined ? { description: result.description } : {}),
+    ...(result.releaseDate !== undefined ? { release_date: result.releaseDate } : {}),
+    ...(result.rating !== undefined ? { rating: result.rating } : {}),
+    ...(result.ratingReason !== undefined ? { rating_reason: result.ratingReason } : {}),
+    ...(result.score !== undefined ? { score: result.score } : {}),
+    ...(result.directors !== undefined ? { directors: result.directors } : {}),
+    ...(result.cast !== undefined ? { cast: result.cast } : {}),
+    ...(result.genres !== undefined ? { genres: result.genres } : {}),
+    ...(result.tags !== undefined ? { tags: result.tags } : {}),
+    published_at: result.publishedAt,
+    created_at: result.createdAt,
+    updated_at: result.updatedAt,
+  };
 }
 
 export default async function videosRoutes(fastify: FastifyInstance): Promise<void> {
@@ -76,6 +109,12 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   const publishVideoUseCase = new PublishVideoUseCase(videoRepository);
   const scheduleVideoUseCase = new ScheduleVideoUseCase(videoRepository);
   const unpublishVideoUseCase = new UnpublishVideoUseCase(videoRepository);
+  const deleteVideoUseCase = new DeleteVideoUseCase(videoRepository, storageClient, transcodeQueue);
+  const taxonomyRepository = new TaxonomyRepository(db);
+  const updateVideoMetadataUseCase = new UpdateVideoMetadataUseCase(
+    videoRepository,
+    taxonomyRepository,
+  );
 
   fastify.get(
     '/videos',
@@ -143,20 +182,31 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
       );
       const result = await getVideoQuery.execute(id, { includeUnpublished });
 
-      return reply.status(200).send({
-        id: result.id,
-        title: result.title,
-        duration: result.duration,
-        thumbnail_url: result.thumbnailUrl,
-        ...(result.streamUrl !== undefined ? { stream_url: result.streamUrl } : {}),
-        status: result.status,
-        ...(result.uploadComplete !== undefined ? { upload_complete: result.uploadComplete } : {}),
-        ...(result.errorReason !== undefined ? { error_reason: result.errorReason } : {}),
-        progress: result.progress,
-        published_at: result.publishedAt,
-        created_at: result.createdAt,
-        updated_at: result.updatedAt,
-      });
+      return reply.status(200).send(serializeVideoDetail(result));
+    },
+  );
+
+  fastify.patch(
+    '/videos/:id',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        response: {
+          200: getVideoResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+          422: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('admin')],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      await updateVideoMetadataUseCase.execute(id, request.body);
+      const result = await getVideoQuery.execute(id, { includeUnpublished: true });
+
+      return reply.status(200).send(serializeVideoDetail(result));
     },
   );
 
@@ -349,6 +399,28 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
         id: result.id,
         published_at: result.publishedAt,
       });
+    },
+  );
+
+  fastify.delete(
+    '/videos/:id',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        response: {
+          204: { type: 'null' },
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('admin')],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      await deleteVideoUseCase.execute(id);
+
+      return reply.status(204).send();
     },
   );
 }

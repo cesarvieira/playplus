@@ -1,12 +1,10 @@
-import type { Redis } from 'ioredis';
-
 import {
   VIDEO_EVENTS_CHANNEL,
   type VideoErrorEvent,
   type VideoStatusEvent,
 } from '@playplus/shared';
 
-import { valkey } from '#infra/valkey/client';
+import { valkey, type RedisClient } from '#infra/valkey/client';
 
 type VideoStatusEventPayload = VideoStatusEvent['payload'];
 type VideoErrorEventPayload = VideoErrorEvent['payload'];
@@ -16,7 +14,7 @@ export interface VideoEventPublisher {
   publishVideoError(payload: VideoErrorEventPayload): Promise<void>;
 }
 
-export function createVideoEventPublisher(client: Redis = valkey): VideoEventPublisher {
+export function createVideoEventPublisher(client: RedisClient = valkey): VideoEventPublisher {
   return {
     async publishVideoStatus(payload: VideoStatusEventPayload): Promise<void> {
       const event: VideoStatusEvent = {

@@ -3,13 +3,45 @@ import type { SQL } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
 import type * as schema from '#infra/database/schema';
+import { actors, videoActors } from '#infra/database/schema/actors';
+import { directors, videoDirectors } from '#infra/database/schema/directors';
+import { genres, videoGenres } from '#infra/database/schema/genres';
+import { tags, videoTags } from '#infra/database/schema/tags';
 import { videos } from '#infra/database/schema/videos';
 
-import type { CreateVideoDto, VideoStatus } from '@playplus/shared';
+import type { Actor, CreateVideoDto, Director, Genre, Tag, VideoRating, VideoStatus } from '@playplus/shared';
 
 import { VideoEntity } from '../domain/video.entity.ts';
 
 type VideoRow = typeof videos.$inferSelect;
+
+interface VideoRelations {
+  directors: Director[];
+  cast: Actor[];
+  genres: Genre[];
+  tags: Tag[];
+}
+
+export interface UpdateVideoMetadataScalars {
+  title?: string;
+  description?: string | null;
+  releaseDate?: string | null;
+  rating?: VideoRating | null;
+  ratingReason?: string | null;
+  score?: number | null;
+}
+
+export interface UpdateVideoMetadataRelations {
+  tagIds?: string[];
+  genreIds?: string[];
+  directorIds?: string[];
+  actorIds?: string[];
+}
+
+export interface UpdateVideoMetadataPatch {
+  scalars: UpdateVideoMetadataScalars;
+  relations: UpdateVideoMetadataRelations;
+}
 
 interface ListVideosParams {
   page: number;
@@ -51,10 +83,15 @@ interface UpdateStatusOptions {
   storageHlsPrefix?: string | null;
 }
 
-function mapRowToEntity(row: VideoRow): VideoEntity {
+function mapRowToEntity(row: VideoRow, relations?: VideoRelations): VideoEntity {
   return VideoEntity.fromPersistence({
     id: row.id,
     title: row.title,
+    description: row.description,
+    releaseDate: row.releaseDate,
+    rating: row.rating,
+    ratingReason: row.ratingReason,
+    score: row.score,
     fileName: row.fileName,
     fileSize: row.fileSize,
     duration: row.duration,
@@ -67,6 +104,10 @@ function mapRowToEntity(row: VideoRow): VideoEntity {
     publishedAt: row.publishedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    directors: relations?.directors,
+    cast: relations?.cast,
+    genres: relations?.genres,
+    tags: relations?.tags,
   });
 }
 
@@ -109,7 +150,94 @@ export class VideoRepository {
       return null;
     }
 
-    return mapRowToEntity(row);
+    const relations = await this.loadRelations(id);
+
+    return mapRowToEntity(row, relations);
+  }
+
+  private async loadRelations(id: string): Promise<VideoRelations> {
+    const [tagRows, genreRows, directorRows, actorRows] = await Promise.all([
+      this.db
+        .select({ id: tags.id, name: tags.name, slug: tags.slug })
+        .from(videoTags)
+        .innerJoin(tags, eq(videoTags.tagId, tags.id))
+        .where(eq(videoTags.videoId, id)),
+      this.db
+        .select({ id: genres.id, name: genres.name, slug: genres.slug })
+        .from(videoGenres)
+        .innerJoin(genres, eq(videoGenres.genreId, genres.id))
+        .where(eq(videoGenres.videoId, id)),
+      this.db
+        .select({ id: directors.id, name: directors.name })
+        .from(videoDirectors)
+        .innerJoin(directors, eq(videoDirectors.directorId, directors.id))
+        .where(eq(videoDirectors.videoId, id)),
+      this.db
+        .select({ id: actors.id, name: actors.name })
+        .from(videoActors)
+        .innerJoin(actors, eq(videoActors.actorId, actors.id))
+        .where(eq(videoActors.videoId, id)),
+    ]);
+
+    return {
+      tags: tagRows,
+      genres: genreRows,
+      directors: directorRows,
+      cast: actorRows,
+    };
+  }
+
+  async updateMetadata(id: string, patch: UpdateVideoMetadataPatch): Promise<VideoEntity | null> {
+    const { scalars, relations } = patch;
+
+    await this.db.transaction(async (tx) => {
+      const setValues: Partial<typeof videos.$inferInsert> = { updatedAt: new Date() };
+
+      if ('title' in scalars) setValues.title = scalars.title;
+      if ('description' in scalars) setValues.description = scalars.description;
+      if ('releaseDate' in scalars) setValues.releaseDate = scalars.releaseDate;
+      if ('rating' in scalars) setValues.rating = scalars.rating;
+      if ('ratingReason' in scalars) setValues.ratingReason = scalars.ratingReason;
+      if ('score' in scalars) setValues.score = scalars.score;
+
+      await tx.update(videos).set(setValues).where(eq(videos.id, id));
+
+      if (relations.tagIds !== undefined) {
+        await tx.delete(videoTags).where(eq(videoTags.videoId, id));
+        if (relations.tagIds.length > 0) {
+          await tx.insert(videoTags).values(relations.tagIds.map(tagId => ({ videoId: id, tagId })));
+        }
+      }
+
+      if (relations.genreIds !== undefined) {
+        await tx.delete(videoGenres).where(eq(videoGenres.videoId, id));
+        if (relations.genreIds.length > 0) {
+          await tx
+            .insert(videoGenres)
+            .values(relations.genreIds.map(genreId => ({ videoId: id, genreId })));
+        }
+      }
+
+      if (relations.directorIds !== undefined) {
+        await tx.delete(videoDirectors).where(eq(videoDirectors.videoId, id));
+        if (relations.directorIds.length > 0) {
+          await tx
+            .insert(videoDirectors)
+            .values(relations.directorIds.map(directorId => ({ videoId: id, directorId })));
+        }
+      }
+
+      if (relations.actorIds !== undefined) {
+        await tx.delete(videoActors).where(eq(videoActors.videoId, id));
+        if (relations.actorIds.length > 0) {
+          await tx
+            .insert(videoActors)
+            .values(relations.actorIds.map(actorId => ({ videoId: id, actorId })));
+        }
+      }
+    });
+
+    return this.findById(id);
   }
 
   async updateStatus(
@@ -193,7 +321,7 @@ export class VideoRepository {
       .limit(params.limit)
       .offset(offset);
 
-    return rows.map(mapRowToEntity);
+    return rows.map(row => mapRowToEntity(row));
   }
 
   async count(params: CountVideosParams = {}): Promise<number> {
@@ -211,6 +339,12 @@ export class VideoRepository {
       .from(videos)
       .where(and(inArray(videos.status, statuses), lt(videos.updatedAt, olderThan)));
 
-    return rows.map(mapRowToEntity);
+    return rows.map(row => mapRowToEntity(row));
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const rows = await this.db.delete(videos).where(eq(videos.id, id)).returning({ id: videos.id });
+
+    return rows.length > 0;
   }
 }
