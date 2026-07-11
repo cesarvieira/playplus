@@ -32,6 +32,22 @@ vi.mock('@aws-sdk/client-s3', () => ({
       this.input = input;
     }
   },
+  ListObjectsV2Command: class MockListObjectsV2Command {
+    input: unknown;
+    type = 'ListObjectsV2';
+
+    constructor(input: unknown) {
+      this.input = input;
+    }
+  },
+  DeleteObjectsCommand: class MockDeleteObjectsCommand {
+    input: unknown;
+    type = 'DeleteObjects';
+
+    constructor(input: unknown) {
+      this.input = input;
+    }
+  },
 }));
 
 vi.mock('@aws-sdk/s3-request-presigner', () => ({
@@ -123,5 +139,93 @@ describe('StorageClient', () => {
     await expect(client.objectExists('videos/id/original/file.mp4')).rejects.toThrow(
       'Network failure',
     );
+  });
+
+  it('listObjectKeys retorna keys paginadas sob o prefixo', async () => {
+    sendMock
+      .mockResolvedValueOnce({
+        Contents: [{ Key: 'videos/id/original/file.mp4' }],
+        IsTruncated: true,
+        NextContinuationToken: 'page-2',
+      })
+      .mockResolvedValueOnce({
+        Contents: [{ Key: 'videos/id/hls/master.m3u8' }],
+        IsTruncated: false,
+      });
+
+    const client = new StorageClient(config);
+    const keys = await client.listObjectKeys('videos/id/');
+
+    expect(keys).toEqual(['videos/id/original/file.mp4', 'videos/id/hls/master.m3u8']);
+
+    const firstCommand = sendMock.mock.calls[0]?.[0] as { input: unknown; type: string };
+    const secondCommand = sendMock.mock.calls[1]?.[0] as { input: unknown; type: string };
+
+    expect(firstCommand.type).toBe('ListObjectsV2');
+    expect(firstCommand.input).toEqual({
+      Bucket: 'playplus',
+      Prefix: 'videos/id/',
+      ContinuationToken: undefined,
+    });
+    expect(secondCommand.input).toEqual({
+      Bucket: 'playplus',
+      Prefix: 'videos/id/',
+      ContinuationToken: 'page-2',
+    });
+  });
+
+  it('deleteObjects remove lotes de até 1000 keys', async () => {
+    sendMock.mockResolvedValue({});
+
+    const client = new StorageClient(config);
+    const keys = ['videos/id/a.ts', 'videos/id/b.ts'];
+
+    await client.deleteObjects(keys);
+
+    const command = sendMock.mock.calls[0]?.[0] as { input: unknown; type: string };
+
+    expect(command.type).toBe('DeleteObjects');
+    expect(command.input).toEqual({
+      Bucket: 'playplus',
+      Delete: {
+        Objects: [{ Key: 'videos/id/a.ts' }, { Key: 'videos/id/b.ts' }],
+        Quiet: true,
+      },
+    });
+  });
+
+  it('deleteObjects é no-op para lista vazia', async () => {
+    const client = new StorageClient(config);
+
+    await client.deleteObjects([]);
+
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it('deleteByPrefix lista e remove objetos do prefixo', async () => {
+    sendMock
+      .mockResolvedValueOnce({
+        Contents: [
+          { Key: 'videos/id/original/file.mp4' },
+          { Key: 'videos/id/hls/master.m3u8' },
+        ],
+        IsTruncated: false,
+      })
+      .mockResolvedValueOnce({});
+
+    const client = new StorageClient(config);
+    await client.deleteByPrefix('videos/id/');
+
+    expect(sendMock).toHaveBeenCalledTimes(2);
+    expect(sendMock.mock.calls[0]?.[0]).toMatchObject({ type: 'ListObjectsV2' });
+    expect(sendMock.mock.calls[1]?.[0]).toMatchObject({ type: 'DeleteObjects' });
+  });
+
+  it('deleteByPrefix ignora prefixo vazio', async () => {
+    const client = new StorageClient(config);
+
+    await client.deleteByPrefix('');
+
+    expect(sendMock).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IconAlertTriangle, IconExternalLink, IconRefresh } from '@tabler/icons-vue';
+import { IconAlertTriangle, IconExternalLink, IconRefresh, IconTrash } from '@tabler/icons-vue';
 import { VIDEO_STATUS } from '@playplus/shared';
 
 import { formatDate, formatDuration } from '~/utils/format';
@@ -19,6 +19,7 @@ const props = defineProps<{
   video: DisplayVideoRow;
   transcodeLoading?: boolean;
   publicationLoading?: boolean;
+  deleteLoading?: boolean;
   webUrl: string;
 }>();
 
@@ -27,6 +28,7 @@ const emit = defineEmits<{
   publish: [videoId: string];
   schedule: [videoId: string];
   unpublish: [videoId: string];
+  delete: [videoId: string];
 }>();
 
 const primaryAction = computed(() =>
@@ -206,6 +208,18 @@ const errorCopy = computed(() => resolveVideoErrorReason(props.video.errorReason
       >
         {{ secondaryText }}
       </span>
+    </div>
+
+    <div class="pl-video-row__secondary-actions">
+      <button
+        type="button"
+        class="pl-video-row__icon-btn pl-video-row__icon-btn--danger pl-focus-ring"
+        :disabled="deleteLoading"
+        :aria-label="deleteLoading ? 'Excluindo vídeo' : `Excluir ${video.title}`"
+        @click="emit('delete', video.id)"
+      >
+        <IconTrash class="size-pl-icon-sm" stroke="2" aria-hidden="true" />
+      </button>
     </div>
   </article>
 </template>

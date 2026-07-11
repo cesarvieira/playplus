@@ -1,4 +1,10 @@
-import { HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectsCommand,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 interface StorageClientConfig {
@@ -9,6 +15,8 @@ interface StorageClientConfig {
   secretAccessKey: string;
   defaultTtlSeconds: number;
 }
+
+const DELETE_BATCH_SIZE = 1000;
 
 function isNotFoundError(error: unknown): boolean {
   if (error === null || typeof error !== 'object') {
@@ -69,5 +77,59 @@ export class StorageClient {
 
       throw error;
     }
+  }
+
+  async listObjectKeys(prefix: string): Promise<string[]> {
+    const keys: string[] = [];
+    let continuationToken: string | undefined;
+
+    do {
+      const response = await this.client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: prefix,
+          ContinuationToken: continuationToken,
+        }),
+      );
+
+      for (const object of response.Contents ?? []) {
+        if (object.Key) {
+          keys.push(object.Key);
+        }
+      }
+
+      continuationToken = response.IsTruncated ? response.NextContinuationToken : undefined;
+    } while (continuationToken);
+
+    return keys;
+  }
+
+  async deleteObjects(keys: string[]): Promise<void> {
+    if (keys.length === 0) {
+      return;
+    }
+
+    for (let offset = 0; offset < keys.length; offset += DELETE_BATCH_SIZE) {
+      const batch = keys.slice(offset, offset + DELETE_BATCH_SIZE);
+
+      await this.client.send(
+        new DeleteObjectsCommand({
+          Bucket: this.bucket,
+          Delete: {
+            Objects: batch.map(key => ({ Key: key })),
+            Quiet: true,
+          },
+        }),
+      );
+    }
+  }
+
+  async deleteByPrefix(prefix: string): Promise<void> {
+    if (!prefix) {
+      return;
+    }
+
+    const keys = await this.listObjectKeys(prefix);
+    await this.deleteObjects(keys);
   }
 }

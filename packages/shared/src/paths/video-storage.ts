@@ -1,3 +1,7 @@
+export function buildStorageVideoPrefix(id: string): string {
+  return `videos/${id}/`;
+}
+
 export function buildStorageOriginalKey(id: string, fileName: string): string {
   return `videos/${id}/original/${fileName}`;
 }

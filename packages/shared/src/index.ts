@@ -34,6 +34,7 @@ export {
   buildStorageHlsPrefix,
   buildStorageOriginalKey,
   buildStorageThumbnailKey,
+  buildStorageVideoPrefix,
 } from './paths/video-storage.ts';
 export {
   VALID_TRANSITIONS,

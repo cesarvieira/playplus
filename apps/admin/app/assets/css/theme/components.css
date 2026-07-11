@@ -373,6 +373,18 @@
     @apply text-pl-xs font-semibold text-peach-label;
   }
 
+  .pl-video-row__secondary-actions {
+    @apply flex shrink-0 items-center gap-1.5;
+  }
+
+  .pl-video-row__icon-btn {
+    @apply inline-flex size-pl-icon-md items-center justify-center rounded-pl-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .pl-video-row__icon-btn--danger {
+    @apply bg-status-error/15 text-status-error-fg hover:bg-status-error/25;
+  }
+
   .pl-publication-badge {
     @apply inline-flex max-w-44 shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-pl-xs font-bold;
   }

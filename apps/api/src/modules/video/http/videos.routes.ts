@@ -10,6 +10,7 @@ import { createAuthMiddleware } from '#modules/user/http/create-auth.middleware'
 import { requireRole } from '#modules/user/http/require-role.middleware';
 
 import { CreateVideoUseCase } from '../application/create-video.use-case.ts';
+import { DeleteVideoUseCase } from '../application/delete-video.use-case.ts';
 import { EnqueueTranscodeUseCase } from '../application/enqueue-transcode.use-case.ts';
 import { GetVideoQuery } from '../application/get-video.query.ts';
 import { IssueMediaTokenQuery } from '../application/issue-media-token.query.ts';
@@ -108,6 +109,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   const publishVideoUseCase = new PublishVideoUseCase(videoRepository);
   const scheduleVideoUseCase = new ScheduleVideoUseCase(videoRepository);
   const unpublishVideoUseCase = new UnpublishVideoUseCase(videoRepository);
+  const deleteVideoUseCase = new DeleteVideoUseCase(videoRepository, storageClient, transcodeQueue);
   const taxonomyRepository = new TaxonomyRepository(db);
   const updateVideoMetadataUseCase = new UpdateVideoMetadataUseCase(
     videoRepository,
@@ -397,6 +399,28 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
         id: result.id,
         published_at: result.publishedAt,
       });
+    },
+  );
+
+  fastify.delete(
+    '/videos/:id',
+    {
+      schema: {
+        params: videoIdParamsSchema,
+        response: {
+          204: { type: 'null' },
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+        },
+      },
+      preHandler: [authenticate, requireRole('admin')],
+    },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      await deleteVideoUseCase.execute(id);
+
+      return reply.status(204).send();
     },
   );
 }

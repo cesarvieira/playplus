@@ -341,4 +341,10 @@ export class VideoRepository {
 
     return rows.map(row => mapRowToEntity(row));
   }
+
+  async delete(id: string): Promise<boolean> {
+    const rows = await this.db.delete(videos).where(eq(videos.id, id)).returning({ id: videos.id });
+
+    return rows.length > 0;
+  }
 }

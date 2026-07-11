@@ -47,6 +47,8 @@ export function createContentSecurityPolicy(isDev: boolean) {
     return {
       'default-src': ['\'self\''],
       'script-src': ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''],
+      // Vite HMR cria Web Workers via blob: no client de dev.
+      'worker-src': ['\'self\'', 'blob:'],
       'style-src': ['\'self\'', '\'unsafe-inline\'', GOOGLE_FONTS_STYLE],
       'font-src': ['\'self\'', GOOGLE_FONTS_FONT, 'data:'],
       'img-src': ['\'self\'', 'data:', 'blob:', 'https:'],

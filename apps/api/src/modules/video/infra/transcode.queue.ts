@@ -79,6 +79,32 @@ export class TranscodeQueue {
     }
   }
 
+  async forceRemoveJob(videoId: string): Promise<void> {
+    const job = await this.queue.getJob(buildTranscodeJobId(videoId));
+
+    if (!job) {
+      return;
+    }
+
+    try {
+      const state = await job.getState();
+
+      if (state === 'active') {
+        await job.discard();
+
+        const token = job.token;
+
+        if (token) {
+          await job.moveToFailed(new Error('video_deleted'), token, true);
+        }
+      }
+
+      await job.remove();
+    } catch {
+      // Best effort — exclusão do vídeo não deve falhar por job preso na fila.
+    }
+  }
+
   async close(): Promise<void> {
     await this.queue.close();
   }

@@ -118,4 +118,61 @@ describe('TranscodeQueue', () => {
     await queue.removeFailedJob(videoId);
     expect(remove).not.toHaveBeenCalled();
   });
+
+  it('forceRemoveJob remove job waiting sem discard', async () => {
+    const { TranscodeQueue } = await import('../transcode.queue.ts');
+    const queue = new TranscodeQueue({} as never);
+    const remove = vi.fn();
+    const discard = vi.fn();
+    const moveToFailed = vi.fn();
+
+    queueGetJob.mockResolvedValue({
+      getState: vi.fn().mockResolvedValue('waiting'),
+      token: undefined,
+      discard,
+      moveToFailed,
+      remove,
+    });
+
+    await queue.forceRemoveJob(videoId);
+
+    expect(discard).not.toHaveBeenCalled();
+    expect(moveToFailed).not.toHaveBeenCalled();
+    expect(remove).toHaveBeenCalled();
+  });
+
+  it('forceRemoveJob descarta e moveToFailed job active antes de remover', async () => {
+    const { TranscodeQueue } = await import('../transcode.queue.ts');
+    const queue = new TranscodeQueue({} as never);
+    const remove = vi.fn();
+    const discard = vi.fn();
+    const moveToFailed = vi.fn();
+
+    queueGetJob.mockResolvedValue({
+      getState: vi.fn().mockResolvedValue('active'),
+      token: 'lock-token',
+      discard,
+      moveToFailed,
+      remove,
+    });
+
+    await queue.forceRemoveJob(videoId);
+
+    expect(discard).toHaveBeenCalled();
+    expect(moveToFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'video_deleted' }),
+      'lock-token',
+      true,
+    );
+    expect(remove).toHaveBeenCalled();
+  });
+
+  it('forceRemoveJob ignora job inexistente', async () => {
+    const { TranscodeQueue } = await import('../transcode.queue.ts');
+    const queue = new TranscodeQueue({} as never);
+
+    queueGetJob.mockResolvedValue(null);
+
+    await expect(queue.forceRemoveJob(videoId)).resolves.toBeUndefined();
+  });
 });
