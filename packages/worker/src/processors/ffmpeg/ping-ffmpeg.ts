@@ -20,13 +20,13 @@ export async function pingFfmpeg(ffmpegPath = 'ffmpeg'): Promise<void> {
       'Instale via scoop install ffmpeg (Windows) ou defina FFMPEG_PATH no .env.';
 
     if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-      throw new Error(`FFmpeg não encontrado em "${ffmpegPath}". ${hint}`);
+      throw new Error(`FFmpeg não encontrado em "${ffmpegPath}". ${hint}`, { cause: error });
     }
 
     if (error instanceof Error) {
-      throw new Error(`FFmpeg indisponível em "${ffmpegPath}": ${error.message}. ${hint}`);
+      throw new Error(`FFmpeg indisponível em "${ffmpegPath}": ${error.message}. ${hint}`, { cause: error });
     }
 
-    throw new Error(`FFmpeg indisponível em "${ffmpegPath}". ${hint}`);
+    throw new Error(`FFmpeg indisponível em "${ffmpegPath}". ${hint}`, { cause: error });
   }
 }

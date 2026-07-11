@@ -27,17 +27,13 @@ export default async function authCorsPlugin(fastify: FastifyInstance): Promise<
     global: true,
     max: 60,
     timeWindow: 60_000,
-    allowList: (request) => !isAuthCorsRoute(request.url),
-    keyGenerator: (request) => `${request.ip}:${request.url.split('?')[0]}`,
+    allowList: request => !isAuthCorsRoute(request.url),
+    keyGenerator: request => `${request.ip}:${request.url.split('?')[0]}`,
   });
 
   fastify.addHook('onRequest', async (request, reply) => {
     if (!isAuthCorsRoute(request.url)) {
       return;
-    }
-
-    if (typeof request.rateLimit === 'function') {
-      await request.rateLimit();
     }
 
     if (request.method === 'OPTIONS') {

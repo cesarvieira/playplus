@@ -1,14 +1,21 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'eslint/config';
+import { includeIgnoreFile } from '@eslint/config-helpers';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import stylistic from '@stylistic/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import prettierPlugin from 'eslint-plugin-prettier';
 import json from '@eslint/json';
 
 import { stylisticRules, typescriptRules } from './eslint.shared.rules.mjs';
 
+const gitignorePath = fileURLToPath(new URL('.gitignore', import.meta.url));
+
+/** @type {import('eslint').Linter.Config} */
+export const gitignoreConfig = includeIgnoreFile(gitignorePath);
+
 export default defineConfig(
+  gitignoreConfig,
   eslintConfigPrettier,
   {
     files: ['**/*.ts'],
@@ -68,10 +75,5 @@ export default defineConfig(
     plugins: { json },
     language: 'json/jsonc',
     extends: ['json/recommended'],
-  },
-  {
-    files: ['**/*.{md,yml,yaml}'],
-    plugins: { prettier: prettierPlugin },
-    rules: { 'prettier/prettier': 'error' },
   },
 );

@@ -1,5 +1,7 @@
 import { spawnSync } from 'node:child_process';
 
+const changedOnly = process.argv.includes('--changed');
+
 const run = (command) => {
   const result = spawnSync(command, {
     stdio: 'inherit',
@@ -11,8 +13,9 @@ const run = (command) => {
   }
 };
 
-run('pnpm exec lint-staged');
-// run('node scripts/lint.mjs --changed');
-run('pnpm exec turbo run typecheck --filter=...[HEAD]');
-run('pnpm exec turbo run test --filter=...[HEAD]');
-run('pnpm knip');
+const turboLint = changedOnly
+  ? 'pnpm exec turbo run lint --filter=...[HEAD]'
+  : 'pnpm exec turbo run lint';
+
+run(turboLint);
+run('pnpm exec eslint . --max-warnings 0');

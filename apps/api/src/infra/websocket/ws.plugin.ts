@@ -80,13 +80,13 @@ const wsPlugin: FastifyPluginAsync<WsPluginOptions> = async (fastify, options = 
       const token = Array.isArray(query.token) ? query.token[0] : query.token;
       const auth = authenticateWsToken(token, jwtService);
 
-    if (!auth.ok) {
-      socket.close(WS_CLOSE_UNAUTHORIZED, 'UNAUTHORIZED');
-      return;
-    }
+      if (!auth.ok) {
+        socket.close(WS_CLOSE_UNAUTHORIZED, 'UNAUTHORIZED');
+        return;
+      }
 
-    registry.add(auth.userId, auth.role, socket);
-    const heartbeat = startHeartbeat(socket);
+      registry.add(auth.userId, auth.role, socket);
+      const heartbeat = startHeartbeat(socket);
 
       socket.on('close', () => {
         heartbeat.stop();

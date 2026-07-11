@@ -20,7 +20,7 @@ type HashPasswordFn = (password: string) => Promise<string>;
 export async function seedAdminUser(
   db: PostgresJsDatabase<typeof schema>,
   input: { email: string; password: string },
-  hashPassword: HashPasswordFn = (password) => hash(password, ARGON2_OPTIONS),
+  hashPassword: HashPasswordFn = password => hash(password, ARGON2_OPTIONS),
 ): Promise<SeedAdminUserResult> {
   const existing = await db
     .select({ id: users.id })

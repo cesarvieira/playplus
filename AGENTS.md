@@ -48,7 +48,15 @@ apps/admin → packages/shared packages/worker → packages/shared
 
 - **Nenhum app importa código de outro app**
 - Comunicação `api` ↔ `worker` **somente via fila BullMQ/Valkey**
-- `packages/shared` contém **apenas contratos** — sem use cases, utils ou dependências externas
+- `packages/shared` contém contratos e **wrappers finos de desacoplamento** (isomórficos, superfície pequena) — sem use cases nem lógica de negócio. Ver [ADR-008](./docs/adr/ADR-008-desacoplamento-pacotes-externos.md)
+
+## Desacoplamento de dependências externas (ADR-008)
+
+Ao introduzir um pacote de terceiro num módulo novo, classifique-o:
+
+- **Wrapper em `shared`** — libs puras, de superfície pequena e trocáveis (ex.: `slugify`, `gravatar-url`). Encapsule num ponto único, **estreitando** a API e com **nome provider-neutro** (ex.: `getAvatarUrl`, não `getGravatarUrl`). Consumido por 1 módulo da API → `apps/api/src/shared/<capacidade>/` (import `#shared/*`); por 2+ apps → `packages/shared`. Nomear por capacidade (`text/`, `avatar/`), nunca `utils/`.
+- **Repository/Adapter** — libs pesadas com I/O (banco, storage, fila, cache, logger, crypto). Ficam atrás de um adapter de ponto único em `infra/`; nada fora do adapter importa a lib (nem o tipo — use aliases reexportados, ex.: `RedisClient`).
+- **Deixar como está** — framework/inseparável (Fastify, Zod, Nuxt/Vue/Pinia, Tailwind). No front, `hls.js`/`ofetch` isolam por composable/api-client.
 
 ## Autenticação e autorização
 
@@ -124,6 +132,7 @@ Em `apps/admin`, **sempre** use o tema em `app/assets/css/theme/` — guia compl
 - DTOs: `CreateVideoDto`, `UpdateProgressDto`
 - Enums: `VideoStatus`, `UserRole`
 - Erros tipados: `VideoNotFoundError`, `UnauthorizedError`
+- Wrappers finos de desacoplamento: `avatar/` (`getAvatarUrl`) — ver ADR-008
 
 ## Ambientes e infra
 
