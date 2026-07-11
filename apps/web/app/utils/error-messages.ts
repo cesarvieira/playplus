@@ -10,6 +10,7 @@ const DEFAULT_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODE.VIDEO_NOT_FOUND]: 'Vídeo não encontrado.',
   [ERROR_CODE.VIDEO_NOT_READY]: 'Vídeo ainda em processamento.',
   [ERROR_CODE.JOB_ALREADY_QUEUED]: 'Transcodificação já está na fila.',
+  [ERROR_CODE.CATEGORY_ALREADY_EXISTS]: 'Categoria já existe.',
   [ERROR_CODE.VALIDATION_ERROR]: 'Verifique os campos e tente novamente.',
   [ERROR_CODE.INTERNAL_ERROR]: 'Erro interno. Tente novamente em instantes.',
 };

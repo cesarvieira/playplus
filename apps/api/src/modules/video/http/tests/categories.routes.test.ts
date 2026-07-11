@@ -1,0 +1,206 @@
+import cookie from '@fastify/cookie';
+import Fastify from 'fastify';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CategoryAlreadyExistsError, ERROR_CODE, USER_ROLE } from '@playplus/shared';
+
+const listExecute = vi.hoisted(() => vi.fn());
+const createExecute = vi.hoisted(() => vi.fn());
+
+vi.mock('#config/env', () => ({
+  env: {
+    JWT_SECRET: 'test-secret-with-at-least-32-characters',
+    JWT_ACCESS_TTL_SECONDS: 900,
+    JWT_REFRESH_TTL_SECONDS: 604800,
+    COOKIE_SECURE: false,
+    COOKIE_SAME_SITE: 'lax',
+    M2M_SERVICE_TOKEN: 'm2m-service-token-with-at-least-32-characters',
+    DELEGATION_JWT_SECRET: 'delegation-secret-with-at-least-32-chars',
+    DELEGATION_JWT_TTL_SECONDS: 60,
+    CDN_BASE_URL: 'http://localhost:8080/media',
+    STORAGE_ENDPOINT: 'http://localhost:9000',
+    STORAGE_BUCKET: 'playplus',
+    STORAGE_ACCESS_KEY: 'minioadmin',
+    STORAGE_SECRET_KEY: 'minioadmin',
+    STORAGE_REGION: 'us-east-1',
+    PRESIGNED_UPLOAD_TTL_SECONDS: 3600,
+    MEDIA_TOKEN_SECRET: 'test-media-token-secret-at-least-32-chars',
+    MEDIA_TOKEN_TTL_SECONDS: 600,
+  },
+}));
+
+vi.mock('#infra/database/client', () => ({
+  db: {},
+}));
+
+vi.mock('#modules/video/infra/taxonomy.repository', () => ({
+  TaxonomyRepository: vi.fn(),
+}));
+
+vi.mock('#modules/video/application/list-categories.query', () => ({
+  ListCategoriesQuery: class MockListCategoriesQuery {
+    execute = listExecute;
+  },
+}));
+
+vi.mock('#modules/video/application/create-category.use-case', () => ({
+  CreateCategoryUseCase: class MockCreateCategoryUseCase {
+    execute = createExecute;
+  },
+}));
+
+const categoryId = '00000000-0000-4000-8000-0000000000c1';
+
+describe('GET /v1/categories', () => {
+  let app: ReturnType<typeof Fastify>;
+  let viewerToken: string;
+
+  beforeEach(async () => {
+    listExecute.mockReset();
+
+    const [{ default: errorHandlerPlugin }, { JwtService }, { default: categoriesRoutes }] =
+      await Promise.all([
+        import('#http/plugins/error-handler'),
+        import('#modules/user/infra/jwt.service'),
+        import('#modules/video/http/categories.routes'),
+      ]);
+
+    const jwtService = new JwtService({
+      secret: 'test-secret-with-at-least-32-characters',
+      accessTtlSeconds: 900,
+    });
+    viewerToken = jwtService.sign({ sub: 'viewer-id', role: USER_ROLE.VIEWER });
+
+    app = Fastify();
+    await app.register(cookie);
+    await errorHandlerPlugin(app);
+    await app.register(categoriesRoutes, { prefix: '/v1' });
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('retorna 401 sem token', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/categories',
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(listExecute).not.toHaveBeenCalled();
+  });
+
+  it('retorna 200 com lista de categorias', async () => {
+    listExecute.mockResolvedValue({
+      data: [{ id: categoryId, name: 'Ação', slug: 'acao' }],
+      meta: { total: 1, page: 1, limit: 1 },
+    });
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/v1/categories',
+      headers: { authorization: `Bearer ${viewerToken}` },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      data: [{ id: categoryId, name: 'Ação', slug: 'acao' }],
+      meta: { total: 1, page: 1, limit: 1 },
+    });
+  });
+});
+
+describe('POST /v1/categories', () => {
+  let app: ReturnType<typeof Fastify>;
+  let adminToken: string;
+  let viewerToken: string;
+
+  beforeEach(async () => {
+    createExecute.mockReset();
+
+    const [{ default: errorHandlerPlugin }, { JwtService }, { default: categoriesRoutes }] =
+      await Promise.all([
+        import('#http/plugins/error-handler'),
+        import('#modules/user/infra/jwt.service'),
+        import('#modules/video/http/categories.routes'),
+      ]);
+
+    const jwtService = new JwtService({
+      secret: 'test-secret-with-at-least-32-characters',
+      accessTtlSeconds: 900,
+    });
+    adminToken = jwtService.sign({ sub: 'admin-id', role: USER_ROLE.ADMIN });
+    viewerToken = jwtService.sign({ sub: 'viewer-id', role: USER_ROLE.VIEWER });
+
+    app = Fastify();
+    await app.register(cookie);
+    await errorHandlerPlugin(app);
+    await app.register(categoriesRoutes, { prefix: '/v1' });
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('retorna 401 sem token', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/categories',
+      payload: { name: 'Ação' },
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(createExecute).not.toHaveBeenCalled();
+  });
+
+  it('retorna 403 para viewer', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/categories',
+      headers: { authorization: `Bearer ${viewerToken}` },
+      payload: { name: 'Ação' },
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(createExecute).not.toHaveBeenCalled();
+  });
+
+  it('retorna 201 com categoria criada para admin', async () => {
+    createExecute.mockResolvedValue({
+      id: categoryId,
+      name: 'Ação',
+      slug: 'acao',
+    });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/categories',
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: { name: 'Ação' },
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(createExecute).toHaveBeenCalledWith({ name: 'Ação' });
+    expect(response.json()).toEqual({
+      id: categoryId,
+      name: 'Ação',
+      slug: 'acao',
+    });
+  });
+
+  it('retorna 409 quando categoria já existe', async () => {
+    createExecute.mockRejectedValue(new CategoryAlreadyExistsError());
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/categories',
+      headers: { authorization: `Bearer ${adminToken}` },
+      payload: { name: 'Ação' },
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({
+      error: { code: ERROR_CODE.CATEGORY_ALREADY_EXISTS, message: expect.any(String) },
+    });
+  });
+});

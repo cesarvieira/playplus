@@ -482,6 +482,63 @@ Remove o vídeo e todos os seus assets (segmentos HLS, thumbnail, arquivo origin
 
 ---
 
+## Categories
+
+Categorias de conteúdo (persistidas na tabela `genres`; o campo `genres` em `PATCH /videos/:id` referencia as mesmas entidades).
+
+### `GET /categories`
+
+Lista todas as categorias cadastradas.
+
+**Headers:** `Authorization: Bearer <access_token>`
+
+**Response `200`:**
+
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "name": "Ficção Científica",
+      "slug": "ficcao-cientifica"
+    }
+  ],
+  "meta": { "total": 1, "page": 1, "limit": 1 }
+}
+```
+
+Lista completa (sem paginação). `meta.limit` reflete o total de itens retornados.
+
+**Erros:** `401 UNAUTHORIZED`
+
+---
+
+### `POST /categories` 🔒 admin
+
+Cria uma nova categoria.
+
+**Body:**
+
+```json
+{ "name": "Ficção Científica" }
+```
+
+**Response `201`:**
+
+```json
+{
+  "id": "uuid",
+  "name": "Ficção Científica",
+  "slug": "ficcao-cientifica"
+}
+```
+
+Unicidade por `slug` derivado do nome. Nome duplicado ou colisão de slug → `409 CATEGORY_ALREADY_EXISTS`.
+
+**Erros:** `401 UNAUTHORIZED` · `403 FORBIDDEN` · `409 CATEGORY_ALREADY_EXISTS` · `422 VALIDATION_ERROR`
+
+---
+
 ## Users 🔒 admin
 
 ### `GET /users`
@@ -682,14 +739,15 @@ Checklist E2E: [checklist-auth-ssr-m2m.md](./checklist-auth-ssr-m2m.md)
 
 ## Códigos de erro
 
-| Código               | HTTP | Descrição                          |
-| -------------------- | ---- | ---------------------------------- |
-| `UNAUTHORIZED`       | 401  | Token ausente ou inválido          |
-| `FORBIDDEN`          | 403  | Sem permissão para o recurso       |
-| `VIDEO_NOT_FOUND`    | 404  | Vídeo não encontrado               |
-| `USER_NOT_FOUND`     | 404  | Usuário não encontrado             |
-| `VIDEO_NOT_READY`    | 409  | Vídeo ainda em processamento       |
-| `JOB_ALREADY_QUEUED` | 409  | Job de transcodificação já na fila |
-| `INVALID_TOKEN`      | 401  | Refresh token inválido ou expirado |
-| `VALIDATION_ERROR`   | 422  | Body da requisição inválido        |
-| `INTERNAL_ERROR`     | 500  | Erro interno — ver Sentry          |
+| Código                    | HTTP | Descrição                          |
+| ------------------------- | ---- | ---------------------------------- |
+| `UNAUTHORIZED`            | 401  | Token ausente ou inválido          |
+| `FORBIDDEN`               | 403  | Sem permissão para o recurso       |
+| `VIDEO_NOT_FOUND`         | 404  | Vídeo não encontrado               |
+| `USER_NOT_FOUND`          | 404  | Usuário não encontrado             |
+| `VIDEO_NOT_READY`         | 409  | Vídeo ainda em processamento       |
+| `JOB_ALREADY_QUEUED`      | 409  | Job de transcodificação já na fila |
+| `CATEGORY_ALREADY_EXISTS` | 409  | Categoria já existe                |
+| `INVALID_TOKEN`           | 401  | Refresh token inválido ou expirado |
+| `VALIDATION_ERROR`        | 422  | Body da requisição inválido        |
+| `INTERNAL_ERROR`          | 500  | Erro interno — ver Sentry          |

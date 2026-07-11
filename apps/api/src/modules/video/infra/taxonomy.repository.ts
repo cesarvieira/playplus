@@ -1,4 +1,4 @@
-import { inArray } from 'drizzle-orm';
+import { inArray, asc, eq } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
 import type * as schema from '#infra/database/schema';
@@ -7,8 +7,15 @@ import { directors } from '#infra/database/schema/directors';
 import { genres } from '#infra/database/schema/genres';
 import { tags } from '#infra/database/schema/tags';
 import { toSlug } from '#shared/text/slug';
+import { CategoryAlreadyExistsError } from '@playplus/shared';
 
 export type TaxonomyKind = 'tag' | 'genre' | 'director' | 'actor';
+
+export interface GenreRecord {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 /**
  * Acesso às entidades de taxonomia (tags, genres, directors, actors).
@@ -20,6 +27,40 @@ export class TaxonomyRepository {
 
   constructor(db: PostgresJsDatabase<typeof schema>) {
     this.db = db;
+  }
+
+  /** Lista todas as categorias (genres) ordenadas por nome. */
+  async listGenres(): Promise<GenreRecord[]> {
+    return this.db
+      .select({ id: genres.id, name: genres.name, slug: genres.slug })
+      .from(genres)
+      .orderBy(asc(genres.name));
+  }
+
+  /**
+   * Cria uma categoria (genre) com unicidade explícita por slug.
+   * Lança CategoryAlreadyExistsError se o slug já existir.
+   */
+  async createGenre(name: string): Promise<GenreRecord> {
+    const trimmed = name.trim();
+    const slug = toSlug(trimmed);
+
+    const existing = await this.db
+      .select({ id: genres.id })
+      .from(genres)
+      .where(eq(genres.slug, slug))
+      .limit(1);
+
+    if (existing.length > 0) {
+      throw new CategoryAlreadyExistsError();
+    }
+
+    const [created] = await this.db
+      .insert(genres)
+      .values({ name: trimmed, slug })
+      .returning({ id: genres.id, name: genres.name, slug: genres.slug });
+
+    return created;
   }
 
   /** Retorna, dentre os ids informados, apenas os que existem na tabela. */
