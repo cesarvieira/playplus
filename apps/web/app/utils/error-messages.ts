@@ -12,6 +12,7 @@ const DEFAULT_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODE.JOB_ALREADY_QUEUED]: 'Transcodificação já está na fila.',
   [ERROR_CODE.CATEGORY_ALREADY_EXISTS]: 'Categoria já existe.',
   [ERROR_CODE.VALIDATION_ERROR]: 'Verifique os campos e tente novamente.',
+  [ERROR_CODE.RATE_LIMITED]: 'Muitas tentativas. Aguarde um instante e tente novamente.',
   [ERROR_CODE.INTERNAL_ERROR]: 'Erro interno. Tente novamente em instantes.',
 };
 

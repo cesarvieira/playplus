@@ -4,6 +4,7 @@ import { InvalidTokenError, UnauthorizedError } from '@playplus/shared';
 import { env } from '#config/env';
 import { db } from '#infra/database/client';
 import { valkey } from '#infra/valkey/client';
+import { RATE_LIMIT_WRITE } from '#http/rate-limit-presets';
 
 import { LoginUseCase } from '../application/login.use-case.ts';
 import { LogoutUseCase } from '../application/logout.use-case.ts';
@@ -67,6 +68,7 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
   fastify.post(
     '/auth/login',
     {
+      config: { rateLimit: RATE_LIMIT_WRITE },
       schema: {
         body: loginBodySchema,
         response: {
@@ -104,6 +106,7 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
   fastify.post(
     '/auth/refresh',
     {
+      config: { rateLimit: RATE_LIMIT_WRITE },
       schema: {
         response: {
           200: loginResponseSchema,
@@ -132,6 +135,7 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
   fastify.post(
     '/auth/logout',
     {
+      config: { rateLimit: RATE_LIMIT_WRITE },
       schema: {
         response: {
           204: { type: 'null' },

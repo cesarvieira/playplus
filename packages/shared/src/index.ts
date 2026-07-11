@@ -32,6 +32,7 @@ export { UserNotFoundError } from './errors/user-not-found.error.ts';
 export { VideoNotFoundError } from './errors/video-not-found.error.ts';
 export { InvalidVideoStatusTransitionError } from './errors/invalid-video-status-transition.error.ts';
 export { CategoryAlreadyExistsError } from './errors/category-already-exists.error.ts';
+export { RateLimitedError } from './errors/rate-limited.error.ts';
 
 export {
   buildStorageHlsPrefix,

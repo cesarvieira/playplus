@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
+import { RateLimitedError } from '@playplus/shared';
 
 import { env } from './config/env.ts';
 import {
@@ -11,7 +12,7 @@ import {
 } from './config/logger.ts';
 import { resolveCorsOrigin } from './http/cors-origins.ts';
 import { closeDatabase } from './infra/database/client.ts';
-import { closeValkey } from './infra/valkey/client.ts';
+import { closeValkey, valkey } from './infra/valkey/client.ts';
 import { closeTranscodeQueue } from './modules/video/infra/transcode.queue.ts';
 import errorHandlerPlugin from './http/plugins/error-handler.ts';
 import authCorsPlugin from './http/plugins/auth-cors.plugin.ts';
@@ -39,6 +40,30 @@ export async function buildServer() {
     });
   }
 
+  // Rate limit global por padrão (opt-out, não opt-in): toda rota nova já
+  // nasce protegida contra flood, sem depender de alguém lembrar de
+  // configurar. Rotas específicas ajustam o limite via `config.rateLimit`
+  // (ver auth.routes, me.routes, videos.routes, categories.routes,
+  // media-verify.routes — ADR-007 — e ws.plugin). Store no Valkey: em
+  // memória local o contador é por processo, então com mais de uma réplica
+  // da API o limite efetivo vira max × nº de réplicas; no Valkey o contador
+  // é compartilhado e o limite vale de verdade.
+  //
+  // errorResponseBuilder: por padrão o @fastify/rate-limit dá `throw` num
+  // Error puro (sem `.code`) quando o limite estoura. O errorHandlerPlugin
+  // deste projeto só reconhece erros com `.code` de ERROR_CODE — sem isso,
+  // um 429 vira 500 "Erro interno do servidor" e polui o log de erro com
+  // algo que é, na verdade, o rate limit funcionando como esperado.
+  // Devolvendo um RateLimitedError aqui, o error handler já sabe mapear
+  // pra 429 com o corpo de erro padrão da API.
+  await fastify.register(rateLimit, {
+    global: true,
+    max: 300,
+    timeWindow: '1 minute',
+    redis: valkey,
+    keyGenerator: request => `ip:${request.ip}`,
+    errorResponseBuilder: () => new RateLimitedError(),
+  });
   await authCorsPlugin(fastify);
   await fastify.register(cors, {
     origin: resolveCorsOrigin,
@@ -47,9 +72,6 @@ export async function buildServer() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
   await fastify.register(cookie);
-  // Rate limiting opt-in por rota (global: false) — habilitado apenas onde é
-  // necessário, ex.: o gate de mídia (ADR-007). Ver videos/http/media-verify.routes.
-  await fastify.register(rateLimit, { global: false });
   await errorHandlerPlugin(fastify);
   await fastify.register(wsPlugin, { prefix: '/v1' });
   await fastify.register(videoReconcilePlugin);

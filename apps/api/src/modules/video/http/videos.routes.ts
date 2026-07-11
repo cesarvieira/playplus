@@ -8,6 +8,13 @@ import { createMediaTokenSigner } from '#infra/media/media-token.factory';
 import { createStorageClient } from '#infra/storage/storage.factory';
 import { createAuthMiddleware } from '#modules/user/http/create-auth.middleware';
 import { requireRole } from '#modules/user/http/require-role.middleware';
+import { JwtService } from '#modules/user/infra/jwt.service';
+import { createUserAwareKeyGenerator } from '#http/rate-limit-key';
+import {
+  RATE_LIMIT_READ,
+  RATE_LIMIT_WRITE,
+  RATE_LIMIT_SENSITIVE_WRITE,
+} from '#http/rate-limit-presets';
 
 import { CreateVideoUseCase } from '../application/create-video.use-case.ts';
 import { DeleteVideoUseCase } from '../application/delete-video.use-case.ts';
@@ -82,6 +89,11 @@ function serializeVideoDetail(result: VideoDetail): Record<string, unknown> {
 
 export default async function videosRoutes(fastify: FastifyInstance): Promise<void> {
   const authenticate = createAuthMiddleware();
+  const jwtService = new JwtService({
+    secret: env.JWT_SECRET,
+    accessTtlSeconds: env.JWT_ACCESS_TTL_SECONDS,
+  });
+  const keyGenerator = createUserAwareKeyGenerator(jwtService);
   const videoRepository = new VideoRepository(db);
   const storageClient = createStorageClient();
   const mediaTokenSigner = createMediaTokenSigner();
@@ -119,6 +131,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.get(
     '/videos',
     {
+      config: { rateLimit: { ...RATE_LIMIT_READ, keyGenerator } },
       schema: {
         querystring: listVideosQuerySchema,
         response: {
@@ -162,6 +175,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.get(
     '/videos/:id',
     {
+      config: { rateLimit: { ...RATE_LIMIT_READ, keyGenerator } },
       schema: {
         params: videoIdParamsSchema,
         querystring: getVideoQuerySchema,
@@ -189,6 +203,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.patch(
     '/videos/:id',
     {
+      config: { rateLimit: { ...RATE_LIMIT_WRITE, keyGenerator } },
       schema: {
         params: videoIdParamsSchema,
         response: {
@@ -213,6 +228,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.get(
     '/videos/:id/media-token',
     {
+      config: { rateLimit: { ...RATE_LIMIT_READ, keyGenerator } },
       schema: {
         params: videoIdParamsSchema,
         querystring: getVideoQuerySchema,
@@ -243,6 +259,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.post(
     '/videos',
     {
+      config: { rateLimit: { ...RATE_LIMIT_SENSITIVE_WRITE, keyGenerator } },
       schema: {
         body: createVideoBodySchema,
         response: {
@@ -273,6 +290,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.post(
     '/videos/:id/upload-url',
     {
+      config: { rateLimit: { ...RATE_LIMIT_SENSITIVE_WRITE, keyGenerator } },
       schema: {
         params: videoIdParamsSchema,
         response: {
@@ -300,6 +318,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.post(
     '/videos/:id/transcode',
     {
+      config: { rateLimit: { ...RATE_LIMIT_SENSITIVE_WRITE, keyGenerator } },
       schema: {
         params: videoIdParamsSchema,
         response: {
@@ -327,6 +346,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.patch(
     '/videos/:id/publish',
     {
+      config: { rateLimit: { ...RATE_LIMIT_WRITE, keyGenerator } },
       schema: {
         params: videoIdParamsSchema,
         response: {
@@ -352,6 +372,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.patch(
     '/videos/:id/schedule',
     {
+      config: { rateLimit: { ...RATE_LIMIT_WRITE, keyGenerator } },
       schema: {
         params: videoIdParamsSchema,
         body: scheduleVideoBodySchema,
@@ -380,6 +401,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.patch(
     '/videos/:id/unpublish',
     {
+      config: { rateLimit: { ...RATE_LIMIT_WRITE, keyGenerator } },
       schema: {
         params: videoIdParamsSchema,
         response: {
@@ -405,6 +427,7 @@ export default async function videosRoutes(fastify: FastifyInstance): Promise<vo
   fastify.delete(
     '/videos/:id',
     {
+      config: { rateLimit: { ...RATE_LIMIT_SENSITIVE_WRITE, keyGenerator } },
       schema: {
         params: videoIdParamsSchema,
         response: {
