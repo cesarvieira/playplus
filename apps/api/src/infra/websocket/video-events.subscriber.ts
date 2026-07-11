@@ -2,9 +2,9 @@ import {
   VIDEO_EVENTS_CHANNEL,
   type VideoEvent,
 } from '@playplus/shared';
-import type { Redis } from 'ioredis';
 
 import { getInfraLogger } from '#config/logger';
+import type { RedisClient } from '#infra/valkey/client';
 
 import { parseVideoEvent } from './parse-video-event.ts';
 
@@ -16,7 +16,7 @@ export interface VideoEventsSubscriber {
 }
 
 export function createVideoEventsSubscriber(
-  client: Redis,
+  client: RedisClient,
   onEvent: (event: VideoEvent) => void,
 ): VideoEventsSubscriber {
   let messageHandler: ((channel: string, message: string) => void) | null = null;

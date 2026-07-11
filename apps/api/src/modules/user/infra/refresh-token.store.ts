@@ -1,4 +1,4 @@
-import type { Redis } from 'ioredis';
+import type { RedisClient } from '#infra/valkey/client';
 
 interface RefreshTokenRecord {
   userId: string;
@@ -9,10 +9,10 @@ function refreshKey(tokenId: string): string {
 }
 
 export class RefreshTokenStore {
-  private readonly redis: Redis;
+  private readonly redis: RedisClient;
   private readonly ttlSeconds: number;
 
-  constructor(redis: Redis, ttlSeconds: number) {
+  constructor(redis: RedisClient, ttlSeconds: number) {
     this.redis = redis;
     this.ttlSeconds = ttlSeconds;
   }

@@ -20,6 +20,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
+  "dependencies": {
+    "gravatar-url": "^4.0.2"
+  },
   "devDependencies": {
     "typescript": "^6.0.3"
   }

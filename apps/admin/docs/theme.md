@@ -98,7 +98,7 @@ Prefixo `ple-` (error **e**): `ple-headline`, `ple-btn`, `ple-dev-panel`, etc. U
 ```vue
 <!-- ❌ Evitar -->
 <h1 class="text-2xl font-extrabold text-peach-ink">Novo vídeo</h1>
-<div class="fixed top-20 right-4 z-[60]">...</div>
+<div class="fixed top-20 right-4 z-pl-toast">...</div>
 
 <!-- ✅ Preferir -->
 <h1 class="pl-page-title">Novo vídeo</h1>

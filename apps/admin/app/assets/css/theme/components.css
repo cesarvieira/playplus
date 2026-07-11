@@ -374,7 +374,7 @@
   }
 
   .pl-publication-badge {
-    @apply inline-flex max-w-[11rem] shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-pl-xs font-bold;
+    @apply inline-flex max-w-44 shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-pl-xs font-bold;
   }
 
   .pl-publication-badge--draft {
@@ -402,7 +402,7 @@
   }
 
   .pl-video-row-menu {
-    @apply absolute top-full right-0 z-pl-modal mt-1 min-w-[11.5rem] overflow-hidden rounded-pl-md border border-peach-border bg-peach-surface py-1 shadow-pl-modal;
+    @apply absolute top-full right-0 z-pl-modal mt-1 min-w-46 overflow-hidden rounded-pl-md border border-peach-border bg-peach-surface py-1 shadow-pl-modal;
   }
 
   .pl-video-row-menu__item {

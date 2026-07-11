@@ -1,12 +1,12 @@
 import { inArray } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import slugify from 'slugify';
 
 import type * as schema from '#infra/database/schema';
 import { actors } from '#infra/database/schema/actors';
 import { directors } from '#infra/database/schema/directors';
 import { genres } from '#infra/database/schema/genres';
 import { tags } from '#infra/database/schema/tags';
+import { toSlug } from '#shared/text/slug';
 
 export type TaxonomyKind = 'tag' | 'genre' | 'director' | 'actor';
 
@@ -77,7 +77,7 @@ export class TaxonomyRepository {
     // dedup por slug (nomes distintos podem colidir no mesmo slug)
     const bySlug = new Map<string, string>();
     for (const name of names) {
-      const slug = slugify(name, { lower: true, strict: true });
+      const slug = toSlug(name);
       if (slug.length > 0 && !bySlug.has(slug)) {
         bySlug.set(slug, name);
       }

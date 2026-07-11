@@ -36,7 +36,8 @@
         "app/components/AppHeader.vue",
         "app/components/PlayerNotFound.vue",
         "app/components/PlayerUnavailable.vue",
-        "app/components/PlayerScrubber.vue"
+        "app/components/PlayerScrubber.vue",
+        "app/utils/avatar.ts"
       ]
     },
     "packages/*": {

@@ -19,6 +19,10 @@
     "#modules/*": {
       "development": "./src/modules/*.ts",
       "default": "./dist/modules/*.js"
+    },
+    "#shared/*": {
+      "development": "./src/shared/*.ts",
+      "default": "./dist/shared/*.js"
     }
   },
   "scripts": {

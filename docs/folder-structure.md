@@ -15,7 +15,8 @@ playplus/
 │   │       │   │   └── http/       # Routes, schemas, controllers
 │   │       │   ├── user/           # Domínio User
 │   │       │   └── watch-session/  # Domínio WatchSession
-│   │       ├── infra/              # DB, Redis, storage, Sentry
+│   │       ├── infra/              # DB, Redis, storage, Sentry (adapters)
+│   │       ├── shared/             # Wrappers cross-módulo (só api) — ver ADR-008
 │   │       └── config/             # Env, plugins, server
 │   │
 │   ├── web/                        # Nuxt 4 — frontend público
@@ -122,7 +123,7 @@ Os três agregados principais são `Video`, `User` e `WatchSession`. Nenhum mód
 
 ## O pacote shared
 
-Contém apenas contratos. Nenhuma lógica de negócio, nenhum utilitário genérico.
+Contratos compartilhados e **wrappers finos de desacoplamento** — sem lógica de negócio.
 
 Pode entrar:
 
@@ -130,12 +131,14 @@ Pode entrar:
 - DTOs de entrada e saída (`CreateVideoDto`, `UpdateProgressDto`)
 - Enums (`VideoStatus`, `UserRole`)
 - Classes de erro tipadas (`VideoNotFoundError`, `UnauthorizedError`)
+- Wrappers finos, isomórficos e de superfície pequena que encapsulam um pacote externo usado por **2+ apps** — ex.: `avatar/` (`getAvatarUrl`, encapsula `gravatar-url`). Ver **[ADR-008](./adr/ADR-008-desacoplamento-pacotes-externos.md)**.
 
 Não pode entrar:
 
-- Use cases ou serviços
-- Helpers, utils, formatters
-- Qualquer coisa com dependência externa
+- Use cases, serviços ou qualquer lógica de negócio
+- Libs pesadas com I/O (banco, storage, fila, cache) — essas ficam atrás de adapter em `infra/` (ADR-008, categoria Repository/Adapter)
+
+> Wrapper usado por **um único módulo da API** mora em `apps/api/src/shared/<capacidade>/` (import `#shared/*`), e só sobe para `packages/shared` quando um 2º app precisar.
 
 ---
 

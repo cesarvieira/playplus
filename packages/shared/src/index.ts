@@ -39,3 +39,5 @@ export {
   VALID_TRANSITIONS,
   assertValidStatusTransition,
 } from './domain/video-status.transitions.ts';
+
+export { getAvatarUrl } from './avatar/avatar.ts';

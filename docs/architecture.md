@@ -62,13 +62,13 @@ flowchart TB
 
 ## Superfícies e dependências
 
-| Superfície | Responsabilidade v0 |
-|------------|---------------------|
-| `packages/shared` | Tipos, DTOs, enums, erros — sem lógica |
-| `apps/api` | Auth, módulos User/Video (DDD), REST `/v1`, WebSocket |
-| `packages/worker` | Job `video.transcode`, FFmpeg, upload HLS |
-| `apps/admin` | Login, upload presigned, listagem + WS |
-| `apps/web` | Login, catálogo, player HLS |
+| Superfície        | Responsabilidade v0                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------- |
+| `packages/shared` | Tipos, DTOs, enums, erros + wrappers finos de desacoplamento (ADR-008) — sem lógica de negócio |
+| `apps/api`        | Auth, módulos User/Video (DDD), REST `/v1`, WebSocket                                          |
+| `packages/worker` | Job `video.transcode`, FFmpeg, upload HLS                                                      |
+| `apps/admin`      | Login, upload presigned, listagem + WS                                                         |
+| `apps/web`        | Login, catálogo, player HLS                                                                    |
 
 **Regra inegociável:** apps → `shared` apenas; `api` ↔ `worker` via BullMQ + Valkey pub/sub (sem HTTP worker→api).
 
@@ -78,21 +78,21 @@ flowchart TB
 
 ### User
 
-| Camada | Artefatos v0 |
-|--------|--------------|
-| `domain/` | `User`, `UserRole`, erros de auth |
+| Camada         | Artefatos v0                                           |
+| -------------- | ------------------------------------------------------ |
+| `domain/`      | `User`, `UserRole`, erros de auth                      |
 | `application/` | `LoginUseCase`, `RefreshTokenUseCase`, `LogoutUseCase` |
-| `infra/` | `UserRepository`, `RefreshTokenStore` (Valkey) |
-| `http/` | Rotas `/auth/*`, middleware JWT + role guard |
+| `infra/`       | `UserRepository`, `RefreshTokenStore` (Valkey)         |
+| `http/`        | Rotas `/auth/*`, middleware JWT + role guard           |
 
 ### Video
 
-| Camada | Artefatos v0 |
-|--------|--------------|
-| `domain/` | `Video`, `VideoStatus`, regras de transição de status |
+| Camada         | Artefatos v0                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------ |
+| `domain/`      | `Video`, `VideoStatus`, regras de transição de status                                                        |
 | `application/` | `CreateVideoUseCase`, `RenewUploadUrlUseCase`, `EnqueueTranscodeUseCase`, `ListVideosQuery`, `GetVideoQuery` |
-| `infra/` | `VideoRepository`, `StorageClient` (presigned + HEAD), `TranscodeQueue` (BullMQ) |
-| `http/` | Rotas `/videos/*`, handler WebSocket |
+| `infra/`       | `VideoRepository`, `StorageClient` (presigned + HEAD), `TranscodeQueue` (BullMQ)                             |
+| `http/`        | Rotas `/videos/*`, handler WebSocket                                                                         |
 
 **WatchSession:** defer v0.1 — sem módulo ativo no v0.
 
@@ -143,30 +143,30 @@ sequenceDiagram
 
 ### `users`
 
-| Coluna | Tipo | Notas |
-|--------|------|-------|
-| `id` | UUID PK | |
-| `email` | VARCHAR UNIQUE | seed único |
-| `password_hash` | VARCHAR | bcrypt/argon2 |
-| `role` | ENUM | `admin` \| `viewer` |
-| `created_at` | TIMESTAMPTZ | |
+| Coluna          | Tipo           | Notas               |
+| --------------- | -------------- | ------------------- |
+| `id`            | UUID PK        |                     |
+| `email`         | VARCHAR UNIQUE | seed único          |
+| `password_hash` | VARCHAR        | bcrypt/argon2       |
+| `role`          | ENUM           | `admin` \| `viewer` |
+| `created_at`    | TIMESTAMPTZ    |                     |
 
 ### `videos`
 
-| Coluna | Tipo | Notas |
-|--------|------|-------|
-| `id` | UUID PK | |
-| `title` | VARCHAR | |
-| `file_name` | VARCHAR | nome original |
-| `file_size` | BIGINT | informado pelo cliente |
-| `duration` | INT NULL | segundos, preenchido pós-transcode |
-| `status` | ENUM | `pending` \| `queued` \| `processing` \| `ready` \| `error` |
-| `upload_complete` | BOOLEAN | default false; ver ADR-005 |
-| `storage_original_key` | VARCHAR | `videos/{id}/original/{file_name}` |
-| `storage_hls_prefix` | VARCHAR NULL | `videos/{id}/hls/` |
-| `error_reason` | VARCHAR NULL | motivo FFmpeg/job |
-| `created_at` | TIMESTAMPTZ | |
-| `updated_at` | TIMESTAMPTZ | |
+| Coluna                 | Tipo         | Notas                                                       |
+| ---------------------- | ------------ | ----------------------------------------------------------- |
+| `id`                   | UUID PK      |                                                             |
+| `title`                | VARCHAR      |                                                             |
+| `file_name`            | VARCHAR      | nome original                                               |
+| `file_size`            | BIGINT       | informado pelo cliente                                      |
+| `duration`             | INT NULL     | segundos, preenchido pós-transcode                          |
+| `status`               | ENUM         | `pending` \| `queued` \| `processing` \| `ready` \| `error` |
+| `upload_complete`      | BOOLEAN      | default false; ver ADR-005                                  |
+| `storage_original_key` | VARCHAR      | `videos/{id}/original/{file_name}`                          |
+| `storage_hls_prefix`   | VARCHAR NULL | `videos/{id}/hls/`                                          |
+| `error_reason`         | VARCHAR NULL | motivo FFmpeg/job                                           |
+| `created_at`           | TIMESTAMPTZ  |                                                             |
+| `updated_at`           | TIMESTAMPTZ  |                                                             |
 
 Índices: `(status)`, `(created_at DESC)`.
 
@@ -195,13 +195,14 @@ Dev: `CDN_BASE=http://localhost:8080/media` (nginx) — ver [ADR-003](./adr/ADR-
 
 ## WebSocket (`/v1/ws?token=`)
 
-| Evento | Direção | Emissor |
-|--------|---------|---------|
-| `video.status` | server → client | API (após pub/sub) |
-| `video.error` | server → client | API (após pub/sub) |
-| `player.progress` | client → server | defer v0.1 |
+| Evento            | Direção         | Emissor            |
+| ----------------- | --------------- | ------------------ |
+| `video.status`    | server → client | API (após pub/sub) |
+| `video.error`     | server → client | API (após pub/sub) |
+| `player.progress` | client → server | defer v0.1         |
 
 Handler WS na API:
+
 1. Valida JWT da query string
 2. Mantém registry de conexões por `userId`
 3. Subscribe Valkey channel `playplus:events:video`
@@ -213,11 +214,11 @@ Ver [ADR-002](./adr/ADR-002-worker-events-valkey-pubsub.md).
 
 ## Auth e autorização
 
-| Rota | Role exigida |
-|------|--------------|
-| `POST /videos`, `POST /videos/:id/*` admin | `admin` |
-| `GET /videos`, `GET /videos/:id` | `admin` ou `viewer` |
-| `POST /auth/*` | público (login/refresh) |
+| Rota                                       | Role exigida            |
+| ------------------------------------------ | ----------------------- |
+| `POST /videos`, `POST /videos/:id/*` admin | `admin`                 |
+| `GET /videos`, `GET /videos/:id`           | `admin` ou `viewer`     |
+| `POST /auth/*`                             | público (login/refresh) |
 
 Usuário seed: role `admin`, que **inclui** permissões viewer — ver [ADR-004](./adr/ADR-004-admin-role-includes-viewer.md).
 
@@ -225,8 +226,8 @@ Usuário seed: role `admin`, que **inclui** permissões viewer — ver [ADR-004]
 
 ## BullMQ
 
-| Job | Nome | Idempotência |
-|-----|------|--------------|
+| Job           | Nome              | Idempotência                 |
+| ------------- | ----------------- | ---------------------------- |
 | Transcode HLS | `video.transcode` | `jobId: transcode:{videoId}` |
 
 Config v0: **concurrency 1** no worker (VPS solo). Retry: 3 tentativas, backoff exponencial.
@@ -235,25 +236,25 @@ Config v0: **concurrency 1** no worker (VPS solo). Retry: 3 tentativas, backoff 
 
 ## Variáveis de ambiente (referência)
 
-| Variável | Consumidor | Exemplo dev |
-|----------|------------|-------------|
-| `DATABASE_URL` | api, worker | `postgresql://...` |
-| `VALKEY_URL` | api, worker | `redis://valkey:6379` |
-| `STORAGE_*` | api, worker | endpoint MinIO |
-| `CDN_BASE_URL` | api | `http://localhost:8080/media` |
-| `JWT_SECRET` | api | secret local |
-| `ADMIN_SEED_EMAIL/PASSWORD` | api migration | usuário único |
+| Variável                    | Consumidor    | Exemplo dev                   |
+| --------------------------- | ------------- | ----------------------------- |
+| `DATABASE_URL`              | api, worker   | `postgresql://...`            |
+| `VALKEY_URL`                | api, worker   | `redis://valkey:6379`         |
+| `STORAGE_*`                 | api, worker   | endpoint MinIO                |
+| `CDN_BASE_URL`              | api           | `http://localhost:8080/media` |
+| `JWT_SECRET`                | api           | secret local                  |
+| `ADMIN_SEED_EMAIL/PASSWORD` | api migration | usuário único                 |
 
 ---
 
 ## Decisões arquiteturais (ADRs)
 
-| ADR | Decisão |
-|-----|---------|
-| [ADR-001](./adr/ADR-001-monorepo-bootstrap-v0.md) | Bootstrap monorepo e Docker Compose |
-| [ADR-002](./adr/ADR-002-worker-events-valkey-pubsub.md) | Eventos worker→API via Valkey pub/sub |
-| [ADR-003](./adr/ADR-003-hls-delivery-dev-nginx-proxy.md) | Entrega HLS em dev via nginx |
-| [ADR-004](./adr/ADR-004-admin-role-includes-viewer.md) | Admin inclui permissões viewer |
+| ADR                                                                   | Decisão                                  |
+| --------------------------------------------------------------------- | ---------------------------------------- |
+| [ADR-001](./adr/ADR-001-monorepo-bootstrap-v0.md)                     | Bootstrap monorepo e Docker Compose      |
+| [ADR-002](./adr/ADR-002-worker-events-valkey-pubsub.md)               | Eventos worker→API via Valkey pub/sub    |
+| [ADR-003](./adr/ADR-003-hls-delivery-dev-nginx-proxy.md)              | Entrega HLS em dev via nginx             |
+| [ADR-004](./adr/ADR-004-admin-role-includes-viewer.md)                | Admin inclui permissões viewer           |
 | [ADR-005](./adr/ADR-005-video-upload-complete-and-job-idempotency.md) | `upload_complete` + idempotência de jobs |
 
 ---

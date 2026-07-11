@@ -3,6 +3,13 @@ import { Redis } from 'ioredis';
 import { env } from '#config/env';
 import { configureRedisClient, formatServiceConnectionError } from '#infra/connection-error';
 
+/**
+ * Tipo do client Valkey/Redis exposto para o restante da aplicação. Consumidores
+ * dependem deste alias em vez de importar `ioredis` diretamente, mantendo o
+ * pacote concreto isolado neste adapter.
+ */
+export type RedisClient = Redis;
+
 const VALKEY_SERVICE_NAME = 'Valkey';
 
 function createValkeyClient(): Redis {
