@@ -1,0 +1,66 @@
+# CI — a mesma prova do pre-push, numa máquina que não é a sua.
+#
+# Por que existe: até aqui todo portão do projeto era local. Um `--no-verify`,
+# um merge feito pela interface do GitHub ou um clone sem `pnpm install` (que é
+# quem liga o core.hooksPath) passavam por fora de tudo. Portão que depende de
+# alguém lembrar de ligar não é portão.
+#
+# Por que é barato:
+#   · um job só, um SO, uma versão de node — sem matriz;
+#   · `cancel-in-progress`: push novo mata a execução anterior do mesmo ref;
+#   · cache do store do pnpm e cache do turbo entre execuções — o que não mudou
+#     não roda de novo (os quatro comandos abaixo são tasks cacheadas);
+#   · sem submódulo: o CI não roda a fábrica, só os portões do projeto.
+#
+# O que ele NÃO cobre, de propósito: `nuxt build` dos dois fronts (minutos, e o
+# gate `front` da fábrica já cobre antes do merge) e o `prettier --check`, que
+# no pre-push é gateado por range e aqui custaria varrer o legado inteiro.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+  DO_NOT_TRACK: 1
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # O cache do turbo é o que torna repetição barata: lint, typecheck, test e
+      # knip são tasks, então pacote que não mudou volta do cache em vez de rodar.
+      - name: Cache do turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm typecheck
+
+      - run: pnpm test
+
+      - run: pnpm knip

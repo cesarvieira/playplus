@@ -27,17 +27,26 @@ cd "$RAIZ" || exit 1
 #     continuam valendo.
 # ---------------------------------------------------------------------------
 FAB="$RAIZ/preator"
-if [ -f "$FAB/esteira/raiz.sh" ]; then
-  # shellcheck disable=SC1091
-  if . "$FAB/esteira/raiz.sh"; then
-    vazou=0
-    for f in $(git diff --cached --name-only --diff-filter=ACM | grep -vE '\.(png|jpg|jpeg|gif|pdf|xlsx|zip|ico|woff2?)$'); do
-      [ -f "$f" ] || continue
-      "$PY" "$FAB/esteira/ferramentas/seguranca/scan_segredos.py" "$f" >/dev/null 2>&1 || {
-        echo "  ⛔ segredo em $f"; vazou=1; }
-    done
-    [ "$vazou" = 1 ] && { echo "[fábrica] BLOQUEADO: segredo detectado."; exit 1; }
+SCAN="$FAB/esteira/ferramentas/seguranca/segredos.sh"
+if [ -f "$SCAN" ]; then
+  # Uma chamada sobre o ÍNDICE inteiro (gitleaks, desde a fábrica 2.3.0).
+  bash "$SCAN" --staged "$RAIZ"
+  rc=$?
+  if [ "$rc" -eq 1 ]; then
+    echo "[fábrica] BLOQUEADO: segredo detectado no que você está commitando."
+    echo "  Tire o valor do arquivo. Se for falso positivo, declare em .gitleaks.toml"
+    echo "  — nunca com --no-verify, que apaga o portão em vez do problema."
+    exit 1
   fi
+  if [ "$rc" -ne 0 ]; then
+    echo "[fábrica] BLOQUEADO: não consegui procurar segredo (veja o erro acima)."
+    echo "  Isto NÃO é 'está limpo'. Instale o gitleaks: scoop install gitleaks"
+    exit 1
+  fi
+else
+  # Submódulo não inicializado. Aviso ALTO em vez de silêncio: quem lê precisa
+  # saber que este commit não foi varrido — `git submodule update --init`.
+  echo "[fábrica] ⚠️  AVISO: preator/ ausente — NINGUÉM procurou segredo neste commit."
 fi
 
 # ---------------------------------------------------------------------------

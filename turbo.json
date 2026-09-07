@@ -16,6 +16,32 @@
     "lint": {},
     "typecheck": {
       "dependsOn": ["^build"]
+    },
+    "//#lint:root": {
+      "inputs": [
+        "eslint.config.mjs",
+        "eslint.shared*.mjs",
+        ".gitignore",
+        "scripts/**",
+        "*.{mjs,cjs,js,ts}",
+        "*.json"
+      ],
+      "outputs": []
+    },
+    "//#knip:run": {
+      "inputs": [
+        "knip.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "package.json",
+        "tsconfig*.json",
+        "vitest.shared.*.ts",
+        "scripts/**",
+        "apps/**",
+        "packages/**",
+        "infra/**"
+      ],
+      "outputs": []
     }
   }
 }
