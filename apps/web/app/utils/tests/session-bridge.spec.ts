@@ -1,11 +1,12 @@
+import { mockNuxtImport } from '@nuxt/test-utils/runtime';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { mapAuthResponse } from '../auth';
 import { clearWebSessionCookie, persistAuthResponse, syncSessionCookie } from '../session-bridge';
 
-const fetchMock = vi.fn();
+const { fetchMock } = vi.hoisted(() => ({ fetchMock: vi.fn() }));
 
-vi.stubGlobal('$fetch', fetchMock);
+mockNuxtImport('$fetch', () => fetchMock);
 
 describe('session-bridge', () => {
   beforeEach(() => {

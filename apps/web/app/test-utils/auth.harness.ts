@@ -1,4 +1,4 @@
-import { mountSuspended } from '@nuxt/test-utils/runtime';
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime';
 import { vi } from 'vitest';
 
 import { useApi } from '~/composables/useApi';
@@ -7,9 +7,11 @@ import { useAuthStore } from '~/stores/auth';
 
 type AuthStore = ReturnType<typeof useAuthStore>;
 
-const sessionFetchMock = vi.fn().mockResolvedValue({ ok: true });
+const { sessionFetchMock } = vi.hoisted(() => ({
+  sessionFetchMock: vi.fn().mockResolvedValue({ ok: true }),
+}));
 
-vi.stubGlobal('$fetch', sessionFetchMock);
+mockNuxtImport('$fetch', () => sessionFetchMock);
 
 export async function withAuthStore<T>(run: (store: AuthStore) => Promise<T>): Promise<T> {
   let store!: AuthStore;

@@ -8,7 +8,8 @@ function flushPromises(): Promise<void> {
   });
 }
 
-const { ofetchMock, navigateToMock, useRouteMock } = vi.hoisted(() => ({
+const { ofetchMock, navigateToMock, useRouteMock, fetchMock } = vi.hoisted(() => ({
+  fetchMock: vi.fn().mockResolvedValue({ ok: true }),
   ofetchMock: vi.fn(),
   navigateToMock: vi.fn().mockResolvedValue(undefined),
   useRouteMock: vi.fn(() => ({
@@ -22,7 +23,7 @@ vi.mock('ofetch', () => ({
   ofetch: ofetchMock,
 }));
 
-vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({ ok: true }));
+mockNuxtImport('$fetch', () => fetchMock);
 
 mockNuxtImport('navigateTo', () => navigateToMock);
 mockNuxtImport('useRoute', () => useRouteMock);
@@ -51,7 +52,7 @@ async function mountLogin() {
 async function fillAndSubmit(
   wrapper: Awaited<ReturnType<typeof mountLogin>>,
   email = 'viewer@playplus.localhost',
-  password = 'password123',
+  password = 'change-me',
 ) {
   await wrapper.find('#login-email').setValue(email);
   await wrapper.find('#login-password').setValue(password);
@@ -135,7 +136,7 @@ describe('login page', () => {
 
     const wrapper = await mountLogin();
     await wrapper.find('#login-email').setValue('viewer@playplus.localhost');
-    await wrapper.find('#login-password').setValue('password123');
+    await wrapper.find('#login-password').setValue('change-me');
     const submitPromise = wrapper.find('form').trigger('submit');
     await flushPromises();
 
