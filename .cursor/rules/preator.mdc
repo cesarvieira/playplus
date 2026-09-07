@@ -1,0 +1,7 @@
+---
+description: Roteador da fábrica — regras inegociáveis para todo agente e para o dev
+alwaysApply: true
+---
+
+Leia `AGENTS.md` do projeto e `preator/AGENTS.md` antes de agir.
+Eles são a fonte; esta regra é só o ponteiro.

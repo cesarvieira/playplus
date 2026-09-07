@@ -4,6 +4,7 @@ import baseConfig from './eslint.shared.mjs';
 export default defineConfig(
   {
     ignores: [
+      'preator/**',
       'apps/**',
       'packages/**',
       '.agents/**',

@@ -6,3 +6,132 @@ coverage
 .nuxt
 .output
 certs/
+
+# >>> preator >>>
+# Acrescentado por adocao/instalar.sh. Edite à vontade; para atualizar,
+# remova este bloco (até a marca de fim) e rode o instalador de novo.
+# .gitignore — projeto que adota o Preator
+#
+# Copiado pelo instalador. Se o projeto já tinha um .gitignore, o bloco do
+# Preator é ACRESCENTADO no fim, entre marcadores, em vez de sobrescrever.
+#
+# O critério: versione o que o TIME precisa; ignore o que a MÁQUINA refaz.
+
+# ---------------------------------------------------------------------------
+# ⛔ SEGREDO — antes de tudo, porque é o que não tem volta
+# ---------------------------------------------------------------------------
+# Um segredo commitado continua no histórico depois de removido do arquivo.
+# O hook de pre-commit instalado pelo Preator bloqueia o óbvio; isto é a
+# segunda camada, não a única.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+secrets.json
+appsettings.*.Local.json
+credentials.*
+
+# ---------------------------------------------------------------------------
+# GERADO PELO PREATOR — a máquina refaz; versionar só cria divergência
+# ---------------------------------------------------------------------------
+# A config do orquestrador é LOCAL de cada máquina: ela declara qual plataforma
+# de IA aquele operador tem instalada e autenticada. Ver
+# preator/esteira/motor/INSTALAR.md.
+# Ancorados na raiz (`/`): sem a barra, o git casa o nome em QUALQUER
+# profundidade — e um `skills.lock` de outra ferramenta sumiria sem ninguém
+# pedir.
+/orquestrador.yaml
+/skills.lock
+
+# Workspace local da Fábrica: memória do condutor, noturno, cache, rastros,
+# tokens de sessão e worktrees do fan-out. Mora sob o overlay em tmp/ — o
+# overlay em si (.preator/) continua versionado; só o tmp é da máquina.
+#
+# O que mora aqui, medido num projeto real: dezenas de MB, com chave privada,
+# segredo de JWT, token de sessão, PIDs, logs, SQLite que muda a cada execução
+# e worktrees git aninhados. Nada disso é conteúdo de projeto.
+#
+# **Ignora a pasta inteira, sem exceção.** Lista de exceções envelhece; o
+# default não. A fonte da fila é o GitHub Issues — nada aqui precisa de exceção.
+/.preator/tmp/
+
+# O carimbo do gate: é por execução, e vale só na máquina que o produziu.
+# Versioná-lo seria transformar um veredito local em declaração de "pronto" —
+# exatamente o que o Preator existe para impedir.
+/.prova-comportamento.json
+
+# ---------------------------------------------------------------------------
+# ✅ O QUE **NÃO** SE IGNORA — está aqui para você não ignorar por engano
+# ---------------------------------------------------------------------------
+#   preator-perfil.sh   o contrato com a fábrica. É do time, não da máquina.
+#   .preator/           o overlay: CONTEXT, convenções, negócio, playbooks.
+#                       É o conhecimento do projeto — a parte mais valiosa.
+#                       Exceção: .preator/tmp/ (acima) — workspace local da máquina.
+#   .github/            o formulário de história e o workflow de labels — é
+#                       por ali que a fila entra.
+#   .githooks/          o portão local; cada um roda o instalador para apontar
+#                       o core.hooksPath, mas o hook em si é compartilhado.
+#   .gitmodules, preator/   o submódulo e o commit em que ele está pinado.
+
+# ---------------------------------------------------------------------------
+# SISTEMA E EDITOR
+# ---------------------------------------------------------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.idea/
+*.swp
+*~
+
+# ---------------------------------------------------------------------------
+# STACK — descomente o bloco da sua quando escolher
+# ---------------------------------------------------------------------------
+# A fábrica não presume stack: ela pergunta ao preator-perfil.sh. Aqui vale o
+# mesmo — nada está ligado por padrão, para o arquivo não mentir sobre o que
+# o projeto é.
+
+# --- .NET ---
+# bin/
+# obj/
+# *.user
+# TestResults/
+
+# --- Node / front ---
+# node_modules/
+# dist/
+# build/
+# .next/
+# .nuxt/
+# .output/
+# *.tsbuildinfo
+# npm-debug.log*
+
+# --- Python ---
+# __pycache__/
+# *.py[cod]
+# .venv/
+# venv/
+# .pytest_cache/
+# .mypy_cache/
+# *.egg-info/
+
+# --- Java / JVM ---
+# target/
+# .gradle/
+# *.class
+
+# --- Go ---
+# vendor/
+# *.exe
+
+# --- Docker / infra local ---
+# docker-compose.override.yml
+# .terraform/
+# *.tfstate
+# *.tfstate.*
+# <<< preator <<<
