@@ -1,7 +1,7 @@
 name: História
 description: Uma história vertical — "o usuário faz X na tela Y". Tela e backend juntos, atravessando os dois portões.
-title: "História · "
-labels: ["historia"]
+title: 'História · '
+labels: ['historia']
 body:
   - type: markdown
     attributes:
@@ -41,7 +41,7 @@ body:
     id: mode
     attributes:
       label: Modo
-      description: "construir = o código não existe. validar-reescrever = auditar o que já está lá."
+      description: 'construir = o código não existe. validar-reescrever = auditar o que já está lá.'
       options:
         - construir
         - validar-reescrever
@@ -78,7 +78,7 @@ body:
       description: >-
         Uma pasta DISJUNTA. No fan-out, um módulo é de um worker só: dois workers no mesmo módulo
         já produziram implementações divergentes e migrations incompatíveis.
-      placeholder: "api/src/modulos/lancamentos"
+      placeholder: 'api/src/modulos/lancamentos'
     validations:
       required: true
 
@@ -91,7 +91,7 @@ body:
         O ponteiro para o design do projeto — onde ele está e como se abre — mora no
         CONTEXT.md do overlay; aqui vai só QUAL tela, para não repetir o endereço em
         toda issue.
-      placeholder: "tela de orçamento do mês + folha de editar categoria"
+      placeholder: 'tela de orçamento do mês + folha de editar categoria'
 
   - type: textarea
     id: ef

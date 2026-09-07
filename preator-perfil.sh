@@ -74,14 +74,17 @@ TYPECHECK_CMD="pnpm --filter @playplus/web --filter @playplus/admin run typechec
 LINT_CMD="pnpm lint"     # scripts/lint.mjs: turbo run lint + eslint na raiz
 DEADCODE_CMD="pnpm knip"
 
-# ⚠️ O hook de pre-commit do time (scripts/pre-commit.mjs: lint-staged,
-# typecheck, test e knip) está declarado aqui inteiro — nenhum portão do projeto
-# fica invisível para o gate mestre.
-# Nota de ambiente: `core.hooksPath` aponta hoje para `.githooks` (o hook de
-# segredo, instalado pela fábrica), o que desliga o hook do husky em
-# `.husky/pre-commit`. Nada se perde em COBERTURA por causa disso — os quatro
-# comandos dele estão neste perfil —, mas quem contava com o bloqueio no commit
-# precisa saber que hoje ele não dispara.
+# ⚠️ Os hooks do projeto estão declarados aqui inteiros — nenhum portão local
+# fica invisível para o gate mestre. São dois, ambos em `.githooks` (o husky
+# foi removido; `core.hooksPath` é ligado pelo `prepare`, em
+# scripts/ativar-githooks.mjs):
+#   pre-commit → segredo (fábrica) + lint-staged + typecheck e test do delta
+#   pre-push   → prettier nos arquivos do range + lint, typecheck, test e knip
+#                do repositório inteiro
+# A ÚNICA coisa do pre-push que não vira gate aqui é o `prettier --check`: ele é
+# gateado por RANGE, porque `pnpm format:check` no repositório inteiro ainda
+# acusa mais de mil arquivos de legado (docs, .github, overlay). Declará-lo em
+# LINT_CMD pintaria a tabela de vermelho por dívida antiga, não pelo diff.
 
 # ---------------------------------------------------------------------------
 # SUBIR O SISTEMA  —  o gate que pega o que o build nunca vê

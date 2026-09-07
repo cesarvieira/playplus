@@ -20,22 +20,22 @@
 
 ## A stack real
 
-> Os *comandos* de build, teste e deploy vivem em `preator-perfil.sh`, não aqui. Esta seção é para
+> Os _comandos_ de build, teste e deploy vivem em `preator-perfil.sh`, não aqui. Esta seção é para
 > o que um humano precisa saber e a máquina não infere.
 
-| Camada | Tecnologia | Observação |
-|---|---|---|
-| Backend | | |
-| Frontend | | |
-| Banco | | |
-| Fila / eventos | | |
-| Infra | | |
+| Camada         | Tecnologia | Observação |
+| -------------- | ---------- | ---------- |
+| Backend        |            |            |
+| Frontend       |            |            |
+| Banco          |            |            |
+| Fila / eventos |            |            |
+| Infra          |            |            |
 
 **Integrações externas** (adaptador, config, credencial — cada uma é cidadã de primeira classe):
 
 | Integração | O que faz | Onde está o adaptador |
-|---|---|---|
-| | | |
+| ---------- | --------- | --------------------- |
+|            |           |                       |
 
 ---
 
@@ -53,8 +53,8 @@
 **Onde está:** <URL ou caminho>
 
 | Arquivo | O que é |
-|---|---|
-| | |
+| ------- | ------- |
+|         |         |
 
 **Como se abre:** <ferramenta, e o que fazer se pedir permissão — ex.: "MCP de design da sua
 plataforma; exige consentimento por sessão; erro de permissão vira pedido ao humano, nunca
@@ -81,20 +81,21 @@ o ADR que o corrigiu>
 > A **Regra #0** vale aqui: nada de fiscal, trabalhista, financeiro ou legal sai de memória.
 > Liste os domínios e a skill correspondente da fábrica.
 
-| Domínio | Skill agnóstica (fábrica) | Overlay específico (aqui) |
-|---|---|---|
-| ex.: fiscal | `preator/conhecimento/negocio/fiscal/` | `skills/negocio/` |
+| Domínio     | Skill agnóstica (fábrica)              | Overlay específico (aqui) |
+| ----------- | -------------------------------------- | ------------------------- |
+| ex.: fiscal | `preator/conhecimento/negocio/fiscal/` | `skills/negocio/`         |
 
 **Regra que este cliente faz diferente do padrão do setor:**
+
 > Documente aqui, com o porquê. É o tipo de coisa que ninguém lembra em seis meses.
 
 ---
 
 ## O que já decidimos (e não vamos rediscutir)
 
-| Decisão | Quando | Por quê | ADR |
-|---|---|---|---|
-| | | | `decisoes/` |
+| Decisão | Quando | Por quê | ADR         |
+| ------- | ------ | ------- | ----------- |
+|         |        |         | `decisoes/` |
 
 ---
 
@@ -102,9 +103,7 @@ o ADR que o corrigiu>
 
 > Tão importante quanto o escopo. Sem isto, todo refinamento vira negociação.
 
--
-
----
+- ***
 
 ## Estado atual
 

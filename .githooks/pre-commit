@@ -1,16 +1,58 @@
 #!/usr/bin/env bash
-# Instalado por preator/adocao/instalar.sh. Bloqueia commit com segredo vazado.
+# ============================================================================
+# pre-commit — UM portão só, com as duas metades que existiam antes:
+#   1. o da fábrica (preator/adocao/instalar.sh): bloqueia segredo vazado;
+#   2. o do projeto (era .husky/pre-commit → scripts/pre-commit.mjs):
+#      lint-staged, typecheck, test e knip.
+#
+# Por que virou um só: o husky aponta `core.hooksPath` para `.husky/_` no
+# `prepare`, e a fábrica aponta para `.githooks`. Dois donos do mesmo ponteiro
+# significa que o último `pnpm install` decidia qual dos dois portões existia —
+# e o perdedor sumia em silêncio, que é o pior jeito de um portão falhar.
+# O husky foi removido do projeto; este arquivo é o único pre-commit.
+#
+# ⚠️ `preator/adocao/instalar.sh` REESCREVE este arquivo (ele o gera do zero no
+# passo 4). Se você rodar o instalador de novo, a metade do projeto some daqui:
+# o arquivo é versionado, então isso aparece como diff em `git status` —
+# confira e restaure com `git checkout .githooks/pre-commit`.
+# ============================================================================
 set -uo pipefail
+
 RAIZ="$(git rev-parse --show-toplevel)"
+cd "$RAIZ" || exit 1
+
+# ---------------------------------------------------------------------------
+# 1 · SEGREDO (fábrica) — primeiro por ser o mais barato e o mais grave.
+#     Sem a fábrica presente, só esta metade é pulada; as checagens do projeto
+#     continuam valendo.
+# ---------------------------------------------------------------------------
 FAB="$RAIZ/preator"
-[ -f "$FAB/esteira/raiz.sh" ] || exit 0
-# shellcheck disable=SC1091
-. "$FAB/esteira/raiz.sh" || exit 0
-vazou=0
-for f in $(git diff --cached --name-only --diff-filter=ACM | grep -vE '\.(png|jpg|jpeg|gif|pdf|xlsx|zip|ico|woff2?)$'); do
-  [ -f "$f" ] || continue
-  "$PY" "$FAB/esteira/ferramentas/seguranca/scan_segredos.py" "$f" >/dev/null 2>&1 || {
-    echo "  ⛔ segredo em $f"; vazou=1; }
-done
-[ "$vazou" = 1 ] && { echo "[fábrica] BLOQUEADO: segredo detectado."; exit 1; }
+if [ -f "$FAB/esteira/raiz.sh" ]; then
+  # shellcheck disable=SC1091
+  if . "$FAB/esteira/raiz.sh"; then
+    vazou=0
+    for f in $(git diff --cached --name-only --diff-filter=ACM | grep -vE '\.(png|jpg|jpeg|gif|pdf|xlsx|zip|ico|woff2?)$'); do
+      [ -f "$f" ] || continue
+      "$PY" "$FAB/esteira/ferramentas/seguranca/scan_segredos.py" "$f" >/dev/null 2>&1 || {
+        echo "  ⛔ segredo em $f"; vazou=1; }
+    done
+    [ "$vazou" = 1 ] && { echo "[fábrica] BLOQUEADO: segredo detectado."; exit 1; }
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# 2 · CHECAGENS DO PROJETO — as mesmas quatro, na mesma ordem, que rodavam pelo
+#     husky. Todas também estão declaradas no preator-perfil.sh, para que o gate
+#     mestre enxergue o que este hook enxerga.
+# ---------------------------------------------------------------------------
+rodar() {
+  "$@" || exit $?
+}
+
+rodar pnpm exec lint-staged
+# rodar node scripts/lint.mjs --changed
+rodar pnpm exec turbo run typecheck --filter=...[HEAD]
+rodar pnpm exec turbo run test --filter=...[HEAD]
+rodar pnpm knip
+
 exit 0

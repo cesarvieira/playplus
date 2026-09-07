@@ -6,24 +6,24 @@
 
 ## Célula técnica
 
-| Papel | Agente base | Skills que carrega | Diretor (humano) |
-|---|---|---|---|
-| Arquiteto | Architect | Conhecimento: arquitetura/* + dados/* · skills/formato-{projeto} | {nome} |
-| Dev Backend | Dev | Conhecimento: linguagens/{stack} + backend-web/* + qualidade/* · formato-{projeto} | {nome} |
-| Dev Frontend | Dev | Conhecimento: frontend/* + linguagens/javascript-typescript · formato-{projeto} | {nome} |
-| QA | QA | Conhecimento: qualidade/tdd + test-plan · edge cases dos domínios | {nome} |
-| Code Review | Code Review | Conhecimento: qualidade/code-review + refatoracao + codigo-limpo | {nome} |
-| Ops | Ops | Conhecimento: devops-infra/* | {nome} |
-| Security | Security | Conhecimento: seguranca/* + regulação do projeto | {nome} |
+| Papel        | Agente base | Skills que carrega                                                                 | Diretor (humano) |
+| ------------ | ----------- | ---------------------------------------------------------------------------------- | ---------------- |
+| Arquiteto    | Architect   | Conhecimento: arquitetura/_ + dados/_ · skills/formato-{projeto}                   | {nome}           |
+| Dev Backend  | Dev         | Conhecimento: linguagens/{stack} + backend-web/_ + qualidade/_ · formato-{projeto} | {nome}           |
+| Dev Frontend | Dev         | Conhecimento: frontend/\* + linguagens/javascript-typescript · formato-{projeto}   | {nome}           |
+| QA           | QA          | Conhecimento: qualidade/tdd + test-plan · edge cases dos domínios                  | {nome}           |
+| Code Review  | Code Review | Conhecimento: qualidade/code-review + refatoracao + codigo-limpo                   | {nome}           |
+| Ops          | Ops         | Conhecimento: devops-infra/\*                                                      | {nome}           |
+| Security     | Security    | Conhecimento: seguranca/\* + regulação do projeto                                  | {nome}           |
 
 ## Célula de produto/negócio
 
-| Papel | Agente base | Skills que carrega | Diretor (humano) |
-|---|---|---|---|
-| PO/Requirements | Requirements | Conhecimento: produto-negocio/gestao-produto + user-stories | {nome} |
-| Especialista {domínio 1} | Especialista de Negócio | preator/conhecimento/negocio/{dominio} + skills/negocio-{cliente} | {nome} |
-| Especialista {domínio 2} | Especialista de Negócio | preator/conhecimento/negocio/{dominio} | {nome} |
-| UX | UX | Conhecimento: frontend/ux-design + acessibilidade do projeto | {nome} |
+| Papel                    | Agente base             | Skills que carrega                                                | Diretor (humano) |
+| ------------------------ | ----------------------- | ----------------------------------------------------------------- | ---------------- |
+| PO/Requirements          | Requirements            | Conhecimento: produto-negocio/gestao-produto + user-stories       | {nome}           |
+| Especialista {domínio 1} | Especialista de Negócio | preator/conhecimento/negocio/{dominio} + skills/negocio-{cliente} | {nome}           |
+| Especialista {domínio 2} | Especialista de Negócio | preator/conhecimento/negocio/{dominio}                            | {nome}           |
+| UX                       | UX                      | Conhecimento: frontend/ux-design + acessibilidade do projeto      | {nome}           |
 
 ## Como funciona (o multiplicador)
 

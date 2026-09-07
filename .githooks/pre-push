@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# ============================================================================
+# pre-push — o último portão local antes do CI.
+# Inspirado no pre-push do EprosERP: o RANGE decide o que é gateado por
+# arquivo, e o resto do repositório é checado inteiro.
+#
+# A divisão de trabalho com o pre-commit é o ponto:
+#   pre-commit → só o DELTA (lint-staged nos staged; typecheck e test apenas
+#                dos pacotes tocados, via --filter=...[HEAD])
+#   pre-push   → o REPOSITÓRIO INTEIRO (lint, typecheck, test, knip), mais a
+#                formatação dos arquivos que estão indo no push
+#
+# Por que a formatação só aparece aqui: o lint-staged CORRIGE o que passa por
+# ele, mas `--no-verify`, merge, rebase e arquivo escrito por outra ferramenta
+# escapam. Este é o último lugar antes de o mesmo check virar cobrança no CI.
+#
+# E por que ela é gateada por RANGE, e não no repositório inteiro: hoje
+# `pnpm format:check` acusa mais de mil arquivos de legado (docs, .github,
+# overlay) que nunca passaram pelo prettier. Gatear isso no push travaria
+# qualquer mudança — zerar o legado é decisão de time (`pnpm format`), não do
+# hook. O que ENTRA no range, esse sim, precisa estar limpo.
+#
+# Nenhum passo é "advisory": todos bloqueiam. Portão que só avisa é portão que
+# se aprende a ignorar — e os quatro comandos abaixo são os mesmos que o gate
+# mestre da fábrica cobra (preator-perfil.sh).
+# ============================================================================
+set -uo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT" || exit 1
+
+# ---------------------------------------------------------------------------
+# O RANGE — o que este push está levando
+# ---------------------------------------------------------------------------
+if git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' >/dev/null 2>&1; then
+  RANGE='@{upstream}..HEAD'
+elif git rev-parse --verify origin/main >/dev/null 2>&1; then
+  RANGE='origin/main..HEAD'
+else
+  RANGE='main..HEAD'
+fi
+
+CHANGED="$(git diff --name-only "$RANGE" 2>/dev/null || true)"
+if [ -z "$CHANGED" ]; then
+  echo "pre-push: nada novo em $RANGE — nada a provar."
+  exit 0
+fi
+
+echo "== pre-push :: range $RANGE ($(echo "$CHANGED" | grep -c .) arquivo(s)) =="
+
+# ---------------------------------------------------------------------------
+# 1 · FORMATAÇÃO DO RANGE (prettier) — gate DURO
+# ---------------------------------------------------------------------------
+# Só as extensões que pertencem ao prettier neste repositório: ts/vue/css são
+# do eslint (veja .prettierignore e .lintstagedrc.json). ACMR ignora deletado;
+# o teste de existência cobre o arquivo que sumiu depois, no diretório de
+# trabalho — passá-lo ao prettier viraria "falhou ao executar", que é uma
+# mensagem enganosa para um problema que não existe.
+FMT_FILES=""
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  [ -f "$f" ] || continue
+  FMT_FILES="$FMT_FILES$f"$'\n'
+done <<< "$(git diff --name-only --diff-filter=ACMR "$RANGE" 2>/dev/null | grep -E '\.(json|md|ya?ml)$' || true)"
+
+if [ -n "${FMT_FILES//[[:space:]]/}" ]; then
+  echo "==> formatação (prettier --check nos arquivos do range)"
+  # Em lotes de 40: no Windows o `pnpm` é um .cmd, e quem manda é o teto de
+  # 8191 caracteres do cmd.exe — uma lista longa morre por "linha de comando
+  # muito longa", e a falha de EXECUÇÃO seria lida como reprovação de estilo.
+  LOTE=40
+  TMP="$(mktemp)"
+  printf '%s' "$FMT_FILES" > "$TMP"
+  TOTAL="$(grep -c . "$TMP")"
+  INI=1
+  while [ "$INI" -le "$TOTAL" ]; do
+    FIM=$((INI + LOTE - 1))
+    [ "$FIM" -gt "$TOTAL" ] && FIM="$TOTAL"
+    ARQS="$(sed -n "${INI},${FIM}p" "$TMP" | tr '\n' ' ')"
+    STATUS=0
+    # shellcheck disable=SC2086
+    pnpm exec prettier --check --no-error-on-unmatched-pattern $ARQS || STATUS=$?
+    # 1 = achou arquivo fora do padrão · 2+ = não conseguiu rodar. Tratar os
+    # dois como iguais é o que produz o bloqueio que ninguém entende.
+    if [ "$STATUS" -eq 1 ]; then
+      rm -f "$TMP"
+      echo "Push bloqueado: arquivo do range fora do padrão do prettier."
+      echo "  pnpm exec prettier --write <arquivos>   (ou \`pnpm format\`)"
+      exit 1
+    fi
+    if [ "$STATUS" -ne 0 ]; then
+      rm -f "$TMP"
+      echo "Push bloqueado: prettier falhou ao EXECUTAR (exit $STATUS)."
+      echo "  Não é diagnóstico de formatação — confira o ambiente:"
+      echo "  pnpm exec prettier --version"
+      exit 1
+    fi
+    INI=$((FIM + 1))
+  done
+  rm -f "$TMP"
+else
+  echo "==> formatação: nenhum .json/.md/.yml no range — pulando prettier"
+fi
+
+# ---------------------------------------------------------------------------
+# 2 · O REPOSITÓRIO INTEIRO — o que o pre-commit viu só no delta
+# ---------------------------------------------------------------------------
+# O turbo cacheia por conteúdo: o que já rodou no commit sai instantâneo aqui,
+# então o custo real é só o que mudou desde então.
+duro() { # <rótulo> <dica de conserto> <comando...>
+  local rotulo="$1" dica="$2"; shift 2
+  echo "==> $rotulo"
+  "$@" && return 0
+  echo "Push bloqueado: $rotulo"
+  echo "  $dica"
+  exit 1
+}
+
+duro "lint (repositório inteiro)"      "pnpm lint"       pnpm lint
+duro "typecheck (todos os pacotes)"    "pnpm typecheck"  pnpm typecheck
+duro "testes (suíte inteira)"          "pnpm test"       pnpm test
+duro "código morto (knip)"             "pnpm knip"       pnpm knip
+
+echo "pre-push OK"
+exit 0

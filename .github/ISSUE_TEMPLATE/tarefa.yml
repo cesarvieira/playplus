@@ -1,7 +1,7 @@
 name: Tarefa
 description: Uma tarefa de uma história — um papel, uma pasta disjunta, um worktree.
-title: "Tarefa · "
-labels: ["tarefa"]
+title: 'Tarefa · '
+labels: ['tarefa']
 body:
   - type: markdown
     attributes:
@@ -23,7 +23,7 @@ body:
     attributes:
       label: História
       description: O número da issue da história a que esta tarefa pertence.
-      placeholder: "#42"
+      placeholder: '#42'
     validations:
       required: true
 
@@ -51,7 +51,7 @@ body:
       description: >
         A pasta DISJUNTA que esta tarefa possui. Nenhuma outra tarefa da mesma história pode
         declarar a mesma. É a trava contra dois agentes no mesmo módulo.
-      placeholder: "Modulos.Cadastros/Produto"
+      placeholder: 'Modulos.Cadastros/Produto'
     validations:
       required: true
 
@@ -73,7 +73,7 @@ body:
       description: >
         Issues que precisam fechar antes desta. Deixe vazio se ela pode começar já — é isso que
         deixa o condutor spawná-la em paralelo.
-      placeholder: "#43, #44"
+      placeholder: '#43, #44'
 
   - type: input
     id: modelo
@@ -82,7 +82,7 @@ body:
       description: >
         Qual modelo executa, pelo tier do papel (`preator/esteira/motor/MODELOS.md`). Preenchido
         pelo condutor na decomposição; entra na linhagem.
-      placeholder: "tier alto · <id do modelo>"
+      placeholder: 'tier alto · <id do modelo>'
 
   - type: textarea
     id: fazer
@@ -105,4 +105,4 @@ body:
       description: >
         Dúvida sem especificação. Escalar é o comportamento correto — inventar regra de negócio,
         não. Se houver fork aberto, a tarefa leva a label `bloqueada`.
-      placeholder: "A regra de arredondamento não está na EF nem na skill — decisão de quem?"
+      placeholder: 'A regra de arredondamento não está na EF nem na skill — decisão de quem?'

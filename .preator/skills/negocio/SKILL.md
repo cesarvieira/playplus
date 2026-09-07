@@ -12,7 +12,7 @@ revisao: por-mudanca-de-regra
 
 > **Skill de Negócio (tipo 3).** O conhecimento do NEGÓCIO que suporta a **especificação**. É o
 > que faz o agente de Requirements/PO escrever specs corretas e o Dev não violar regra de domínio.
-> Não é sobre código — é sobre *o que o cliente faz e as regras que o regem*.
+> Não é sobre código — é sobre _o que o cliente faz e as regras que o regem_.
 
 ## O que é o negócio (em 3 linhas)
 
@@ -21,24 +21,24 @@ revisao: por-mudanca-de-regra
 ## Atores / personas
 
 | Ator | Quem é | O que faz no sistema | Restrições |
-|---|---|---|---|
-| | | | |
+| ---- | ------ | -------------------- | ---------- |
+|      |        |                      |            |
 
 ## Glossário do domínio (a linguagem ubíqua)
 
 > Todo nome de código, tela e evento deve usar estes termos — não sinônimos técnicos.
 
 | Termo | Definição precisa |
-|---|---|
-| | |
+| ----- | ----------------- |
+|       |                   |
 
 ## Regras de negócio (as invioláveis)
 
 > Numeradas para rastrear na spec e no teste. Cada regra vira critério de aceite e edge case.
 
-| # | Regra | Origem (lei/norma/decisão) |
-|---|---|---|
-| RN-001 | | |
+| #      | Regra | Origem (lei/norma/decisão) |
+| ------ | ----- | -------------------------- |
+| RN-001 |       |                            |
 
 ## Regulação / compliance (o que a lei/norma exige)
 
@@ -52,9 +52,9 @@ tramitação, publicação. É daqui que saem os casos de uso.>
 
 ## Casos de uso principais
 
-| UC | Ator | Objetivo | Regras envolvidas |
-|---|---|---|---|
-| UC-01 | | | RN-... |
+| UC    | Ator | Objetivo | Regras envolvidas |
+| ----- | ---- | -------- | ----------------- |
+| UC-01 |      |          | RN-...            |
 
 ## Edge cases e exceções do domínio
 

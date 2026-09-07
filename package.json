@@ -25,10 +25,11 @@
     "lint": "node scripts/lint.mjs",
     "typecheck": "turbo run typecheck",
     "knip": "knip",
+    "prepare": "node scripts/ativar-githooks.mjs || exit 0",
     "format": "prettier --write \"**/*.{json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{json,md,yml,yaml}\"",
-    "prepare": "husky",
-    "pre-commit": "node scripts/pre-commit.mjs",
+    "pre-commit": "bash .githooks/pre-commit",
+    "pre-push": "bash .githooks/pre-push",
     "db:migrate": "pnpm --filter @playplus/api db:migrate"
   },
   "devDependencies": {
@@ -41,7 +42,6 @@
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.5",
     "happy-dom": "^20.0.2",
-    "husky": "^9.1.7",
     "knip": "^6.26.0",
     "lint-staged": "^15.5.2",
     "prettier": "^3.5.3",
