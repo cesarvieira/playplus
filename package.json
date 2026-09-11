@@ -35,7 +35,7 @@
     "db:migrate": "pnpm --filter @playplus/api db:migrate"
   },
   "devDependencies": {
-    "@awmottaz/prettier-plugin-void-html": "^2.1.0",
+    "@awmottaz/prettier-plugin-void-html": "^2.2.1",
     "@eslint/config-helpers": "^0.6.0",
     "@eslint/js": "^10.0.1",
     "@eslint/json": "^2.0.1",

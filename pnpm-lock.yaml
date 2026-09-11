@@ -14,8 +14,8 @@ importers:
   .:
     devDependencies:
       '@awmottaz/prettier-plugin-void-html':
-        specifier: ^2.1.0
-        version: 2.1.0(prettier@3.8.4)
+        specifier: ^2.2.1
+        version: 2.2.1(prettier@3.8.4)
       '@eslint/config-helpers':
         specifier: ^0.6.0
         version: 0.6.0
@@ -339,10 +339,11 @@ packages:
   '@apm-js-collab/tracing-hooks@0.10.1':
     resolution: {integrity: sha512-w2OWXR7FWrKqSziuE9+QclaZrStxO/8+OwbXM635s/zs0Eez1Qo3ivSPdB2WsaPY/iznKTytONPx/PitD7IXcA==}
 
-  '@awmottaz/prettier-plugin-void-html@2.1.0':
-    resolution: {integrity: sha512-csoLknjo0lcqkhlsp3qg0jLSmQnow1sLwJTt3oAQmUyIbBtIXVUX1TBk+ay6HvphsUtkWGW8lyAcr/3I4gRJQQ==}
+  '@awmottaz/prettier-plugin-void-html@2.2.1':
+    resolution: {integrity: sha512-GWoadatDXCyboNPE5AeM7Mv9CuSi1kr/Yty/MHfKKrAhsDAL7Ip+qs+8qNZCnWZmIINoIqky6z/6p8F/H0/Png==}
+    engines: {node: 22 || 24 || 26}
     peerDependencies:
-      prettier: 3.0.0 - 3.8.x
+      prettier: 3.0.0 - 3.9.x
 
   '@aws-sdk/checksums@3.1000.12':
     resolution: {integrity: sha512-RgNDWfhNRIlNEzePIRrYTNi/6q+wwRMMapojn8YVzw4ZcJRa/gxVMtUbeZARR1gmopuv6oIhMbY7J66qIQ0ynw==}
@@ -6917,7 +6918,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@awmottaz/prettier-plugin-void-html@2.1.0(prettier@3.8.4)':
+  '@awmottaz/prettier-plugin-void-html@2.2.1(prettier@3.8.4)':
     dependencies:
       prettier: 3.8.4
 
