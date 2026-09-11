@@ -54,7 +54,7 @@
     "postgres": "^3.4.8",
     "slugify": "^1.6.9",
     "ws": "^8.21.0",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
